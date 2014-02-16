@@ -18,10 +18,12 @@ public class TimeCalc {
 		}
 	}
 	
-	public static void end(int id){
+	public static int end(int id){
 		int index = findIndex(id);
-		if(index<0)
+		if(index<0){
 			System.out.println("Error! There is no such id!");
+			return 0;
+		}
 		else{
 			long span_ms = System.currentTimeMillis() - startTimes[index];
 			String msg;
@@ -35,6 +37,7 @@ public class TimeCalc {
 			
 			ids[index] = -1;
 			size--;
+			return (int)span_ms;
 		}
 	}
 	
