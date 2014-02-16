@@ -16,11 +16,11 @@ import dao.Tuple;
  * @author Asia
  *
  */
-public class ScanOperator implements Operator, Iterator<Tuple> {
+public class ScanOperator implements Operator, Iterable<Tuple>, Iterator<Tuple> {
 
 	protected BufferedReader inputReader;
 	protected File file;
-	protected String line = null;
+	protected Tuple tuple = null;
 	
 	public ScanOperator(File f){
 		file = f;
@@ -31,24 +31,23 @@ public class ScanOperator implements Operator, Iterator<Tuple> {
 	public Tuple readOneTuple() {
 		checkInput();
 		try {
-			line = inputReader.readLine();
-			if(line==null) 
-				return null;
-			else{
-				return new Tuple(line.split("|"));
-			}
+			String line = inputReader.readLine();
+			if(line==null)
+				tuple = null;			
+			else
+				tuple = new Tuple(line.split("\\|"));
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-			return null;
 		}
+		return tuple;
 	}
 
 	@Override
 	public void reset() {
 		try {
 			inputReader = new BufferedReader(new FileReader(file));
-			readOneTuple();
+			tuple = null;
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -56,7 +55,11 @@ public class ScanOperator implements Operator, Iterator<Tuple> {
 		}
 	}
 	
-	public boolean checkInput(){
+	/**
+	 * Check inputReader whether is null
+	 * @return
+	 */
+	private boolean checkInput(){
 		if(inputReader==null){
 			try {
 				throw new Exception("inputReader is null!");
@@ -71,12 +74,13 @@ public class ScanOperator implements Operator, Iterator<Tuple> {
 
 	@Override
 	public boolean hasNext() {
-		return (line!=null);
+		readOneTuple();
+		return (tuple!=null);
 	}
 
 	@Override
 	public Tuple next() {
-		return new Tuple(line.split("|"));
+		return tuple;
 	}
 
 	@Override
@@ -87,7 +91,19 @@ public class ScanOperator implements Operator, Iterator<Tuple> {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
 	}
 
+	@Override
+	public Iterator<Tuple> iterator() {
+		return this;
+	}
+
+	
+	public static void main(String[] args){
+		System.out.println("test");
+		String text = "wgaweg|gaweg|bqeqwg|12|fqweg2|23fasdf|fs.w';eg";
+		String[] sArr = text.split("\\|");
+		for(String s : sArr)
+			System.out.println(s);
+	}
 }
