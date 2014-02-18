@@ -2,7 +2,7 @@ package ra;
 
 import dao.Tuple;
 
-public interface Operator {
+public interface Operator{
 	//read one tuple from stream
 	public Tuple readOneTuple();
 	
