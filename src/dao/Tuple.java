@@ -1,17 +1,23 @@
 package dao;
 
+
 public class Tuple {
 	
 	private Datum[] columns;
+	private Schema schema;
 	
 	/**
 	 * Constructor
-	 * @param columnsIn
+	 * @param dataIn
+	 * @throws Exception 
 	 */
-	public Tuple(String[] columnsIn){
-		columns = new Datum[columnsIn.length];
-		for(int i=0; i<columnsIn.length; i++){
-			columns[i] = new Datum(columnsIn[i]);
+	public Tuple(String[] dataIn, Schema schemaIn) throws Exception{
+		columns = new Datum[dataIn.length];
+		schema = schemaIn;
+		
+		for(int i=0; i<dataIn.length; i++){
+			DatumType type = schemaIn.getColType(i);
+			columns[i] = DatumFactory.create(dataIn[i], type);
 		}
 	}
 	
@@ -25,19 +31,28 @@ public class Tuple {
 	 * Get specific data block by column index
 	 * @param index
 	 * @return
+	 * @throws Exception 
 	 */
-	public Datum getData(int index){
+	public Datum getData(int index) throws Exception{
 		if(index>=columns.length){
-			try {
-				throw new Exception("Index out of range!");
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			return null;
+			throw new Exception("Index out of range! index: " + index + ", Length: " + columns.length);
 		}else{
 			return columns[index];
 		}		
+	}
+	
+	/**
+	 * Get data by column name
+	 * @param colName
+	 * @return
+	 * @throws Exception
+	 */
+	public Datum getDataByName(String colName) throws Exception{
+		int index = schema.getIndex(colName);
+		if(index<0)
+			throw new Exception("There is no such a column name : " + colName);
+		else
+			return columns[index];
 	}
 	
 	

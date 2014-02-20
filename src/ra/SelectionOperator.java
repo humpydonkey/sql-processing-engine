@@ -1,16 +1,31 @@
 package ra;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+
 import net.sf.jsqlparser.expression.Expression;
-import net.sf.jsqlparser.schema.Column;
+import net.sf.jsqlparser.parser.CCJSqlParser;
+import dao.Schema;
 import dao.Tuple;
 
 public class SelectionOperator implements Operator{
 
 	private Operator input;
-	private Column[] schema;
+	private Schema schema;
 	private Expression condition;
 	
-	public SelectionOperator(Operator inputIn, Column[] schemaIn, Expression conditionIn){
+	public static void main(String[] args){
+		String add1 = "data/NBA/nba11.sql";
+		try {
+			CCJSqlParser parser = new CCJSqlParser(new FileInputStream(new File(add1)));
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	public SelectionOperator(Operator inputIn, Schema schemaIn, Expression conditionIn){
 		input = inputIn;
 		schema = schemaIn;
 		condition = conditionIn;
@@ -29,7 +44,7 @@ public class SelectionOperator implements Operator{
 			if(!evaluator.getResult()){
 				tuple = null;
 			}
-			
+		
 		}while(tuple == null);
 		
 		return tuple;
