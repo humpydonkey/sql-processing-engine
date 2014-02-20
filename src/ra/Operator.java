@@ -1,5 +1,6 @@
 package ra;
 
+import dao.Schema;
 import dao.Tuple;
 
 public interface Operator{

@@ -13,14 +13,13 @@ public class ScanOperatorTest {
 	@Before
 	public void testScanOperator() {
 		String addr = "data/NBA/nba11.expected.dat";
-		scan = new ScanOperator(new File(addr));
+		//scan = new ScanOperator(new File(addr));
 	}
 
 	@Test
 	public void testIterable() {
 		for(Tuple t : scan){
 			t.printTuple();			
-			System.out.println(" Long:" + t.getData(2).toLong() + " Date:" + t.getData(3).toDate());
 		}
 	}
 	

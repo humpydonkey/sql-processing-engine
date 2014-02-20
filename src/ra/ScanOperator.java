@@ -10,6 +10,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.Iterator;
 
+import dao.Schema;
 import dao.Tuple;
 
 /**
@@ -21,9 +22,11 @@ public class ScanOperator implements Operator, Iterable<Tuple>, Iterator<Tuple> 
 	protected BufferedReader inputReader;
 	protected File file;
 	protected Tuple tuple = null;
+	protected Schema schema;
 	
-	public ScanOperator(File f){
+	public ScanOperator(File f, Schema schemaIn){
 		file = f;
+		schema = schemaIn;
 		reset();
 	}
 	
@@ -35,8 +38,8 @@ public class ScanOperator implements Operator, Iterable<Tuple>, Iterator<Tuple> 
 			if(line==null)
 				tuple = null;			
 			else
-				tuple = new Tuple(line.split("\\|"));
-		} catch (IOException e) {
+				tuple = new Tuple(line.split("\\|"), schema);
+		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
