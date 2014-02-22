@@ -15,7 +15,6 @@ import net.sf.jsqlparser.statement.create.table.CreateTable;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
 import net.sf.jsqlparser.statement.select.SelectBody;
-import net.sf.jsqlparser.statement.select.SelectItem;
 import ra.Operator;
 import ra.SelectionOperator;
 import dao.Tuple;
@@ -97,8 +96,8 @@ public class SQLParser {
 		Tuple tuple = oper.readOneTuple();
 		while(tuple!=null){
 			results.add(tuple);
-			tuple = oper.readOneTuple();
 			tuple.printTuple();
+			tuple = oper.readOneTuple();
 		}
 		return results;
 	}

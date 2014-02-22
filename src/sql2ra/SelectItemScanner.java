@@ -67,7 +67,7 @@ public class SelectItemScanner implements SelectItemVisitor{
 		ifSelectAll = true;
 	}
 
-	@Override
+	@Override																																										
 	public void visit(AllTableColumns arg0) {
 		ifSelectAll = true;
 	}
