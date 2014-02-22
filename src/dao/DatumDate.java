@@ -10,9 +10,14 @@ public class DatumDate extends Datum {
 	
 	private Date value;
 	
-	public DatumDate(String dataIn) throws ParseException{
+	public DatumDate(String dataIn){
 		super(DatumType.Date);
-		value = format.parse(dataIn);
+		try {
+			value = format.parse(dataIn);
+		} catch (ParseException e) {
+			value = null;
+			e.printStackTrace();
+		}
 	}
 	
 	public DatumDate(Date dataIn){

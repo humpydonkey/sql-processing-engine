@@ -14,6 +14,29 @@ public abstract class Datum {
 		return type;
 	}
 	
+	@Override
+	public String toString(){
+		switch(type){
+			case String:
+				DatumString valStr = (DatumString)this;
+				return valStr.getValue();
+			case Date:
+				DatumDate valDate = (DatumDate)this;
+				return String.valueOf(valDate.getValue());
+			case Bool:
+				DatumBool valBool = (DatumBool)this;
+				return String.valueOf(valBool.getValue());
+			case Float:
+				return String.valueOf((float)this.getNumericValue());
+			default:	//Int or Long
+				return String.valueOf((long)this.getNumericValue());
+		}
+	}
+	
+	public abstract double getNumericValue();
+	public abstract void setNumericValue(double valueIn);
+	
+	
 	/**
 	 * compare whether two Datum objects are equal (have the same value).
 	 * @param data1
@@ -86,9 +109,7 @@ public abstract class Datum {
 			else return 0;
 		}
 	}
-	
-	public abstract double getNumericValue();
-	public abstract void setNumericValue(double valueIn);
+
 	
 	public static void main(String[] args){
 		Datum d1 = new DatumString("ABc");

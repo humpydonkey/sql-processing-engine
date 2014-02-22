@@ -1,9 +1,11 @@
 package dao;
 
+import net.sf.jsqlparser.schema.Column;
+
 
 public class Tuple {
 	
-	private Datum[] columns;
+	private Datum[] dataArr;
 	private Schema schema;
 	
 	/**
@@ -11,21 +13,48 @@ public class Tuple {
 	 * @param dataIn
 	 * @throws Exception 
 	 */
-	public Tuple(String[] dataIn, Schema schemaIn) throws Exception{
-		columns = new Datum[dataIn.length];
+	public Tuple(String[] dataIn, Schema schemaIn){
+		dataArr = new Datum[dataIn.length];
 		schema = schemaIn;
 		
 		for(int i=0; i<dataIn.length; i++){
 			DatumType type = schemaIn.getColType(i);
-			columns[i] = DatumFactory.create(dataIn[i], type);
+			dataArr[i] = DatumFactory.create(dataIn[i], type);
 		}
 	}
 	
 	
 	public Datum[] getTuple(){
-		return columns;
+		return dataArr;
 	}
 	
+	/**
+	 * Change tuple by new schema
+	 * @param newSchema
+	 * @return
+	 */
+	public boolean changeTuple(Schema newSchema){
+		Column[] newCols = newSchema.getColumns();
+		Datum[] newDataArr = new Datum[newCols.length];
+		
+		int i=0; 
+		for(Column newCol : newCols){
+			//Get data from old tuple
+			Datum data = getDataByName(newCol.getColumnName());
+			if(data==null){
+				//not from the original column, 
+				//may be a constant or aggregate function
+				data = DatumFactory.create(newCol.getColumnName(), DatumType.String);
+				if(data==null)
+					return false;
+			}
+			newDataArr[i] = data;
+			i++;
+		}
+		dataArr = newDataArr;
+		schema = newSchema;
+		return true;
+	}
 	
 	/**
 	 * Get specific data block by column index
@@ -34,10 +63,10 @@ public class Tuple {
 	 * @throws Exception 
 	 */
 	public Datum getData(int index) throws Exception{
-		if(index>=columns.length){
-			throw new Exception("Index out of range! index: " + index + ", Length: " + columns.length);
+		if(index>=dataArr.length){
+			throw new Exception("Index out of range! index: " + index + ", Length: " + dataArr.length);
 		}else{
-			return columns[index];
+			return dataArr[index];
 		}		
 	}
 	
@@ -47,12 +76,25 @@ public class Tuple {
 	 * @return
 	 * @throws Exception
 	 */
-	public Datum getDataByName(String colName) throws Exception{
+	public Datum getDataByName(String colName){
 		int index = schema.getIndex(colName);
 		if(index<0)
-			throw new Exception("There is no such a column name : " + colName);
+			return null;
 		else
-			return columns[index];
+			return dataArr[index];
+	}
+	
+	/**
+	 * Get Datum type by column name
+	 * @param colName
+	 * @return
+	 */
+	public DatumType getDataTypeByName(String colName){
+		int index = schema.getIndex(colName);
+		if(index<0)
+			return null;
+		else
+			return schema.getColType(index);
 	}
 	
 	
@@ -61,9 +103,9 @@ public class Tuple {
 	 */
 	public void printTuple(){
 		int i=0;
-		for(Datum data : columns){
+		for(Datum data : dataArr){
 			i++;
-			if(i==columns.length)
+			if(i==dataArr.length)
 				System.out.println(data.toString());
 			else
 				System.out.print(data.toString()+"|");
@@ -72,7 +114,7 @@ public class Tuple {
 	
 	public String toString(){
 		StringBuffer sb = new StringBuffer();
-		for(Datum data : columns)
+		for(Datum data : dataArr)
 			sb.append(data.toString()+'|');
 		sb.deleteCharAt(sb.length()-1);
 		return sb.toString();
