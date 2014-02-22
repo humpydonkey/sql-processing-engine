@@ -77,6 +77,17 @@ public class Evaluator implements ExpressionVisitor{
 
 	@Override
 	public void visit(Function arg) {
+		String funcName = arg.getName();
+		
+		switch(funcName){
+		case "sum":
+			;
+		case "count":
+			;
+		default :
+			;
+		}
+		
 		throw new UnsupportedOperationException("Not supported yet."); 
 	}
 
@@ -133,7 +144,7 @@ public class Evaluator implements ExpressionVisitor{
 		arg.getRightExpression().accept(this);
 		Datum right = data;
 		
-		data.setNumericValue(left.getNumericValue() + right.getNumericValue());
+		data = new DatumFloat((float)(left.getNumericValue() + right.getNumericValue()));
 	}
 
 	@Override
@@ -144,7 +155,7 @@ public class Evaluator implements ExpressionVisitor{
 		arg.getRightExpression().accept(this);
 		Datum right = data;
 		
-		data.setNumericValue(left.getNumericValue() / right.getNumericValue());
+		data = new DatumFloat((float)(left.getNumericValue() / right.getNumericValue()));
 	}
 
 	@Override
@@ -155,7 +166,7 @@ public class Evaluator implements ExpressionVisitor{
 		arg.getRightExpression().accept(this);
 		Datum right = data;
 		
-		data.setNumericValue(left.getNumericValue() * right.getNumericValue());
+		data = new DatumFloat((float)(left.getNumericValue() * right.getNumericValue()));
 	}
 
 	@Override
@@ -166,7 +177,7 @@ public class Evaluator implements ExpressionVisitor{
 		arg.getRightExpression().accept(this);
 		Datum right = data;
 		
-		data.setNumericValue(left.getNumericValue() - right.getNumericValue());
+		data = new DatumFloat((float)(left.getNumericValue() - right.getNumericValue()));
 	}
 
 	@Override
