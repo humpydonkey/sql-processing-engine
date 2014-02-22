@@ -1,9 +1,6 @@
 package ra;
 
-import java.io.StringReader;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 import net.sf.jsqlparser.expression.AllComparisonExpression;
 import net.sf.jsqlparser.expression.AnyComparisonExpression;
@@ -43,70 +40,33 @@ import net.sf.jsqlparser.expression.operators.relational.Matches;
 import net.sf.jsqlparser.expression.operators.relational.MinorThan;
 import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
 import net.sf.jsqlparser.expression.operators.relational.NotEqualsTo;
-import net.sf.jsqlparser.parser.CCJSqlParser;
 import net.sf.jsqlparser.schema.Column;
-import net.sf.jsqlparser.statement.create.table.ColumnDefinition;
-import net.sf.jsqlparser.statement.select.SelectBody;
 import net.sf.jsqlparser.statement.select.SubSelect;
 import dao.Datum;
 import dao.DatumDate;
 import dao.DatumFloat;
 import dao.DatumLong;
 import dao.DatumString;
-import dao.Schema;
 import dao.Tuple;
 
 public class Evaluator implements ExpressionVisitor{
 
 	private Tuple tuple;
-	private Schema schema;
 	private boolean evalResult;
 	private Datum data;
 	
-	public static void main(String[] args){
-		try {
-			String sql = "SELECT FIRSTNAME, LASTNAME, (LASTSEASON-FIRSTSEASON) AS CAREER  FROM PLAYERS WHERE LASTSEASON-FIRSTSEASON>10";
-			CCJSqlParser parser = new CCJSqlParser(new StringReader(sql));
-			List<ColumnDefinition> cds = parser.ColumnsNamesList();
-			ColumnDefinition[] colDefs = new ColumnDefinition[cds.size()];
-			for(int i=0; i<colDefs.length; i++){
-				colDefs[i] = cds.get(i);
-			}
-				
-			Column[] cols = new Column[]{new Column(null,"A"),new Column(null,"B"),new Column(null,"C")};
-			Schema schema = new Schema(cols,colDefs);
-			Tuple tuple1 = new Tuple(new String[]{"1","2","3"}, schema);
-			Tuple tuple2 = new Tuple(new String[]{"1.1","2.2","3.3"}, schema);
-			Tuple tuple3 = new Tuple(new String[]{"11","0.2","13"}, schema);
-			Tuple tuple4 = new Tuple(new String[]{"11.1","5.2","1.3"}, schema);
-			List<Tuple> tuples = new ArrayList<Tuple>();
-			tuples.add(tuple4);
-			tuples.add(tuple3);
-			tuples.add(tuple2);
-			tuples.add(tuple1);
-			
-			for(Tuple t : tuples){
-				Evaluator eval = new Evaluator(schema, t);
-	
-				
-				//expression.accept(eval);
-				
-			}
-			
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
-	
-	public Evaluator(Schema schemaIn, Tuple tupleIn){
-		evalResult = false;
+	public Evaluator(Tuple tupleIn){
+		evalResult = true;
 		tuple = tupleIn;
-		schema = schemaIn;
 	}
+	
 	
 	public boolean getResult(){	
 		return evalResult;
+	}
+	
+	public Datum getDatum(){
+		return data;
 	}
 	
 	
@@ -229,46 +189,44 @@ public class Evaluator implements ExpressionVisitor{
 
 	@Override
 	public void visit(Between arg) {
-		arg.getLeftExpression().accept(this);
-		DatumString colName = (DatumString)data;
+	arg.getLeftExpression().accept(this);
+	DatumString colName = (DatumString)data;
+	
+		Datum var = tuple.getDataByName(colName.getValue());
+		if(var==null)
+			throw new NullPointerException();
 		
-		try {
-			Datum var = tuple.getDataByName(colName.getValue());
-			
-			arg.getBetweenExpressionStart().accept(this);
-			Datum start = data;
-			arg.getBetweenExpressionEnd().accept(this);
-			Datum end = data;
-			
-			if(var instanceof DatumDate){
-				DatumDate dateData = (DatumDate)var;
-				Date date = dateData.getValue();
+		arg.getBetweenExpressionStart().accept(this);
+		Datum start = data;
+		arg.getBetweenExpressionEnd().accept(this);
+		Datum end = data;
+		
+		if(var instanceof DatumDate){
+			DatumDate dateData = (DatumDate)var;
+			Date date = dateData.getValue();
 
-				DatumDate startDatum = (DatumDate)start;
-				Date startDate = startDatum.getValue();
-				
-				DatumDate endDatum = (DatumDate)end;
-				Date endDate = endDatum.getValue();
-				
-				if(date.compareTo(startDate)>0&&date.compareTo(endDate)<0){
-					evalResult = true;
-				}else
-					evalResult = false;
-				
-			}else{
-				double varVal = var.getNumericValue();				
-				double startVal= start.getNumericValue();
-				double endVal = end.getNumericValue();
-				
-				if(varVal>startVal&&varVal<endVal)
-					evalResult = true;
-				else
-					evalResult = false;
-			}
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			DatumDate startDatum = (DatumDate)start;
+			Date startDate = startDatum.getValue();
+			
+			DatumDate endDatum = (DatumDate)end;
+			Date endDate = endDatum.getValue();
+			
+			if(date.compareTo(startDate)>0&&date.compareTo(endDate)<0){
+				evalResult = true;
+			}else
+				evalResult = false;
+			
+		}else{
+			double varVal = var.getNumericValue();				
+			double startVal= start.getNumericValue();
+			double endVal = end.getNumericValue();
+			
+			if(varVal>startVal&&varVal<endVal)
+				evalResult = true;
+			else
+				evalResult = false;
 		}
+		
 	}
 
 	@Override
@@ -287,7 +245,8 @@ public class Evaluator implements ExpressionVisitor{
 				try {
 					Datum leftDatum = tuple.getDataByName(leftVar.getValue());
 					Datum rightDatum = tuple.getDataByName(rightVar.getValue());
-					
+					if(leftDatum==null||rightDatum==null)
+						throw new NullPointerException();
 					evalResult = Datum.equals(leftDatum, rightDatum);
 					return;
 				} catch (Exception e) {
@@ -334,7 +293,8 @@ public class Evaluator implements ExpressionVisitor{
 				try {
 					Datum leftDatum = tuple.getDataByName(leftVar.getValue());
 					Datum rightDatum = tuple.getDataByName(rightVar.getValue());
-					
+					if(leftDatum==null||rightDatum==null)
+						throw new NullPointerException();
 					evalResult = (Datum.compare(leftDatum, rightDatum)>0);
 					return;
 				} catch (Exception e) {
@@ -380,7 +340,8 @@ public class Evaluator implements ExpressionVisitor{
 				try {
 					Datum leftDatum = tuple.getDataByName(leftVar.getValue());
 					Datum rightDatum = tuple.getDataByName(rightVar.getValue());
-					
+					if(leftDatum==null||rightDatum==null)
+						throw new NullPointerException();
 					evalResult = (Datum.compare(leftDatum, rightDatum)>=0);
 					return;
 				} catch (Exception e) {
@@ -441,7 +402,8 @@ public class Evaluator implements ExpressionVisitor{
 				try {
 					Datum leftDatum = tuple.getDataByName(leftVar.getValue());
 					Datum rightDatum = tuple.getDataByName(rightVar.getValue());
-					
+					if(leftDatum==null||rightDatum==null)
+						throw new NullPointerException();
 					evalResult = (Datum.compare(leftDatum, rightDatum)<0);
 					return;
 				} catch (Exception e) {
@@ -487,7 +449,8 @@ public class Evaluator implements ExpressionVisitor{
 				try {
 					Datum leftDatum = tuple.getDataByName(leftVar.getValue());
 					Datum rightDatum = tuple.getDataByName(rightVar.getValue());
-					
+					if(leftDatum==null||rightDatum==null)
+						throw new NullPointerException();
 					evalResult = (Datum.compare(leftDatum, rightDatum)<=0);
 					return;
 				} catch (Exception e) {
@@ -524,7 +487,10 @@ public class Evaluator implements ExpressionVisitor{
 
 	@Override
 	public void visit(Column arg) {
-		throw new UnsupportedOperationException("Not supported yet."); 
+		Datum var = tuple.getDataByName(arg.getColumnName());
+		if(var==null)
+			throw new NullPointerException();
+		data = var;
 	}
 
 	@Override

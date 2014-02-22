@@ -17,27 +17,45 @@ import net.sf.jsqlparser.statement.create.table.CreateTable;
 public class Schema {
 
 	private Map<String, Integer> indexMap;
+	private int length;
 	private Column[] columns;
-	private ColumnDefinition[] colDefs;
 	private DatumType[] colTypes;
 	
-	public Schema(Column[] colsIn, ColumnDefinition[] colDefsIn) throws Exception{		
-		if(colsIn.length==0||colDefsIn.length==0)
+	public Schema(Column[] colsIn, List<ColumnDefinition> colDefsIn) throws Exception{
+		if(colsIn.length==0||colDefsIn.size()==0)
 			throw new IllegalArgumentException("the number of columns/column definitions is 0.");
+		if(colsIn.length!=colDefsIn.size())
+			throw new IllegalArgumentException("Column[] size and DatumType[] size doesn't match : " + colsIn.length + "," + colDefsIn.size());
 		
+		length = colsIn.length;
 		columns = colsIn;
-		colDefs = colDefsIn;
-		colTypes = new DatumType[colsIn.length];
-		indexMap = new HashMap<String, Integer>(colsIn.length);
+		colTypes = new DatumType[length];
+		indexMap = new HashMap<String, Integer>(length);
 		
-		for(int i=0; i<columns.length; i++){
+		for(int i=0; i<length; i++){
 			indexMap.put(columns[i].getColumnName(), i);
-			colTypes[i] = convertColType(i);
+			colTypes[i] = convertColType(i, colDefsIn.get(i));
 			//compare the Column[] and ColumnDefinition has the same order index, if not throw exception 
-			if(!columns[i].getColumnName().equals(colDefs[i].getColumnName()))
+			if(!columns[i].getColumnName().equals(colDefsIn.get(i).getColumnName()))
 				throw new Exception("Column[] and ColumnDefinition has not the same order index.");
 		}
 	}
+	
+	public Schema(Column[] colsIn, DatumType[] colTypesIn){
+		if(colsIn.length==0||colTypesIn.length==0)
+			throw new IllegalArgumentException("the number of columns/column definitions is 0.");
+		if(colsIn.length!=colTypesIn.length)
+			throw new IllegalArgumentException("Column[] size and DatumType[] size doesn't match : " + colsIn.length + "," + colTypesIn.length);
+		
+		length = colsIn.length;
+		columns = colsIn;
+		colTypes = colTypesIn;
+		indexMap = new HashMap<String, Integer>(length);
+		for(int i=0; i<length; i++){
+			indexMap.put(columns[i].getColumnName(), i);
+		}
+	}
+	
 	
 	public Table getTable(){
 		return columns[0].getTable();
@@ -72,8 +90,8 @@ public class Schema {
 	 * @return
 	 * @throws Exception
 	 */
-	private DatumType convertColType(int index) throws Exception{
-		ColumnDefinition colDef = getColDefinition(index);
+	private DatumType convertColType(int index, ColumnDefinition colDef) throws Exception{
+//		ColumnDefinition colDef = getColDefinition(index);
 		String typeStr = colDef.getColDataType().getDataType();
 		DatumType type = DatumType.Int;
 		switch(typeStr){
@@ -114,19 +132,19 @@ public class Schema {
 	}
 	
 	
-	public ColumnDefinition getColDefinition(int index){
-		if(index>=colDefs.length)
-			throw new IndexOutOfBoundsException();
-		return colDefs[index];
-	}
+//	public ColumnDefinition getColDefinition(int index){
+//		if(index>=colDefs.size())
+//			throw new IndexOutOfBoundsException();
+//		return colDefs.get(index);
+//	}
 	
 	public Column[] getColumns(){		
 		return columns;
 	}
 	
-	public ColumnDefinition[] getColDefs(){
-		return colDefs;
-	}
+//	public List<ColumnDefinition> getColDefs(){
+//		return colDefs;
+//	}
 	
 	public int getIndex(String colName){
 		Integer index = indexMap.get(colName);
