@@ -1,6 +1,8 @@
 package ra;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import net.sf.jsqlparser.expression.AllComparisonExpression;
 import net.sf.jsqlparser.expression.AnyComparisonExpression;
@@ -51,15 +53,21 @@ import dao.Tuple;
 
 public class Evaluator implements ExpressionVisitor{
 
+	private Function func;
 	private Tuple tuple;
 	private boolean evalResult;
 	private Datum data;
+	private Column column;
 	
+
 	public Evaluator(Tuple tupleIn){
 		evalResult = true;
 		tuple = tupleIn;
 	}
 	
+	public Evaluator(){
+		evalResult = true;
+	}
 	
 	public boolean getResult(){	
 		return evalResult;
@@ -67,6 +75,14 @@ public class Evaluator implements ExpressionVisitor{
 	
 	public Datum getDatum(){
 		return data;
+	}
+	
+	public Column getColumn(){
+		return column;
+	}
+	
+	public Function getFunc(){
+		return func;
 	}
 	
 	
@@ -77,18 +93,7 @@ public class Evaluator implements ExpressionVisitor{
 
 	@Override
 	public void visit(Function arg) {
-		String funcName = arg.getName();
-		
-		switch(funcName){
-		case "sum":
-			;
-		case "count":
-			;
-		default :
-			;
-		}
-		
-		throw new UnsupportedOperationException("Not supported yet."); 
+		func = arg;
 	}
 
 	@Override
@@ -498,10 +503,15 @@ public class Evaluator implements ExpressionVisitor{
 
 	@Override
 	public void visit(Column arg) {
-		Datum var = tuple.getDataByName(arg.getColumnName());
-		if(var==null)
-			throw new NullPointerException();
-		data = var;
+		column = arg;
+		if(tuple==null){
+			data = new DatumString(arg.getColumnName());
+		}else{
+			Datum var = tuple.getDataByName(arg.getColumnName());
+			if(var==null)
+				throw new NullPointerException();
+			data = var;
+		}
 	}
 
 	@Override

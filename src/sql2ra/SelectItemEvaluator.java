@@ -1,4 +1,7 @@
-package ra;
+package sql2ra;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import net.sf.jsqlparser.expression.AllComparisonExpression;
 import net.sf.jsqlparser.expression.AnyComparisonExpression;
@@ -40,16 +43,24 @@ import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
 import net.sf.jsqlparser.expression.operators.relational.NotEqualsTo;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.select.SubSelect;
-import dao.Datum;
+import ra.Aggregator;
+import ra.AggregatorCount;
 
-public class ProjectEvaluator implements ExpressionVisitor {
+public class SelectItemEvaluator implements ExpressionVisitor {
 	
-	private String colName = null;
+	private List<Aggregator> aggregators = null;
+	private Column col = null;
 	
-	public String getColName(){
-		return colName;
+	public List<Aggregator> getAggregators(){
+		return aggregators;
+	}
+	public Column getColumn(){
+		return col;
 	}
 	
+	public SelectItemEvaluator(){
+		
+	}
 	
 	@Override
 	public void visit(NullValue arg0) {
@@ -59,6 +70,7 @@ public class ProjectEvaluator implements ExpressionVisitor {
 	@Override
 	public void visit(Function arg0) {
 		throw new UnsupportedOperationException("Not supported yet."); 
+		
 	}
 
 	@Override
@@ -213,8 +225,8 @@ public class ProjectEvaluator implements ExpressionVisitor {
 
 	@Override
 	public void visit(Column arg0) {
-		//return column name, not the value
-		colName = arg0.getColumnName();
+		//return column name
+		col = arg0;
 	}
 
 	@Override
