@@ -114,8 +114,20 @@ public abstract class Datum {
 	public static void main(String[] args){
 		Datum d1 = new DatumString("ABc");
 		Datum d2 = new DatumString("abc");
+		Datum d3 = new DatumDate("1989-09-29");
+		Datum d4 = new DatumBool(false);
+		Datum d5 = new DatumFloat(0.23f);
+		Datum d6 = new DatumLong(112112);
+		Datum d7 = new DatumInt(12);
 		try {
-			System.out.println(Datum.equals(d2, d1));
+			System.out.println(Datum.equals(d2, d1) + "\n");
+			System.out.println(d1.toString());
+			System.out.println(d2.toString());
+			System.out.println(d3.toString());
+			System.out.println(d4.toString());
+			System.out.println(d5.toString());
+			System.out.println(d6.toString());
+			System.out.println(d7.toString());
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

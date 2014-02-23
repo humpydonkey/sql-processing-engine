@@ -15,8 +15,13 @@ import net.sf.jsqlparser.statement.create.table.CreateTable;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
 import net.sf.jsqlparser.statement.select.SelectBody;
+import ra.Aggregator;
+import ra.CacheOperator;
+import ra.GroupByOperator;
 import ra.Operator;
+import ra.ProjectionOperator;
 import ra.SelectionOperator;
+import dao.Schema;
 import dao.Tuple;
 
 public class SQLParser {
@@ -53,29 +58,35 @@ public class SQLParser {
 				oper = new SelectionOperator(oper,pselect.getWhere());
 			}
 			
-			/*********************    Projection    ********************/
+			/*********************    Parsing selected items    ********************/
 			SelectItemScanner selectItemScan = new SelectItemScanner(pselect, oper);
-			oper = selectItemScan.getOutput();
+			Schema newSchema = selectItemScan.getSelectedColumns();
+			Aggregator[] aggrs = selectItemScan.getAggregators();
+			/*********************    Group By    ********************/
+			if(pselect.getGroupByColumnReferences() != null){  //have group by
+				@SuppressWarnings("unchecked")
+				List colRefs = pselect.getGroupByColumnReferences();
+				GroupByOperator groupby = new GroupByOperator(oper, colRefs, aggrs);
+				List<Tuple> tuples = groupby.getTuples();
+				oper = new CacheOperator(tuples);
+			 }
+			 
+			
+			/*********************    Projection    ********************/
+			if(!selectItemScan.getIfSelectAll()){
+				oper = new ProjectionOperator(oper, newSchema);
+			}
 			
 			
-//			if(pselect.getGroupByColumnReferences() != null){  //have group by, maybe no where
-//				oper = new GroupByOperator(  //GroupByOperator dai ding yi  //bixu you select limian de attribute
-//						oper,
-//						fromscan.columns,
-//						pselect.getWhere(),
-//						pselect.getGroupByColumnReferences()
-//					);
-//			  }
-//			 
 //			if(pselect.getHaving()!=null){  //have having, maybe no where, no groupby
-//					oper = new HavingOperator(  //GroupByOperator dai ding yi
+//				oper = new HavingOperator(  //GroupByOperator dai ding yi
 //						oper,
 //						fromscan.columns,
 //						pselect.getWhere(),
 //						pselect.getGroupByColumnReferences(),
 //						pselect.getHaving()
 //					);
-//				}
+//			}
 //			if(pselect.getOrderByElements()!=null){  //have orderby, maybe no where
 //						oper = new OrderByOperator(
 //						 oper,
@@ -84,8 +95,7 @@ public class SQLParser {
 //						 pselect.getOrderByElements()
 //					);
 //					
-//				}
-//			OperatorTest.dump(oper);
+//			}
 		}
 		
 		return dump(oper);
@@ -107,7 +117,7 @@ public class SQLParser {
 		System.out.println("begin");
 		int i;
 		String dataDirStr = "data/NBA/";
-		String sqlFilePath = "data/cp1_graded_sqls/nba03.sql";
+		String sqlFilePath = "data/cp1_graded_sqls/nba02.sql";
 		
 		File dataDir = null;
 		//set arguments
@@ -142,9 +152,11 @@ public class SQLParser {
         			else {
         				
         			 if(stmt instanceof Select){
-        				List<Tuple> tuples = select(stmt,tables,dataDir);        					
+        				List<Tuple> tuples = select(stmt,tables,dataDir);
+        				
+        				for(Tuple tuple : tuples)
+        					tuple.printTuple();
         			 }
-        				 
         			 else 
         				System.out.println("PANIC! I don't know how to handle" + stmt);
         			}

@@ -1,6 +1,10 @@
 package dao;
 
+import net.sf.jsqlparser.expression.Expression;
+import net.sf.jsqlparser.expression.Function;
 import net.sf.jsqlparser.schema.Column;
+import ra.Aggregator;
+import ra.Evaluator;
 
 
 public class Tuple {
@@ -34,22 +38,40 @@ public class Tuple {
 	 * @return
 	 */
 	public boolean changeTuple(Schema newSchema){
-		Column[] newCols = newSchema.getColumns();
-		Datum[] newDataArr = new Datum[newCols.length];
+		 int length = newSchema.getLength();
+		Datum[] newDataArr = new Datum[length];
+		Column[] newColNames = newSchema.getColumnNames();
+		Expression[] newColSources = newSchema.getColumnSources();
 		
-		int i=0; 
-		for(Column newCol : newCols){
+		for(int i=0; i<length; i++){
 			//Get data from old tuple
-			Datum data = getDataByName(newCol.getColumnName());
-			if(data==null){
-				//not from the original column, 
-				//may be a constant or aggregate function
-				data = DatumFactory.create(newCol.getColumnName(), DatumType.String);
-				if(data==null)
-					return false;
+			Datum data = null;
+			Expression newSource = newColSources[i];
+			Column newName = newColNames[i]; 
+			if(newSource instanceof Column)
+				data = getDataByName(newName.getColumnName());
+			else if(newSource instanceof Function){ 
+				//is an aggregate function
+				Function func = (Function)newSource;
+				if(func.isAllColumns()){
+					data = newSchema.getAggregator(func).getValue("*");
+				}else{
+					//find the key
+					Aggregator aggre = newSchema.getAggregator(func);
+					String groupbyKey = "";
+					for(String colName : aggre.getGroupByColumns()){
+						Datum groupbyColumn = getDataByName(colName);
+						groupbyKey += groupbyColumn.toString();
+					}
+					//map to the aggregated Datum value
+					data = aggre.getValue(groupbyKey);
+				}
+			}else{
+				// TODO should parse the expression
+				//may be a constant or expression
+				data = DatumFactory.create(newColNames[i].getColumnName(), DatumType.String);
 			}
 			newDataArr[i] = data;
-			i++;
 		}
 		dataArr = newDataArr;
 		schema = newSchema;
