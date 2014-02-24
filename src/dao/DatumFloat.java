@@ -29,9 +29,6 @@ public class DatumFloat extends Datum{
 	
 	@Override
 	public String toString(){
-		if(value==0f)
-			return new String("0");
-		else
-			return String.valueOf(value);
+			return String.valueOf((int)value);
 	}
 }
