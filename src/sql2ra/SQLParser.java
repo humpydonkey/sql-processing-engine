@@ -60,6 +60,7 @@ public class SQLParser {
 			SelectItemScanner selectItemScan = new SelectItemScanner(pselect, oper);
 			Schema newSchema = selectItemScan.getSelectedColumns();
 			Aggregator[] aggrs = selectItemScan.getAggregators();
+			
 			/*********************    Group By    ********************/
 			if(pselect.getGroupByColumnReferences() != null){  //have group by
 				@SuppressWarnings("unchecked")

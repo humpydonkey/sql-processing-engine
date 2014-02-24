@@ -72,6 +72,10 @@ public class Tuple {
 				Evaluator eval = new Evaluator(this);
 				newSource.accept(eval);
 				data = eval.getDatum();
+				if(data.getNumericValue()==1168){
+					System.out.println("!!");
+				}
+				
 			}
 			newDataArr[i] = data;
 		}
