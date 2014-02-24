@@ -3,11 +3,11 @@ package ra;
 import dao.Schema;
 import dao.Tuple;
 
-public class ProjectionOperator implements Operator{
+public class OperatorProjection implements Operator{
 	private Operator input;
 	private Schema newSchema;
 	
-	public ProjectionOperator(Operator inputIn, Schema schemaIn){
+	public OperatorProjection(Operator inputIn, Schema schemaIn){
 		input = inputIn;
 		newSchema = schemaIn;
 	}

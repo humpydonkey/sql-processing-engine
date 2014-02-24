@@ -3,12 +3,12 @@ package ra;
 import net.sf.jsqlparser.expression.Expression;
 import dao.Tuple;
 
-public class SelectionOperator implements Operator{
+public class OperatorSelection implements Operator{
 
 	private Operator input;
 	private Expression condition;
 	
-	public SelectionOperator(Operator inputIn,  Expression conditionIn){
+	public OperatorSelection(Operator inputIn,  Expression conditionIn){
 		input = inputIn;
 		condition = conditionIn;
 	}

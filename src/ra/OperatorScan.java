@@ -16,14 +16,14 @@ import dao.Tuple;
  * @author Asia
  *
  */
-public class ScanOperator implements Operator, Iterable<Tuple>, Iterator<Tuple> {
+public class OperatorScan implements Operator, Iterable<Tuple>, Iterator<Tuple> {
 
 	protected BufferedReader inputReader;
 	protected File file;
 	protected Tuple tuple = null;
 	protected Schema schema;
 	
-	public ScanOperator(File f, Schema schemaIn){
+	public OperatorScan(File f, Schema schemaIn){
 		file = f;
 		schema = schemaIn;
 		reset();

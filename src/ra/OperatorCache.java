@@ -5,12 +5,12 @@ import java.util.List;
 
 import dao.Tuple;
 
-public class CacheOperator implements Operator {
+public class OperatorCache implements Operator {
 	
 	List<Tuple> tuples;
 	Iterator<Tuple> iter;
 	
-	public CacheOperator(List<Tuple> tuplesIn){
+	public OperatorCache(List<Tuple> tuplesIn){
 		tuples = tuplesIn;
 		iter = tuples.iterator();
 	}

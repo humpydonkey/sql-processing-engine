@@ -9,7 +9,7 @@ import net.sf.jsqlparser.schema.Column;
 import dao.Datum;
 import dao.Tuple;
 
-public class GroupByOperator implements Operator{
+public class OperatorGroupBy implements Operator{
 
 	private Operator input;
 	private Map<String, Integer> groupMap;
@@ -18,7 +18,7 @@ public class GroupByOperator implements Operator{
 	private Aggregator[] aggregators;
 	
 	@SuppressWarnings("rawtypes")
-	public GroupByOperator(Operator inputIn, List columnsIn, Aggregator... aggregatorsIn){
+	public OperatorGroupBy(Operator inputIn, List columnsIn, Aggregator... aggregatorsIn){
 		input = inputIn;
 		groupMap = new HashMap<String, Integer>();
 		groupTuples = new ArrayList<Tuple>();

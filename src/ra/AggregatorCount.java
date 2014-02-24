@@ -61,7 +61,7 @@ public class AggregatorCount extends Aggregator{
 				}else{	//no distinct
 					if(!countMap.containsKey(key)){
 						//insert new
-						countMap.put(key, new DatumInt(0));
+						countMap.put(key, new DatumInt(1));
 					}else{
 						//else count ++
 						countPlusPlus(key);

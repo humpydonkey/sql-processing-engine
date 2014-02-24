@@ -13,9 +13,9 @@ import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.SelectBody;
 import net.sf.jsqlparser.statement.select.SubJoin;
 import net.sf.jsqlparser.statement.select.SubSelect;
-import ra.CacheOperator;
+import ra.OperatorCache;
 import ra.Operator;
-import ra.ScanOperator;
+import ra.OperatorScan;
 import dao.Schema;
 import dao.Tuple;
 
@@ -43,7 +43,7 @@ public class FromScanner implements FromItemVisitor{
 	public void visit(SubSelect subselect)
 	{
 		List<Tuple> tuples = SQLParser.select(subselect.getSelectBody(), SQLParser.getFromScanner());
-		source = new CacheOperator(tuples); 
+		source = new OperatorCache(tuples); 
 	}
 	
 	public void visit(Table tableName)
@@ -62,7 +62,7 @@ public class FromScanner implements FromItemVisitor{
 		
 		try {
 			schema = new Schema(columns, colDefs);
-			source = new ScanOperator(
+			source = new OperatorScan(
 					new File(basePath, tableName.getName() + ".dat"),
 					schema
 				);
