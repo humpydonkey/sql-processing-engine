@@ -27,7 +27,8 @@ public abstract class Datum {
 				DatumBool valBool = (DatumBool)this;
 				return String.valueOf(valBool.getValue());
 			case Float:
-				return String.valueOf((float)this.getNumericValue());
+				DatumFloat valFloat = (DatumFloat)this;
+				return valFloat.toString();
 			default:	//Int or Long
 				return String.valueOf((long)this.getNumericValue());
 		}
