@@ -38,7 +38,7 @@ public class Tuple {
 	 * @return
 	 */
 	public boolean changeTuple(Schema newSchema){
-		 int length = newSchema.getLength();
+		int length = newSchema.getLength();
 		Datum[] newDataArr = new Datum[length];
 		Column[] newColNames = newSchema.getColumnNames();
 		Expression[] newColSources = newSchema.getColumnSources();
@@ -48,9 +48,10 @@ public class Tuple {
 			Datum data = null;
 			Expression newSource = newColSources[i];
 			Column newName = newColNames[i]; 
-			if(newSource instanceof Column)
+			if(newSource instanceof Column){
+				//is a column
 				data = getDataByName(newName.getColumnName());
-			else if(newSource instanceof Function){ 
+			}else if(newSource instanceof Function){ 
 				//is an aggregate function
 				Function func = (Function)newSource;
 				if(func.isAllColumns()){
@@ -67,9 +68,10 @@ public class Tuple {
 					data = aggre.getValue(groupbyKey);
 				}
 			}else{
-				// TODO should parse the expression
-				//may be a constant or expression
-				data = DatumFactory.create(newColNames[i].getColumnName(), DatumType.String);
+				//should be a constant or expression
+				Evaluator eval = new Evaluator(this);
+				newSource.accept(eval);
+				data = eval.getDatum();
 			}
 			newDataArr[i] = data;
 		}
