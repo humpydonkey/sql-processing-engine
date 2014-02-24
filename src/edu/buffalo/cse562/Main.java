@@ -1,7 +1,5 @@
 package edu.buffalo.cse562;
 
-import io.FileAccessor;
-
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
@@ -28,16 +26,16 @@ public class Main {
 //		
 		//System.out.println("begin");
 		int i;
-		String dataDirStr = "data/tpch/";//"data/NBA/";  //"/data/tpch/";
-		String sqlFilePath = "data/cp1_graded_sqls/tpch1.sql";
+		String dataDirStr = "data/NBA/";  //"/data/tpch/";
+		String sqlFilePath = "data/cp1_graded_sqls/nba04.sql";
 		
 		File dataDir = null;
 		//set arguments
-        args = new String[]{
-        		"--data",
-        		dataDirStr,
-        		sqlFilePath
-        };
+//        args = new String[]{
+//        		"--data",
+//        		dataDirStr,
+//        		sqlFilePath
+//        };
         
         ArrayList<File> sqlFiles = new ArrayList<File>();
         HashMap<String,CreateTable> tables = new HashMap<String, CreateTable>();

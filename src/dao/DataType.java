@@ -21,8 +21,13 @@ public class DataType {
 			return DataType.DATE;
 		}else if(typeIn.toUpperCase().contains("DOUBLE")){
 			return DataType.FLOAT;
-		}else{
-			throw new UnsupportedOperationException("Not supported yet."); 
+		}else if(typeIn.toUpperCase().contains("STRING")){
+			return DataType.STRING;
+		}else if(typeIn.toUpperCase().contains("BOOL")){
+			return DataType.BOOL;
+		}
+		else{
+			throw new UnsupportedOperationException("Not supported yet. " + typeIn.toUpperCase()); 
 		}
 	}
 }
