@@ -28,5 +28,4 @@ public class DatumBool extends Datum {
 	public void setNumericValue(double valueIn) {
 		System.out.println("Wrong set value.");
 	}
-
 }

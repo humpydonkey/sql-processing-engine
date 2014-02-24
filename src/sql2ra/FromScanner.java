@@ -48,7 +48,7 @@ public class FromScanner implements FromItemVisitor{
 	
 	public void visit(Table tableName)
 	{
-		CreateTable table = tables.get(tableName.getName());
+		CreateTable table = tables.get(tableName.getName().toUpperCase());
 		if(table==null)
 			try {
 				throw new Exception("No such table : " + tableName.getName());

@@ -17,6 +17,7 @@ import net.sf.jsqlparser.statement.select.SelectExpressionItem;
 import net.sf.jsqlparser.statement.select.SelectItem;
 import net.sf.jsqlparser.statement.select.SelectItemVisitor;
 import ra.Aggregator;
+import ra.AggregatorAvg;
 import ra.AggregatorCount;
 import ra.AggregatorSum;
 import ra.Evaluator;
@@ -148,6 +149,9 @@ public class SelectItemScanner implements SelectItemVisitor{
 			
 			switch(funcName){
 				case "AVG":
+				Aggregator aggrAvg = new AggregatorAvg(func, groupbyNames);
+				aggregators.add(aggrAvg);
+				aggreMap.put(func, aggrAvg);
 				return;
 			case "COUNT":
 				Aggregator aggrCount = new AggregatorCount(func, groupbyNames);

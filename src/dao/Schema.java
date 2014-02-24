@@ -116,6 +116,7 @@ public class Schema {
 //		ColumnDefinition colDef = getColDefinition(index);
 		String typeStr = colDef.getColDataType().getDataType();
 		DatumType type = DatumType.Int;
+		typeStr = DataType.recognizeType(typeStr);
 		switch(typeStr){
 		case DataType.INT:
 			type = DatumType.Int;
