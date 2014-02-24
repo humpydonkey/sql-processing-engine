@@ -22,7 +22,7 @@ public abstract class Datum {
 				return valStr.getValue();
 			case Date:
 				DatumDate valDate = (DatumDate)this;
-				return String.valueOf(valDate.getValue());
+				return valDate.toString();
 			case Bool:
 				DatumBool valBool = (DatumBool)this;
 				return String.valueOf(valBool.getValue());

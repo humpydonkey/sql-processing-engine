@@ -7,4 +7,22 @@ public class DataType {
 	public final static String DATE = "date";
 	public final static String BOOL = "bool";
 	public final static String STRING = "string";
+	
+	public static String recognizeType(String typeIn){
+		if(typeIn.toUpperCase().contains("CHAR")){
+			return DataType.STRING;
+		}else if(typeIn.toUpperCase().contains("DECIMAL")){
+			return DataType.FLOAT;
+		}else if(typeIn.toUpperCase().contains("INT")){
+			return DataType.INT;
+		}else if(typeIn.toUpperCase().contains("LONG")){
+			return DataType.LONG;
+		}else if(typeIn.toUpperCase().contains("DATE")){
+			return DataType.DATE;
+		}else if(typeIn.toUpperCase().contains("DOUBLE")){
+			return DataType.FLOAT;
+		}else{
+			throw new UnsupportedOperationException("Not supported yet."); 
+		}
+	}
 }
