@@ -86,10 +86,4 @@ public class AggregatorCount extends Aggregator{
 		data.setNumericValue(data.getNumericValue()+1);
 	}
 
-	@Override
-	public Aggregator clone() {
-		return new AggregatorCount(func, groupbyNames);
-	}
-
-	
 }

@@ -18,6 +18,7 @@ import net.sf.jsqlparser.statement.select.SelectItem;
 import net.sf.jsqlparser.statement.select.SelectItemVisitor;
 import ra.Aggregator;
 import ra.AggregatorCount;
+import ra.AggregatorSum;
 import ra.Evaluator;
 import ra.Operator;
 import dao.DatumType;
@@ -149,11 +150,14 @@ public class SelectItemScanner implements SelectItemVisitor{
 				case "AVG":
 				return;
 			case "COUNT":
-				Aggregator aggr = new AggregatorCount(func, groupbyNames);
-				aggregators.add(aggr);
-				aggreMap.put(func, aggr);
+				Aggregator aggrCount = new AggregatorCount(func, groupbyNames);
+				aggregators.add(aggrCount);
+				aggreMap.put(func, aggrCount);
 				return;
 			case "SUM":
+				Aggregator aggrSum = new AggregatorSum(func, groupbyNames);
+				aggregators.add(aggrSum);
+				aggreMap.put(func, aggrSum);
 				return;
 			case "MAX":
 				return;

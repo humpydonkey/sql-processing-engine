@@ -31,5 +31,4 @@ public abstract class Aggregator{
 	
 	public abstract void aggregate(Tuple tuple, String key);
 	public abstract Datum getValue(String key);
-	public abstract Aggregator clone();
 }
