@@ -40,5 +40,10 @@ public class DatumDate extends Datum {
 		System.out.println("Wrong set value.");
 	}
 	
+	@Override
+	public String toString(){
+		return format.format(value);
+	}
+	
 
 }

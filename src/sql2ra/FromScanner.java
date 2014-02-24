@@ -50,7 +50,12 @@ public class FromScanner implements FromItemVisitor{
 	{
 		CreateTable table = tables.get(tableName.getName());
 		if(table==null)
-			System.out.println("No such table : " + tableName.getName());
+			try {
+				throw new Exception("No such table : " + tableName.getName());
+			} catch (Exception e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 		
 		@SuppressWarnings("unchecked")
 		List<ColumnDefinition> colDefs = table.getColumnDefinitions();
