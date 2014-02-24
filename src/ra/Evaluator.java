@@ -1,8 +1,6 @@
 package ra;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 import net.sf.jsqlparser.expression.AllComparisonExpression;
 import net.sf.jsqlparser.expression.AnyComparisonExpression;

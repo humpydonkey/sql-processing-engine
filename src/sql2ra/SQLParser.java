@@ -25,6 +25,11 @@ import dao.Schema;
 import dao.Tuple;
 
 public class SQLParser {
+	private static FromScanner fromscan;
+	
+	public static FromScanner getFromScanner(){
+		return fromscan;
+	}
 	
 	public static void create(Statement stmt,HashMap<String,CreateTable> tables)
 	{
@@ -39,16 +44,12 @@ public class SQLParser {
 		}
 	}
 	
-	public static List<Tuple> select(Statement stmt,HashMap<String,CreateTable> tables,File dataDir) //whether there should be a File var
-	{
-		SelectBody select = ((Select)stmt).getSelectBody();
+	public static List<Tuple> select(SelectBody select, FromScanner fromscan){
 		System.out.println("I would now evaluate:" + select);
 		Operator oper = null;
 		
 		if(select instanceof PlainSelect){
-			
 			PlainSelect pselect = (PlainSelect) select;
-			FromScanner fromscan = new FromScanner(dataDir, tables);
 			pselect.getFromItem().accept(fromscan);
 			
 			oper = fromscan.source;
@@ -76,26 +77,6 @@ public class SQLParser {
 			if(!selectItemScan.getIfSelectAll()){
 				oper = new ProjectionOperator(oper, newSchema);
 			}
-			
-			
-//			if(pselect.getHaving()!=null){  //have having, maybe no where, no groupby
-//				oper = new HavingOperator(  //GroupByOperator dai ding yi
-//						oper,
-//						fromscan.columns,
-//						pselect.getWhere(),
-//						pselect.getGroupByColumnReferences(),
-//						pselect.getHaving()
-//					);
-//			}
-//			if(pselect.getOrderByElements()!=null){  //have orderby, maybe no where
-//						oper = new OrderByOperator(
-//						 oper,
-//						 fromscan.columns,
-//						 pselect.getWhere(),
-//						 pselect.getOrderByElements()
-//					);
-//					
-//			}
 		}
 		
 		return dump(oper);
@@ -117,7 +98,7 @@ public class SQLParser {
 		System.out.println("begin");
 		int i;
 		String dataDirStr = "data/NBA/";
-		String sqlFilePath = "data/cp1_graded_sqls/nba02.sql";
+		String sqlFilePath = "data/cp1_graded_sqls/nba04.sql";
 		
 		File dataDir = null;
 		//set arguments
@@ -138,6 +119,9 @@ public class SQLParser {
                 sqlFiles.add(new File(args[i]));
             }
         }
+        
+        fromscan = new FromScanner(dataDir, tables);
+        
         for (File sql : sqlFiles){
         	try{
         		FileReader stream = new FileReader(sql);
@@ -152,8 +136,8 @@ public class SQLParser {
         			else {
         				
         			 if(stmt instanceof Select){
-        				List<Tuple> tuples = select(stmt,tables,dataDir);
-        				
+        				Select sel = (Select)stmt;
+        				List<Tuple> tuples = select(sel.getSelectBody(),fromscan);
         				for(Tuple tuple : tuples)
         					tuple.printTuple();
         			 }

@@ -9,11 +9,15 @@ import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.create.table.ColumnDefinition;
 import net.sf.jsqlparser.statement.create.table.CreateTable;
 import net.sf.jsqlparser.statement.select.FromItemVisitor;
+import net.sf.jsqlparser.statement.select.PlainSelect;
+import net.sf.jsqlparser.statement.select.SelectBody;
 import net.sf.jsqlparser.statement.select.SubJoin;
 import net.sf.jsqlparser.statement.select.SubSelect;
+import ra.CacheOperator;
 import ra.Operator;
 import ra.ScanOperator;
 import dao.Schema;
+import dao.Tuple;
 
 
 
@@ -38,7 +42,8 @@ public class FromScanner implements FromItemVisitor{
 	
 	public void visit(SubSelect subselect)
 	{
-		
+		List<Tuple> tuples = SQLParser.select(subselect.getSelectBody(), SQLParser.getFromScanner());
+		source = new CacheOperator(tuples); 
 	}
 	
 	public void visit(Table tableName)
@@ -46,6 +51,8 @@ public class FromScanner implements FromItemVisitor{
 		CreateTable table = tables.get(tableName.getName());
 		if(table==null)
 			System.out.println("No such table : " + tableName.getName());
+		
+		@SuppressWarnings("unchecked")
 		List<ColumnDefinition> colDefs = table.getColumnDefinitions();
 		columns = new Column[colDefs.size()];
 		for(int i = 0; i < colDefs.size(); i++){
