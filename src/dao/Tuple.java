@@ -1,5 +1,7 @@
 package dao;
 
+import java.util.Date;
+
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.Function;
 import net.sf.jsqlparser.schema.Column;
@@ -164,5 +166,11 @@ public class Tuple{
 	public Schema getSchema(){
 		return schema;
 	}
+	
+//	public static void main(String[] args){
+//		 Date d1 = new Date(1994,01,01);
+//		 Date d2 = new Date(1993,12,12);
+//		 System.out.println(d1.compareTo(d2));
+//	}
 
 }
