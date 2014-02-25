@@ -1,5 +1,7 @@
 package dao;
 
+import java.util.Date;
+
 public class DatumString extends Datum {
 	private String value;
 	
@@ -21,6 +23,24 @@ public class DatumString extends Datum {
 	@Override
 	public void setNumericValue(double valueIn) {
 		System.out.println("Wrong set value.");
+	}
+	
+	@Override
+	public int compareTo(Datum o) {
+		if(o instanceof DatumString){
+			DatumString obj = (DatumString)o;
+			String obj1 = this.getValue();
+			String obj2 = obj.getValue();
+			return obj1.compareTo(obj2);
+		} else{
+			try {
+				throw new IllegalArgumentException("Wrong type (" + o.getClass().getCanonicalName() + ") of this Object.");
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			return 0;
+		}
 	}
 	
 }

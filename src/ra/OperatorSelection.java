@@ -1,5 +1,8 @@
 package ra;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import net.sf.jsqlparser.expression.Expression;
 import dao.Tuple;
 
@@ -12,6 +15,27 @@ public class OperatorSelection implements Operator{
 		input = inputIn;
 		condition = conditionIn;
 	}
+	
+
+	@Override
+	public List<Tuple> readOneBlock() {
+		
+		List<Tuple> selectedTuples = new LinkedList<Tuple>();
+
+		List<Tuple> tuples = input.readOneBlock();
+		for(Tuple tuple : tuples){
+			
+			Evaluator evaluator = new Evaluator(tuple);
+			condition.accept(evaluator);
+			if(evaluator.getResult()){
+				selectedTuples.add(tuple);
+			}
+		}
+
+	
+		return selectedTuples;
+	}
+	
 	
 	@Override
 	public Tuple readOneTuple() {
@@ -32,9 +56,9 @@ public class OperatorSelection implements Operator{
 		return tuple;
 	}
 	
+	
 	@Override
 	public void reset() {
 		input.reset();
-	}
-	
+	}	
 }

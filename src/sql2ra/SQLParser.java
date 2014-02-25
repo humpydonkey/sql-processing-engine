@@ -6,12 +6,14 @@ import java.util.List;
 
 import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.create.table.CreateTable;
+import net.sf.jsqlparser.statement.select.OrderByElement;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.SelectBody;
 import ra.Aggregator;
 import ra.Operator;
 import ra.OperatorCache;
 import ra.OperatorGroupBy;
+import ra.OperatorOrderBy;
 import ra.OperatorProjection;
 import ra.OperatorSelection;
 import dao.Schema;
@@ -42,7 +44,6 @@ public class SQLParser {
 	}
 	
 	public static List<Tuple> select(SelectBody select, FromScanner fromscan){
-		System.out.println("I would now evaluate:" + select);
 		Operator oper = null;
 		
 		if(select instanceof PlainSelect){
@@ -75,6 +76,20 @@ public class SQLParser {
 			if(!selectItemScan.getIfSelectAll()){
 				oper = new OperatorProjection(oper, newSchema);
 			}
+			
+			
+			if(pselect.getOrderByElements()!=null){
+				@SuppressWarnings("unchecked")
+				List<OrderByElement> elets = pselect.getOrderByElements();
+
+				try {
+					OperatorOrderBy orderby = new OperatorOrderBy(dump(oper),elets);
+					return orderby.getResults();
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
 		}
 		
 		return dump(oper);
@@ -82,11 +97,16 @@ public class SQLParser {
 	
 	public static List<Tuple> dump(Operator oper){
 		List<Tuple> results = new LinkedList<Tuple>();
-		Tuple tuple = oper.readOneTuple();
-		while(tuple!=null){
-			results.add(tuple);
-			//tuple.printTuple();
-			tuple = oper.readOneTuple();
+//		Tuple tuple = oper.readOneTuple();
+//		while(tuple!=null){
+//			results.add(tuple);
+//			tuple = oper.readOneTuple();
+//		}
+		
+		List<Tuple> tuples = oper.readOneBlock();
+		while(tuples.size()!=0){
+			results.addAll(tuples);
+			tuples = oper.readOneBlock();
 		}
 		return results;
 	}

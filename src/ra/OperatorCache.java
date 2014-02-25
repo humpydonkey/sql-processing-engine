@@ -1,6 +1,7 @@
 package ra;
 
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 
 import dao.Tuple;
@@ -15,9 +16,6 @@ public class OperatorCache implements Operator {
 		iter = tuples.iterator();
 	}
 	
-	public OperatorCache(StringBuilder sb){
-		
-	}
 	
 	@Override
 	public Tuple readOneTuple() {
@@ -30,6 +28,13 @@ public class OperatorCache implements Operator {
 	@Override
 	public void reset() {
 		iter = tuples.iterator();
+	}
+
+	@Override
+	public List<Tuple> readOneBlock() {
+		List<Tuple> returnData = tuples;
+		tuples = new LinkedList<Tuple>();
+		return returnData;
 	}
 
 }

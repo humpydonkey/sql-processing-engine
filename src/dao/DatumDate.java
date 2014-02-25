@@ -44,6 +44,24 @@ public class DatumDate extends Datum {
 	public String toString(){
 		return format.format(value);
 	}
+
+	@Override
+	public int compareTo(Datum o) {
+		if(o instanceof DatumDate){
+			DatumDate obj = (DatumDate)o;
+			Date obj1 = this.getValue();
+			Date obj2 = obj.getValue();
+			return obj1.compareTo(obj2);
+		} else{
+			try {
+				throw new IllegalArgumentException("Wrong type (" + o.getClass().getCanonicalName() + ") of this Object.");
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			return 0;
+		}
+	}
 	
 
 }
