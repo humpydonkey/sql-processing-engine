@@ -24,7 +24,7 @@ public class DatumLong extends Datum{
 
 	@Override
 	public void setNumericValue(double valueIn) {
-		value = (int)valueIn;
+		value = (long)valueIn;
 	}
 	
 	
