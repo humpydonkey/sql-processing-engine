@@ -70,24 +70,22 @@ public class Tuple{
 			}else if(newSource instanceof Function){ 
 				//is an aggregate function
 				Function func = (Function)newSource;
-				if(func.isAllColumns()){
-					data = newSchema.getAggregator(func).getValue("*");
-				}else{
-					//find the key
-					Aggregator aggre = newSchema.getAggregator(func);
-					String groupbyKey = "";
-					for(String colName : aggre.getGroupByColumns()){
-						Datum groupbyColumn = getDataByName(colName);
-						groupbyKey += groupbyColumn.toString();
-					}
-					//map to the aggregated Datum value
-					data = aggre.getValue(groupbyKey);
+		
+				//find the key
+				Aggregator aggre = newSchema.getAggregator(func);
+				String groupbyKey = "";
+				for(String colName : aggre.getGroupByColumns()){
+					Datum groupbyColumn = getDataByName(colName);
+					groupbyKey += groupbyColumn.toString();
 				}
+				//map to the aggregated Datum value
+				data = aggre.getValue(groupbyKey);
+				
 			}else{
 				//should be a constant or expression
 				Evaluator eval = new Evaluator(this);
 				newSource.accept(eval);
-				data = eval.getDatum();
+				data = eval.copyDatum();
 				if(data.getNumericValue()==1168){
 					System.out.println("!!");
 				}

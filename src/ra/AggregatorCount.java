@@ -14,8 +14,8 @@ public class AggregatorCount extends Aggregator{
 
 	private Map<String, Datum> countMap;
 	private String colName;
-	private boolean countAll;
 	private boolean distinct;
+	private boolean countAll;
 	private Map<String, Set<Datum>> distinctCountMap;
 	
 	
@@ -24,27 +24,39 @@ public class AggregatorCount extends Aggregator{
 		
 		countMap = new HashMap<String, Datum>();
 		
-		if(func.isAllColumns()){
+		if(funcIn.isAllColumns()){
 			countAll = true;
-			countMap.put("*", new DatumInt(0));
+			colName = "*";
 		}else{
 			countAll = false;
-			//assume Count() function only take one variable
+			//assume Count() function only takes one variable
 			colName = func.getParameters().getExpressions().get(0).toString();
-			if(func.isDistinct()){
-				distinct = true;
-				distinctCountMap = new HashMap<String, Set<Datum>>();
-			}
-			else
-				distinct = false;	
 		}
+		
+		if(func.isDistinct()){
+			distinct = true;
+			distinctCountMap = new HashMap<String, Set<Datum>>();
+		}
+		else
+			distinct = false;	
+		
 	}
 	
 	@Override
 	public void aggregate(Tuple tuple, String key) {
-		if(countAll)
-			countPlusPlus("*");
-		else{
+
+		if(countAll){
+			//do not need to compare column,
+			//because it is countAll, no specific column 	
+			if(!countMap.containsKey(key)){
+				//insert new
+				countMap.put(key, new DatumInt(1));
+			}else{
+				//else count ++
+				countPlusPlus(key);
+			}
+			
+		}else{
 			Datum data = tuple.getDataByName(colName);
 			if(data!=null){	//only count non-null value
 				if(distinct){
@@ -69,6 +81,8 @@ public class AggregatorCount extends Aggregator{
 				}
 			}
 		}
+			
+		
 	}
 
 

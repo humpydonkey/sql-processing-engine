@@ -63,5 +63,9 @@ public class DatumDate extends Datum {
 		}
 	}
 	
-
+	@Override
+	public Datum clone() {
+		Datum copy = new DatumDate((Date)value.clone());
+		return copy;
+	}
 }

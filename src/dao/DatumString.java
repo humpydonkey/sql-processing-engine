@@ -13,6 +13,10 @@ public class DatumString extends Datum {
 	public String getValue(){
 		return value;
 	}
+	
+	public void setValue(String str){
+		value = str;
+	}
 
 	@Override
 	public double getNumericValue() {
@@ -43,4 +47,9 @@ public class DatumString extends Datum {
 		}
 	}
 	
+	@Override
+	public Datum clone() {
+		Datum copy = new DatumString(new String(value));
+		return copy;
+	}
 }

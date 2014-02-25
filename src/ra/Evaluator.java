@@ -71,8 +71,8 @@ public class Evaluator implements ExpressionVisitor{
 		return evalResult;
 	}
 	
-	public Datum getDatum(){
-		return data;
+	public Datum copyDatum(){
+		return data.clone();
 	}
 	
 	public Column getColumn(){

@@ -36,7 +36,7 @@ public abstract class Datum implements Comparable<Datum> {
 	
 	public abstract double getNumericValue();
 	public abstract void setNumericValue(double valueIn);
-	
+	public abstract Datum clone();
 	
 	/**
 	 * compare whether two Datum objects are equal (have the same value).

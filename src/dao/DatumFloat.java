@@ -1,5 +1,6 @@
 package dao;
 
+
 public class DatumFloat extends Datum{
 	private float value;
 	
@@ -59,5 +60,11 @@ public class DatumFloat extends Datum{
 			}
 			return 0;
 		}
+	}
+	
+	@Override
+	public Datum clone() {
+		Datum copy = new DatumFloat(value);
+		return copy;
 	}
 }
