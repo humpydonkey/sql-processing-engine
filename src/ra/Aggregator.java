@@ -12,7 +12,7 @@ public abstract class Aggregator{
 	public Aggregator(Function funcIn, String[] groupByNamesIn){
 		func = funcIn;
 		if(groupByNamesIn==null)
-			groupbyNames = new String[]{"*"};
+			groupbyNames = new String[]{""};
 		else
 			groupbyNames = groupByNamesIn;
 	}
