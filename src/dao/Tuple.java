@@ -160,5 +160,9 @@ public class Tuple{
 		sb.deleteCharAt(sb.length()-1);
 		return sb.toString();
 	}
+	
+	public Schema getSchema(){
+		return schema;
+	}
 
 }
