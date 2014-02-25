@@ -26,8 +26,8 @@ public class Main {
 //		
 		//System.out.println("begin");
 		int i;
-		String dataDirStr = "data/NBA/";  //"/data/tpch/";
-		String sqlFilePath = "data/cp1_graded_sqls/nba04.sql";
+		String dataDirStr = "data/tpch/";//"data/NBA/";  //"/data/tpch/";
+		String sqlFilePath = "data/cp1_graded_sqls/tpch6.sql";
 		
 		File dataDir = null;
 		//set arguments

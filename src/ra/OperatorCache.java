@@ -15,6 +15,10 @@ public class OperatorCache implements Operator {
 		iter = tuples.iterator();
 	}
 	
+	public OperatorCache(StringBuilder sb){
+		
+	}
+	
 	@Override
 	public Tuple readOneTuple() {
 		if(iter.hasNext())

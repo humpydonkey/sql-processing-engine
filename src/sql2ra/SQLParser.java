@@ -42,7 +42,7 @@ public class SQLParser {
 	}
 	
 	public static List<Tuple> select(SelectBody select, FromScanner fromscan){
-		//System.out.println("I would now evaluate:" + select);
+		System.out.println("I would now evaluate:" + select);
 		Operator oper = null;
 		
 		if(select instanceof PlainSelect){

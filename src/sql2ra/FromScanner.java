@@ -1,5 +1,7 @@
 package sql2ra;
 
+import io.FileAccessor;
+
 import java.io.File;
 import java.util.HashMap;
 import java.util.List;
@@ -71,6 +73,8 @@ public class FromScanner implements FromItemVisitor{
 					new File(basePath, tableName.getName() + ".dat"),
 					schema
 				);
+//			List<Tuple> tuples = FileAccessor.getInstance().readBlock(basePath +"/" + tableName.getName() + ".dat", schema);
+//			source = new OperatorCache(tuples);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
