@@ -22,6 +22,8 @@ public class Tuple {
 		schema = schemaIn;
 		
 		for(int i=0; i<dataIn.length; i++){
+			if(dataIn.equals(""))
+				continue;
 			DatumType type = schemaIn.getColType(i);
 			dataArr[i] = DatumFactory.create(dataIn[i], type);
 		}

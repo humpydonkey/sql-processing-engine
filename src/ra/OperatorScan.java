@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.util.Iterator;
+import java.util.List;
 
 import dao.Schema;
 import dao.Tuple;
@@ -28,6 +29,7 @@ public class OperatorScan implements Operator, Iterable<Tuple>, Iterator<Tuple> 
 		schema = schemaIn;
 		reset();
 	}
+	
 	
 	@Override
 	public Tuple readOneTuple() {

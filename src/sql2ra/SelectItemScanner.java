@@ -58,6 +58,7 @@ public class SelectItemScanner implements SelectItemVisitor{
 		colTypes = new LinkedList<DatumType>();
 		colSources = new LinkedList<Expression>();
 		aggreMap = new HashMap<Function, Aggregator>();
+		aggregators = new ArrayList<Aggregator>();
 		
 		//get group by column names
 		List groupbys = select.getGroupByColumnReferences();
@@ -144,9 +145,7 @@ public class SelectItemScanner implements SelectItemVisitor{
 			colSources.add(func);
 			
 			//sum, count, avg, max, min
-			String funcName = func.getName();
-			aggregators = new ArrayList<Aggregator>();
-			
+			String funcName = func.getName().toUpperCase();
 			switch(funcName){
 				case "AVG":
 				Aggregator aggrAvg = new AggregatorAvg(func, groupbyNames);
