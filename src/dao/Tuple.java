@@ -118,7 +118,7 @@ public class Tuple{
 	 * @throws Exception
 	 */
 	public Datum getDataByName(String colName){
-		int index = schema.getIndex(colName);
+		int index = schema.getIndex(colName.toUpperCase());
 		if(index<0)
 			return null;
 		else

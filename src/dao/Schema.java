@@ -42,7 +42,7 @@ public class Schema {
 		indexMap = new HashMap<String, Integer>(length);
 		
 		for(int i=0; i<length; i++){
-			indexMap.put(columnNames[i].getColumnName(), i);
+			indexMap.put(columnNames[i].getColumnName().toUpperCase(), i);
 			colTypes[i] = convertColType(i, colDefs.get(i));
 			columnSources[i] = cols[i];	//assign it as a column
 			//compare the Column[] and ColumnDefinition has the same order index, if not throw exception 
@@ -64,7 +64,7 @@ public class Schema {
 		indexMap = new HashMap<String, Integer>(length);
 		
 		for(int i=0; i<length; i++){
-			indexMap.put(columnNames[i].getColumnName(), i);
+			indexMap.put(columnNames[i].getColumnName().toUpperCase(), i);
 			colTypes[i] = convertColType(i, colDefsIn.get(i));
 			columnSources[i] = colsIn[i];	//assign it as a column
 			//compare the Column[] and ColumnDefinition has the same order index, if not throw exception 
@@ -85,7 +85,7 @@ public class Schema {
 		columnSources = columnSourcesIn;
 		indexMap = new HashMap<String, Integer>(length);
 		for(int i=0; i<length; i++){
-			indexMap.put(columnNames[i].getColumnName(), i);
+			indexMap.put(columnNames[i].getColumnName().toUpperCase(), i);
 		}
 		
 		if(aggreMapIn!=null)

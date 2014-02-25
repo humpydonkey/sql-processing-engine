@@ -25,7 +25,7 @@ public class DatumFloat extends Datum{
 
 	@Override
 	public void setNumericValue(double valueIn) {
-		value = (int)valueIn;
+		value = (float)valueIn;
 	}
 	
 	@Override
