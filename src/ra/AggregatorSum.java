@@ -40,9 +40,7 @@ public class AggregatorSum extends Aggregator {
 			//update old, sum
 			Datum old = sumMap.get(key);
 			//can not sum Bool, String, Date
-			double oldVal = old.getNumericValue();
-			double newVal = data.getNumericValue();
-			old.setNumericValue(oldVal+newVal);
+			old.setNumericValue(old.getNumericValue()+data.getNumericValue());
 		}
 	}
 
