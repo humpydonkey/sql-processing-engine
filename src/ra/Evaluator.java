@@ -545,7 +545,7 @@ public class Evaluator implements ExpressionVisitor{
 		}else{
 			Datum var = tuple.getDataByName(arg.getColumnName());
 			if(var==null)
-				throw new NullPointerException();
+				throw new NullPointerException(tuple.toString() + "\nColumnName : " +arg.getColumnName());
 			data = var;
 		}
 	}
