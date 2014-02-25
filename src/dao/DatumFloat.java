@@ -11,7 +11,7 @@ public class DatumFloat extends Datum{
 	
 	public DatumFloat(float dataIn){
 		super(DatumType.Float);
-		value = Math.round(dataIn);
+		value = dataIn;
 	}
 	
 	public float getValue(){

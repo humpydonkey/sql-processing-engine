@@ -74,7 +74,9 @@ public class Evaluator implements ExpressionVisitor{
 	}
 	
 	public Datum copyDatum(){
-		return data.clone();
+		Datum d = data.clone();
+		data = null;
+		return d;
 	}
 	
 	public Column getColumn(){
@@ -93,7 +95,12 @@ public class Evaluator implements ExpressionVisitor{
 
 	@Override
 	public void visit(Function arg) {
-		func = arg;
+		if(arg.getName().equalsIgnoreCase("DATE")){
+			String date = arg.getParameters().toString();
+			String tmp = date.substring(2, date.length()-2);
+			data = new DatumDate(tmp);
+		}else
+			func = arg;
 	}
 
 	@Override
@@ -189,6 +196,9 @@ public class Evaluator implements ExpressionVisitor{
 	public void visit(AndExpression arg) {
 		arg.getLeftExpression().accept(this);
 		boolean left = evalResult;
+		if(left==false)
+			return;
+		
 		arg.getRightExpression().accept(this);
 		boolean right = evalResult;
 		evalResult = (left&&right);
