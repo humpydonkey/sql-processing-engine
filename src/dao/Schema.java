@@ -202,6 +202,11 @@ public class Schema {
 			return index.intValue();
 	}
 	
+	public Map<String, Integer> getIndexMap(){
+		return indexMap;
+	}
+	
+	
 	public static void main(String[] args) {
 
 		try {
@@ -219,6 +224,6 @@ public class Schema {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
 	}
+
 }

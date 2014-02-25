@@ -1,6 +1,8 @@
 package ra;
 
 import java.util.Date;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import net.sf.jsqlparser.expression.AllComparisonExpression;
 import net.sf.jsqlparser.expression.AnyComparisonExpression;
@@ -544,8 +546,14 @@ public class Evaluator implements ExpressionVisitor{
 			data = new DatumString(arg.getColumnName());
 		}else{
 			Datum var = tuple.getDataByName(arg.getColumnName());
-			if(var==null)
-				throw new NullPointerException(tuple.toString() + "\nColumnName : " +arg.getColumnName());
+			if(var==null){
+				StringBuilder sb = new StringBuilder();
+				Map<String, Integer> schemaMap = tuple.getSchema().getIndexMap();
+				for(Entry<String, Integer> entry : schemaMap.entrySet())
+					sb.append(entry.getKey() + " | ");
+				throw new NullPointerException("ColumnName : " +arg.getColumnName() + "\n" + sb.toString());
+			}
+				
 			data = var;
 		}
 	}
