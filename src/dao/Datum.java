@@ -2,7 +2,7 @@ package dao;
 
 
 
-public abstract class Datum {
+public abstract class Datum implements Comparable<Datum> {
 	
 	private DatumType type;
 	

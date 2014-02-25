@@ -27,7 +27,7 @@ public class Main {
 		//System.out.println("begin");
 		int i;
 		String dataDirStr = "data/tpch/";//"data/NBA/";  //"/data/tpch/";
-		String sqlFilePath = "data/cp1_graded_sqls/tpch6.sql";
+		String sqlFilePath = "data/cp1_graded_sqls/tpch1.sql";
 		
 		File dataDir = null;
 		//set arguments
@@ -66,6 +66,7 @@ public class Main {
         			else {
         				
         			 if(stmt instanceof Select){
+        				//System.out.println("I would now evaluate:" + stmt);
         				Select sel = (Select)stmt;
         				List<Tuple> tuples = SQLParser.select(sel.getSelectBody(),fromscan);
         				for(Tuple tuple : tuples)
@@ -83,6 +84,8 @@ public class Main {
         	}
 		
 	}//end for
+        
+  //  System.out.println("end");
   }//end main
 	
 }

@@ -8,7 +8,7 @@ public interface Operator{
 	//read one tuple from stream
 	public Tuple readOneTuple();
 	
-	//public List<Tuple> readOneBolck();
+	public List<Tuple> readOneBlock();
 	
 	//reset all
 	public void reset();

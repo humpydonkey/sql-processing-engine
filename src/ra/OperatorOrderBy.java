@@ -1,38 +1,174 @@
 package ra;
 
-import java.io.*;
-import java.util.*;
+import java.io.FileNotFoundException;
+import java.rmi.UnexpectedException;
+import java.util.ArrayList;
+import java.util.List;
 
-import ra.Operator;
 import net.sf.jsqlparser.expression.Expression;
-import net.sf.jsqlparser.parser.CCJSqlParser;
 import net.sf.jsqlparser.parser.ParseException;
 import net.sf.jsqlparser.schema.Column;
+import net.sf.jsqlparser.statement.create.table.ColDataType;
 import net.sf.jsqlparser.statement.create.table.ColumnDefinition;
-import net.sf.jsqlparser.statement.create.table.CreateTable;
 import net.sf.jsqlparser.statement.select.OrderByElement;
-import dao.*;
+import dao.Datum;
+import dao.Schema;
+import dao.Tuple;
 
 public class OperatorOrderBy{
 
-	private List<Tuple> list;
-	private List attr;
-	private OrderByElement orderby;
-	private Set<Datum> allData;
-	private HashMap<Datum, List<Tuple>> orders;
-	/*Operator input;
-	Column[] schema;
-	Expression condition;*/
+	private List<Tuple> results;
+	private List<OrderByElement> orderbyInfo;
+	private List<String> colNames;	//ordered column names
+	private String firstColName;
 	
-	public static void main(String[] args){
+	public OperatorOrderBy(List<Tuple> listIn, List<OrderByElement> eles) throws Exception{
+		results = listIn;		
+		orderbyInfo = eles;
+		colNames = new ArrayList<String>(eles.size());
+		
+		for(OrderByElement ele : eles){
+			Expression expr = ele.getExpression();
+			if(expr instanceof Column){
+				Column col = (Column)expr;
+				colNames.add(col.getColumnName());
+			}else
+				throw new UnsupportedOperationException("Unsupported, OrderByElement is an expression! "+expr.toString());
+		}
+		
+		if(colNames.size()==0)
+			throw new UnexpectedException("The size of OrderBy ColNames should not be 0");
+		
+		firstColName = colNames.get(0);
+		
+		if(orderbyInfo.get(0).isAsc()){
+			quickSort_Asce(results, 0, results.size()-1);
+		}else{
+			quickSort_Desc(results, 0, results.size()-1);
+		}
+	}
+	
+	public List<Tuple> getResults(){
+		return results;
+	}
+
+	
+	private void quickSort_Desc(List<Tuple> list, int left, int right) {
+		if (left >= right) {
+			return;
+		}
+
+		Datum pivot = list.get(left).getDataByName(firstColName);
+		int center = left;
+		for (int j = left + 1; j <= right; j++) {
+			Datum movingData = list.get(j).getDataByName(firstColName);
+			int compResult = movingData.compareTo(pivot);
+			if (compResult > 0) {
+				center++;
+				if (center != j)
+					swap(list, center, j);
+			}else if(colNames.size()>1&&compResult == 0){
+				pivot = list.get(left).getDataByName(colNames.get(1));
+				movingData = list.get(j).getDataByName(colNames.get(1));
+				compResult = movingData.compareTo(pivot);
+
+				if (compResult>0 && !orderbyInfo.get(1).isAsc()) {
+					center++;
+					if (center != j)
+						swap(list, center, j);
+				}
+			}
+		}
+		swap(list, center, left); // swap pivot to center
+		quickSort_Desc(list, left, center - 1); // left part
+		quickSort_Desc(list, center + 1, right); // right part
+	}
+
+	private void quickSort_Asce(List<Tuple> list, int left, int right) {
+		if (left >= right) {
+			return;
+		}
+
+		Datum pivot;
+		int center = left;
+		for (int j = left + 1; j <= right; j++) {
+			pivot = list.get(left).getDataByName(firstColName);
+			Datum movingData = list.get(j).getDataByName(firstColName);
+			int compResult = movingData.compareTo(pivot);
+			if (compResult < 0) {
+				center++;
+				if (center != j)
+					swap(list, center, j);
+			}else if(colNames.size()>1&&compResult == 0){
+				pivot = list.get(left).getDataByName(colNames.get(1));
+				movingData = list.get(j).getDataByName(colNames.get(1));
+				compResult = movingData.compareTo(pivot);
+
+				if (compResult<0 && orderbyInfo.get(1).isAsc()) {
+					center++;
+					if (center != j)
+						swap(list, center, j);
+				}
+			}
+		}
+		swap(list, center, left); // swap pivot to center
+		quickSort_Asce(list, left, center - 1); // left part
+		quickSort_Asce(list, center + 1, right); // right part
+	}
+
+	private void swap(List<Tuple> a, int i, int j) {
+		Tuple temp = a.get(i);
+		a.set(i, a.get(j));
+		a.set(j, temp);
+	}
+	
+	 
+	public static void main(String[] args) throws Exception{
 		
 		try {
-			CCJSqlParser parser = new CCJSqlParser(new FileInputStream(new File("data/NBA/nba11.sql")));
-			CreateTable ct = parser.CreateTable();
-			List<ColumnDefinition> list = ct.getColumnDefinitions();
-			for(ColumnDefinition cd : list){
-				System.out.println(cd.getColumnName() + " : " + cd.getColDataType().getDataType());
-			}
+			Column col1 = new Column();
+			Column col2 = new Column();
+			col1.setColumnName("A");
+			col2.setColumnName("Num");
+			ColumnDefinition colDef1 = new ColumnDefinition();
+			ColumnDefinition colDef2 = new ColumnDefinition();
+			colDef1.setColumnName(col1.getColumnName());
+			colDef2.setColumnName(col2.getColumnName());
+			ColDataType type1 = new ColDataType();
+			ColDataType type2 = new ColDataType();
+			type1.setDataType("string");
+			type2.setDataType("int");
+			colDef1.setColDataType(type1);
+			colDef2.setColDataType(type2);
+			List<ColumnDefinition> defs =  new ArrayList<ColumnDefinition>();
+			defs.add(colDef1);
+			defs.add(colDef2);
+			Schema schema = new Schema(new Column[]{col1,col2},defs);
+			Tuple t1 = new Tuple(new String[]{"E","22"}, schema);
+			Tuple t2 = new Tuple(new String[]{"F","5"}, schema);
+			Tuple t3 = new Tuple(new String[]{"A","11"}, schema);
+			Tuple t4 = new Tuple(new String[]{"C","8"}, schema);
+			Tuple t5 = new Tuple(new String[]{"B","1"}, schema);
+			Tuple t6 = new Tuple(new String[]{"B","4"}, schema);
+			List<Tuple> tuples = new ArrayList<Tuple>();
+			tuples.add(t1);
+			tuples.add(t2);
+			tuples.add(t3);
+			tuples.add(t4);
+			tuples.add(t5);
+			tuples.add(t6);
+			List<OrderByElement> eles = new ArrayList<OrderByElement>();
+			OrderByElement ele1 = new OrderByElement();
+			OrderByElement ele2 = new OrderByElement();
+			ele1.setExpression(col1);
+			ele2.setExpression(col2);
+			ele2.setAsc(false);
+			eles.add(ele1);
+			eles.add(ele2);
+			OperatorOrderBy ob = new OperatorOrderBy(tuples, eles);
+
+			for(Tuple t : ob.getResults())
+				t.printTuple();
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -41,106 +177,5 @@ public class OperatorOrderBy{
 			e.printStackTrace();
 		}
 	}
-	
-	public boolean isAsc(){
-		String attrAll = attr.toString();
-		if(attrAll.contains("ASC") == true){
-			return true;
-		}
-		else return false;
-	}
-	
-	public OperatorOrderBy(List<Tuple> listIn,List attrIn) throws Exception{
-		list = listIn;
-		attr = attrIn;
-		
-		//todo find column
-		//todo find all the tuples that have same attr value
-		for(int i = 0;i<list.size();i++){
-			String colName = attr.toString();
-			Tuple tup;
-			tup = list.get(i);
-			Datum data = tup.getDataByName(colName);
-			
-			if(allData.add(data)){	//new attr value
-				List<Tuple> allTuple = null;
-				allTuple.add(list.get(i));
-				orders.put(data, allTuple);
-			}
-			else{  //already have that attr value
-				List<Tuple> thisTuple = orders.get(data);
-				thisTuple.add(list.get(i));
-				orders.put(data, thisTuple);
-			}
-		}
-		
-		//todo order the set
-		//set to array
-		Datum[] allDatum = allData.toArray(new Datum[0]);  //string type..... what if the attr type is int?? string(10)<string(2)
-		//array to list
-		List<Datum> datumlist = Arrays.asList(allDatum);  //<-could this happen...
-		//quick sort that list
-		qsort(datumlist);
-		if(isAsc()==true){
-			for(int i = 0;i<datumlist.size()-1;i++){
-				Datum temp = datumlist.get(i);
-				System.out.println(temp);  //shuchu
-			}
-			
-		}
-		
-		else {  //DESC
-			for(int i = datumlist.size()-1;i>=0;i++){
-				Datum temp = datumlist.get(i);
-				System.out.println(temp);  //shuchu
-			}
-			
-		}
-		//output tuples
-		for(int k = 0;k<allDatum.length;k++){
-			Datum temp = allDatum[k];
-			List<Tuple> tmp = orders.get(temp);
-			System.out.println(tmp); //print to screen or send to others
-		}
-	}
-	
-	//quick sort http://ppd.fnal.gov/experiments/cdms/old_files/software/net/dist/sort.java
-	public void qsort(List<Datum> datumlist) throws Exception {
-//		super(list);
-	    quicksort(datumlist, 0, datumlist.size()-1);
-	  }
-
-	public void quicksort(List<Datum> datumlist, int p, int r) throws Exception {
-	    if (p < r) {
-	      int q = partition(datumlist,p,r);
-	      if (q == r) {
-		q--;
-	      }
-	      quicksort(datumlist,p,q);
-	      quicksort(datumlist,q+1,r);
-	    }
-	  }
-
-	 public int partition (List<Datum> datumlist, int p, int r) throws Exception {
-	    Datum pivot = datumlist.get(p);
-	    int lo = p;
-	    int hi = r;
-	    
-	    while (true) {   
-	      int cmprst1 = Datum.compare(datumlist.get(hi),pivot);  //???
-	      int cmprst2 = Datum.compare(datumlist.get(lo),pivot);
-	      while (cmprst1 >= 0 &&lo < hi) {hi--;}  //hi >= pivot
-	      while (cmprst2 < 0 &&lo < hi)  {lo++;}   //lo < pivot
-	      if (lo < hi) {
-	    	  Datum T = datumlist.get(lo);
-	    	  datumlist.set(lo, datumlist.get(hi)) ;
-	    	  datumlist.set(hi, T) ;
-	      }
-	      else return hi;
-	    }
-	    
-	  }      
-	//---quick sort
-	 
 }
 

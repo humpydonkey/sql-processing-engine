@@ -19,7 +19,7 @@ import dao.Tuple;
 public class FileAccessor {
 
 	private static FileAccessor instance = new FileAccessor();
-	private final int BUFFERSIZE = 2000000;
+	private final int BUFFERSIZE = 200000000;	//200MB
 	
 	private FileAccessor(){} 
 	
@@ -32,7 +32,7 @@ public class FileAccessor {
 		String add0 = "data/NBA/";
 		String add1 = "data/NBA/nba11.sql";
 		String add2 = "data/NBA/nba16.expected.dat";
-		String add3 = "data/tpch/orders.tbl";
+		String add3 = "data/tpch/partsupp.tbl";
 		System.out.println("start");
 		
 		TimeCalc.begin(1);
@@ -41,9 +41,9 @@ public class FileAccessor {
 		List<File> test =FileAccessor.getInstance().getDataFiles(add0, "dat");
 		List<String> sqls = FileAccessor.getInstance().readAllSqls(add1);
 		
-		StringBuilder sb = FileAccessor.getInstance().readBlock(new File(add3));
+		StringBuilder sb = FileAccessor.getInstance().readPartOfFile(new File(add3), 7);
 		try {
-			FileAccessor.getInstance().writeFile(sb,"orders.dat");
+			FileAccessor.getInstance().writeFile(sb,"partsupp.dat");
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -111,6 +111,29 @@ public class FileAccessor {
 			e.printStackTrace();
 		}
 		sb.append(content);
+		return sb;
+	}
+	
+	
+	public StringBuilder readPartOfFile(File f, int parts){
+		StringBuilder sb = new StringBuilder();
+		try {
+			BufferedReader reader = getBR(f);
+			String line = "";
+			int i=0;
+			while((line = reader.readLine())!=null){
+				if(i==parts){
+					sb.append(line+"\n");
+					i=0;
+				}
+					
+				i++;
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
 		return sb;
 	}
 	

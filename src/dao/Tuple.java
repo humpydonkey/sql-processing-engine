@@ -7,25 +7,39 @@ import ra.Aggregator;
 import ra.Evaluator;
 
 
-public class Tuple {
+public class Tuple{
 	
 	private Datum[] dataArr;
 	private Schema schema;
 	
 	/**
 	 * Constructor
-	 * @param dataIn
+	 * @param splitedData
 	 * @throws Exception 
 	 */
-	public Tuple(String[] dataIn, Schema schemaIn){
-		dataArr = new Datum[dataIn.length];
+	public Tuple(String[] splitedData, Schema schemaIn){
+		dataArr = new Datum[splitedData.length];
 		schema = schemaIn;
 		
-		for(int i=0; i<dataIn.length; i++){
-			if(dataIn.equals(""))
+		for(int i=0; i<splitedData.length; i++){
+			if(splitedData[i].equals(""))
 				continue;
 			DatumType type = schemaIn.getColType(i);
-			dataArr[i] = DatumFactory.create(dataIn[i], type);
+			dataArr[i] = DatumFactory.create(splitedData[i], type);
+		}
+	}
+	
+	
+	public Tuple(String rawLine, Schema schemaIn){
+		String[] splitedData = rawLine.split("\\|");
+		dataArr = new Datum[splitedData.length];
+		schema = schemaIn;
+		
+		for(int i=0; i<splitedData.length; i++){
+			if(splitedData[i].equals(""))
+				continue;
+			DatumType type = schemaIn.getColType(i);
+			dataArr[i] = DatumFactory.create(splitedData[i], type);
 		}
 	}
 	
@@ -39,7 +53,7 @@ public class Tuple {
 	 * @param newSchema
 	 * @return
 	 */
-	public boolean changeTuple(Schema newSchema){
+	public void changeTuple(Schema newSchema){
 		int length = newSchema.getLength();
 		Datum[] newDataArr = new Datum[length];
 		Column[] newColNames = newSchema.getColumnNames();
@@ -83,7 +97,6 @@ public class Tuple {
 		}
 		dataArr = newDataArr;
 		schema = newSchema;
-		return true;
 	}
 	
 	/**
@@ -149,4 +162,5 @@ public class Tuple {
 		sb.deleteCharAt(sb.length()-1);
 		return sb.toString();
 	}
+
 }

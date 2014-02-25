@@ -26,6 +26,31 @@ public class Schema {
 	private DatumType[] colTypes;
 	private Map<Function, Aggregator> aggregatorMap;
 	
+	public Schema(CreateTable table, Table tableName) throws Exception{	
+		@SuppressWarnings("unchecked")
+		List<ColumnDefinition> colDefs = table.getColumnDefinitions();
+		Column[] cols = new Column[colDefs.size()];
+		for(int i = 0; i < colDefs.size(); i++){
+			ColumnDefinition col = (ColumnDefinition)colDefs.get(i);
+			cols[i] = new Column(tableName, col.getColumnName());
+		}
+		
+		length = cols.length;
+		columnNames = cols;
+		colTypes = new DatumType[length];
+		columnSources = new Expression[length];
+		indexMap = new HashMap<String, Integer>(length);
+		
+		for(int i=0; i<length; i++){
+			indexMap.put(columnNames[i].getColumnName(), i);
+			colTypes[i] = convertColType(i, colDefs.get(i));
+			columnSources[i] = cols[i];	//assign it as a column
+			//compare the Column[] and ColumnDefinition has the same order index, if not throw exception 
+			if(!columnNames[i].getColumnName().equals(colDefs.get(i).getColumnName()))
+				throw new Exception("Column[] and ColumnDefinition has not the same order index.");
+		}
+	}
+	
 	public Schema(Column[] colsIn, List<ColumnDefinition> colDefsIn) throws Exception{
 		if(colsIn.length==0||colDefsIn.size()==0)
 			throw new IllegalArgumentException("the number of columns/column definitions is 0.");
@@ -182,6 +207,7 @@ public class Schema {
 		try {
 			CCJSqlParser parser = new CCJSqlParser(new FileInputStream(new File("data/NBA/nba11.sql")));
 			CreateTable ct = parser.CreateTable();
+			@SuppressWarnings("unchecked")
 			List<ColumnDefinition> list = ct.getColumnDefinitions();
 			for(ColumnDefinition cd : list){
 				System.out.println(cd.getColumnName() + " : " + cd.getColDataType().getDataType());
