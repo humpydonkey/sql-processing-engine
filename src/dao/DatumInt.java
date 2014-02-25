@@ -56,4 +56,10 @@ public class DatumInt extends Datum{
 			return 0;
 		}
 	}
+	
+	@Override
+	public Datum clone() {
+		Datum copy = new DatumInt(value);
+		return copy;
+	}
 }

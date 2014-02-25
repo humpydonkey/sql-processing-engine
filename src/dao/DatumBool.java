@@ -49,4 +49,10 @@ public class DatumBool extends Datum {
 			return 0;
 		}
 	}
+
+	@Override
+	public Datum clone() {
+		Datum copy = new DatumBool(this.getValue());
+		return copy;
+	}
 }
