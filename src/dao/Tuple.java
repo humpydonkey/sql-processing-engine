@@ -121,9 +121,15 @@ public class Tuple{
 	 */
 	public Datum getDataByName(String colName){
 		int index = schema.getIndex(colName.toUpperCase());
-		if(index<0)
-			return null;
-		else
+		if(index<0){
+			try {
+				throw new Exception("Cannot find column : "+colName);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			return null;	
+		}else
 			return dataArr[index];
 	}
 	
