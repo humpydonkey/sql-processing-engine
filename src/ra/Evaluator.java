@@ -249,45 +249,50 @@ public class Evaluator implements ExpressionVisitor{
 		Datum left = data;
 		arg.getRightExpression().accept(this);
 		Datum right = data;
+		int compResult = left.compareTo(right);
+		if(compResult==0)
+			evalResult = true;
+		else
+			evalResult = false;
 		
-		if(left instanceof DatumString){
-			DatumString leftVar = (DatumString)left;
-
-			if(right instanceof DatumString){
-				//two variables
-				DatumString rightVar = (DatumString)right;
-				try {
-					Datum leftDatum = tuple.getDataByName(leftVar.getValue());
-					Datum rightDatum = tuple.getDataByName(rightVar.getValue());
-					if(leftDatum==null||rightDatum==null)
-						throw new NullPointerException();
-					evalResult = Datum.equals(leftDatum, rightDatum);
-					return;
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}else{
-				//one variable, one constant
-				try {
-					Datum leftDatum = tuple.getDataByName(leftVar.getValue());
-					evalResult = Datum.equals(leftDatum, right);
-					return;
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
-		}else{
-			//two constant
-			try {
-				evalResult = Datum.equals(left, right);
-				return;
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}		
-		}
+//		if(left instanceof DatumString){
+//			DatumString leftVar = (DatumString)left;
+//
+//			if(right instanceof DatumString){
+//				//two variables
+//				DatumString rightVar = (DatumString)right;
+//				try {
+//					Datum leftDatum = tuple.getDataByName(leftVar.getValue());
+//					Datum rightDatum = tuple.getDataByName(rightVar.getValue());
+//					if(leftDatum==null||rightDatum==null)
+//						throw new NullPointerException();
+//					evalResult = Datum.equals(leftDatum, rightDatum);
+//					return;
+//				} catch (Exception e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
+//			}else{
+//				//one variable, one constant
+//				try {
+//					Datum leftDatum = tuple.getDataByName(leftVar.getValue());
+//					evalResult = Datum.equals(leftDatum, right);
+//					return;
+//				} catch (Exception e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
+//			}
+//		}else{
+//			//two constant
+//			try {
+//				evalResult = Datum.equals(left, right);
+//				return;
+//			} catch (Exception e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}		
+//		}
 	}
 
 	
@@ -298,44 +303,50 @@ public class Evaluator implements ExpressionVisitor{
 		arg.getRightExpression().accept(this);
 		Datum right = data;
 		
-		if(left instanceof DatumString){
-			DatumString leftVar = (DatumString)left;
-
-			if(right instanceof DatumString){
-				//two variables
-				DatumString rightVar = (DatumString)right;
-				try {
-					Datum leftDatum = tuple.getDataByName(leftVar.getValue());
-					Datum rightDatum = tuple.getDataByName(rightVar.getValue());
-					if(leftDatum==null||rightDatum==null)
-						throw new NullPointerException();
-					evalResult = (Datum.compare(leftDatum, rightDatum)>0);
-					return;
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}else{
-				//one variable, one constant
-				try {
-					Datum leftDatum = tuple.getDataByName(leftVar.getValue());
-					evalResult = (Datum.compare(leftDatum, right)>0);
-					return;
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
-		}else{
-			//two constant
-			try {
-				evalResult = (Datum.compare(left, right)>0);
-				return;
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}		
-		}
+		int compResult = left.compareTo(right);
+		if(compResult>0)
+			evalResult = true;
+		else
+			evalResult = false;
+		
+//		if(left instanceof DatumString){
+//			DatumString leftVar = (DatumString)left;
+//
+//			if(right instanceof DatumString){
+//				//two variables
+//				DatumString rightVar = (DatumString)right;
+//				try {
+//					Datum leftDatum = tuple.getDataByName(leftVar.getValue());
+//					Datum rightDatum = tuple.getDataByName(rightVar.getValue());
+//					if(leftDatum==null||rightDatum==null)
+//						throw new NullPointerException();
+//					evalResult = (Datum.compare(leftDatum, rightDatum)>0);
+//					return;
+//				} catch (Exception e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
+//			}else{
+//				//one variable, one constant
+//				try {
+//					Datum leftDatum = tuple.getDataByName(leftVar.getValue());
+//					evalResult = (Datum.compare(leftDatum, right)>0);
+//					return;
+//				} catch (Exception e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
+//			}
+//		}else{
+//			//two constant
+//			try {
+//				evalResult = (Datum.compare(left, right)>0);
+//				return;
+//			} catch (Exception e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}		
+//		}
 	}
 
 	@Override
@@ -345,44 +356,50 @@ public class Evaluator implements ExpressionVisitor{
 		arg.getRightExpression().accept(this);
 		Datum right = data;
 		
-		if(left instanceof DatumString){
-			DatumString leftVar = (DatumString)left;
-
-			if(right instanceof DatumString){
-				//two variables
-				DatumString rightVar = (DatumString)right;
-				try {
-					Datum leftDatum = tuple.getDataByName(leftVar.getValue());
-					Datum rightDatum = tuple.getDataByName(rightVar.getValue());
-					if(leftDatum==null||rightDatum==null)
-						throw new NullPointerException();
-					evalResult = (Datum.compare(leftDatum, rightDatum)>=0);
-					return;
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}else{
-				//one variable, one constant
-				try {
-					Datum leftDatum = tuple.getDataByName(leftVar.getValue());
-					evalResult = (Datum.compare(leftDatum, right)>=0);
-					return;
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
-		}else{
-			//two constant
-			try {
-				evalResult = (Datum.compare(left, right)>=0);
-				return;
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}		
-		} 
+		int compResult = left.compareTo(right);
+		if(compResult>=0)
+			evalResult = true;
+		else
+			evalResult = false;
+		
+//		if(left instanceof DatumString){
+//			DatumString leftVar = (DatumString)left;
+//
+//			if(right instanceof DatumString){
+//				//two variables
+//				DatumString rightVar = (DatumString)right;
+//				try {
+//					Datum leftDatum = tuple.getDataByName(leftVar.getValue());
+//					Datum rightDatum = tuple.getDataByName(rightVar.getValue());
+//					if(leftDatum==null||rightDatum==null)
+//						throw new NullPointerException();
+//					evalResult = (Datum.compare(leftDatum, rightDatum)>=0);
+//					return;
+//				} catch (Exception e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
+//			}else{
+//				//one variable, one constant
+//				try {
+//					Datum leftDatum = tuple.getDataByName(leftVar.getValue());
+//					evalResult = (Datum.compare(leftDatum, right)>=0);
+//					return;
+//				} catch (Exception e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
+//			}
+//		}else{
+//			//two constant
+//			try {
+//				evalResult = (Datum.compare(left, right)>=0);
+//				return;
+//			} catch (Exception e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}		
+//		} 
 	}
 
 	@Override
@@ -407,44 +424,50 @@ public class Evaluator implements ExpressionVisitor{
 		arg.getRightExpression().accept(this);
 		Datum right = data;
 		
-		if(left instanceof DatumString){
-			DatumString leftVar = (DatumString)left;
-
-			if(right instanceof DatumString){
-				//two variables
-				DatumString rightVar = (DatumString)right;
-				try {
-					Datum leftDatum = tuple.getDataByName(leftVar.getValue());
-					Datum rightDatum = tuple.getDataByName(rightVar.getValue());
-					if(leftDatum==null||rightDatum==null)
-						throw new NullPointerException();
-					evalResult = (Datum.compare(leftDatum, rightDatum)<0);
-					return;
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}else{
-				//one variable, one constant
-				try {
-					Datum leftDatum = tuple.getDataByName(leftVar.getValue());
-					evalResult = (Datum.compare(leftDatum, right)<0);
-					return;
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
-		}else{
-			//two constant
-			try {
-				evalResult = (Datum.compare(left, right)<0);
-				return;
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}		
-		}
+		int compResult = left.compareTo(right);
+		if(compResult<0)
+			evalResult = true;
+		else
+			evalResult = false;
+		
+//		if(left instanceof DatumString){
+//			DatumString leftVar = (DatumString)left;
+//
+//			if(right instanceof DatumString){
+//				//two variables
+//				DatumString rightVar = (DatumString)right;
+//				try {
+//					Datum leftDatum = tuple.getDataByName(leftVar.getValue());
+//					Datum rightDatum = tuple.getDataByName(rightVar.getValue());
+//					if(leftDatum==null||rightDatum==null)
+//						throw new NullPointerException();
+//					evalResult = (Datum.compare(leftDatum, rightDatum)<0);
+//					return;
+//				} catch (Exception e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
+//			}else{
+//				//one variable, one constant
+//				try {
+//					Datum leftDatum = tuple.getDataByName(leftVar.getValue());
+//					evalResult = (Datum.compare(leftDatum, right)<0);
+//					return;
+//				} catch (Exception e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
+//			}
+//		}else{
+//			//two constant
+//			try {
+//				evalResult = (Datum.compare(left, right)<0);
+//				return;
+//			} catch (Exception e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}		
+//		}
 	}
 
 	@Override
@@ -454,49 +477,64 @@ public class Evaluator implements ExpressionVisitor{
 		arg.getRightExpression().accept(this);
 		Datum right = data;
 		
-		if(left instanceof DatumString){
-			DatumString leftVar = (DatumString)left;
-
-			if(right instanceof DatumString){
-				//two variables
-				DatumString rightVar = (DatumString)right;
-				try {
-					Datum leftDatum = tuple.getDataByName(leftVar.getValue());
-					Datum rightDatum = tuple.getDataByName(rightVar.getValue());
-					if(leftDatum==null||rightDatum==null)
-						throw new NullPointerException();
-					evalResult = (Datum.compare(leftDatum, rightDatum)<=0);
-					return;
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}else{
-				//one variable, one constant
-				try {
-					Datum leftDatum = tuple.getDataByName(leftVar.getValue());
-					evalResult = (Datum.compare(leftDatum, right)<=0);
-					return;
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
-		}else{
-			//two constant
-			try {
-				evalResult = (Datum.compare(left, right)<=0);
-				return;
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}		
-		}
+		int compResult = left.compareTo(right);
+		if(compResult<=0)
+			evalResult = true;
+		else
+			evalResult = false;
+		
+//		if(left instanceof DatumString){
+//			DatumString leftVar = (DatumString)left;
+//
+//			if(right instanceof DatumString){
+//				//two variables
+//				DatumString rightVar = (DatumString)right;
+//				try {
+//					Datum leftDatum = tuple.getDataByName(leftVar.getValue());
+//					Datum rightDatum = tuple.getDataByName(rightVar.getValue());
+//					if(leftDatum==null||rightDatum==null)
+//						throw new NullPointerException();
+//					evalResult = (Datum.compare(leftDatum, rightDatum)<=0);
+//					return;
+//				} catch (Exception e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
+//			}else{
+//				//one variable, one constant
+//				try {
+//					Datum leftDatum = tuple.getDataByName(leftVar.getValue());
+//					evalResult = (Datum.compare(leftDatum, right)<=0);
+//					return;
+//				} catch (Exception e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
+//			}
+//		}else{
+//			//two constant
+//			try {
+//				evalResult = (Datum.compare(left, right)<=0);
+//				return;
+//			} catch (Exception e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}		
+//		}
 	}
 
 	@Override
 	public void visit(NotEqualsTo arg) {
-		throw new UnsupportedOperationException("Not supported yet."); 
+		arg.getLeftExpression().accept(this);
+		Datum left = data;
+		arg.getRightExpression().accept(this);
+		Datum right = data;
+		
+		int compResult = left.compareTo(right);
+		if(compResult!=0)
+			evalResult = true;
+		else
+			evalResult = false; 
 	}
 
 	@Override

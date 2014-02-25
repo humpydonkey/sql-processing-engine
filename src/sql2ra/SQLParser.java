@@ -78,6 +78,7 @@ public class SQLParser {
 			}
 			
 			
+			/*********************    Order By    ********************/
 			if(pselect.getOrderByElements()!=null){
 				@SuppressWarnings("unchecked")
 				List<OrderByElement> elets = pselect.getOrderByElements();
