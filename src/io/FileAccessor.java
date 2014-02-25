@@ -32,7 +32,7 @@ public class FileAccessor {
 		String add0 = "data/NBA/";
 		String add1 = "data/NBA/nba11.sql";
 		String add2 = "data/NBA/nba16.expected.dat";
-		String add3 = "data/tpch/partsupp.tbl";
+		String add3 = "data/tpch/lineitem.tbl";
 		System.out.println("start");
 		
 		TimeCalc.begin(1);
@@ -41,9 +41,9 @@ public class FileAccessor {
 		List<File> test =FileAccessor.getInstance().getDataFiles(add0, "dat");
 		List<String> sqls = FileAccessor.getInstance().readAllSqls(add1);
 		
-		StringBuilder sb = FileAccessor.getInstance().readPartOfFile(new File(add3), 7);
+		StringBuilder sb = FileAccessor.getInstance().readPartOfFile(new File(add3), 16);
 		try {
-			FileAccessor.getInstance().writeFile(sb,"partsupp.dat");
+			FileAccessor.getInstance().writeFile(sb,"lineitem.dat");
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

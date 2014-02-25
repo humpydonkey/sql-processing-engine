@@ -27,15 +27,15 @@ public class Main {
 		//System.out.println("begin");
 		int i;
 		String dataDirStr = "data/tpch/";//"data/NBA/";  //"/data/tpch/";
-		String sqlFilePath = "data/cp1_graded_sqls/tpch1.sql";
+		String sqlFilePath = "data/cp1_graded_sqls/tpch6.sql";
 		
 		File dataDir = null;
 		//set arguments
-//        args = new String[]{
-//        		"--data",
-//        		dataDirStr,
-//        		sqlFilePath
-//        };
+        args = new String[]{
+        		"--data",
+        		dataDirStr,
+        		sqlFilePath
+        };
         
         ArrayList<File> sqlFiles = new ArrayList<File>();
         HashMap<String,CreateTable> tables = new HashMap<String, CreateTable>();
