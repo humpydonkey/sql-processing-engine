@@ -75,13 +75,15 @@ public class Tuple{
 		
 				//find the key
 				Aggregator aggre = newSchema.getAggregator(func);
-				String groupbyKey = "";
+				StringBuilder groupbyKey = new StringBuilder("");
 				for(String colName : aggre.getGroupByColumns()){
+					if(colName.equals(""))	//no group by
+						break;
 					Datum groupbyColumn = getDataByName(colName);
-					groupbyKey += groupbyColumn.toString();
+					groupbyKey.append(groupbyColumn.toString());
 				}
 				//map to the aggregated Datum value
-				data = aggre.getValue(groupbyKey);
+				data = aggre.getValue(groupbyKey.toString());
 				
 			}else{
 				//should be a constant or expression
