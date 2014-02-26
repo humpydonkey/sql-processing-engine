@@ -31,11 +31,11 @@ public class Main {
 		
 		File dataDir = null;
 		//set arguments
-        args = new String[]{
-        		"--data",
-        		dataDirStr,
-        		sqlFilePath
-        };
+//        args = new String[]{
+//        		"--data",
+//        		dataDirStr,
+//        		sqlFilePath
+//        };
         
         ArrayList<File> sqlFiles = new ArrayList<File>();
         HashMap<String,CreateTable> tables = new HashMap<String, CreateTable>();
