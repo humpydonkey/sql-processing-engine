@@ -19,13 +19,6 @@ import dao.Tuple;
 public class Main {
 
 	public static void main(String args[]){
-		
-//		String testDir = "D:/Asia/tpch/";
-//		List<File> files = FileAccessor.getInstance().getDataFiles(testDir, "dat");
-//		System.out.println(FileAccessor.getInstance().readAll(testDir).toString());
-//		
-		//System.out.println("begin");
-		int i;
 		String dataDirStr = "data/tpch/";//"data/NBA/";  //"/data/tpch/";
 		String sqlFilePath = "data/cp1_graded_sqls/tpch1.sql";
 		
@@ -40,7 +33,7 @@ public class Main {
         ArrayList<File> sqlFiles = new ArrayList<File>();
         HashMap<String,CreateTable> tables = new HashMap<String, CreateTable>();
         
-        for(i = 0; i<args.length;i++){
+        for(int i = 0; i<args.length;i++){
             if(args[i].equals("--data")){
                 dataDir = new File(args[i+1]);
                 i++;
@@ -54,13 +47,11 @@ public class Main {
         
         for (File sql : sqlFiles){
         	try{
-        		FileReader stream = new FileReader(sql);
-        		
+        		FileReader stream = new FileReader(sql);   		
         		CCJSqlParser parser = new CCJSqlParser(stream);
         		Statement stmt;
 
-        		while((stmt = parser.Statement()) !=null){
-        			
+        		while((stmt = parser.Statement()) !=null){		
         			if(stmt instanceof CreateTable)	
         				SQLParser.create(stmt,tables);
         			else {
