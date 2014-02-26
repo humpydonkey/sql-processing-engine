@@ -31,16 +31,16 @@ public class AggregatorSum extends Aggregator {
 	public void aggregate(Tuple tuple, String key) {
 		Evaluator eval = new Evaluator(tuple);
 		paraExpr.accept(eval);
-		Datum data = eval.copyDatum();
+		Datum sumValue = eval.copyDatum();
 		
 		if(!sumMap.containsKey(key)){
 			//insert new
-			sumMap.put(key, data);
+			sumMap.put(key, sumValue);
 		}else{
 			//update old, sum
 			Datum old = sumMap.get(key);
 			//can not sum Bool, String, Date
-			old.setNumericValue(old.getNumericValue()+data.getNumericValue());
+			old.setNumericValue(old.getNumericValue()+sumValue.getNumericValue());
 		}
 	}
 

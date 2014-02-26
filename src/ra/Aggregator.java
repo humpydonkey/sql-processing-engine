@@ -11,7 +11,7 @@ public abstract class Aggregator{
 	
 	public Aggregator(Function funcIn, String[] groupByNamesIn){
 		func = funcIn;
-		if(groupByNamesIn==null)
+		if(groupByNamesIn==null||groupbyNames.length==0)
 			groupbyNames = new String[]{""};
 		else
 			groupbyNames = groupByNamesIn;

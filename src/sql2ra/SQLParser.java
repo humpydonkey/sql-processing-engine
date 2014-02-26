@@ -62,12 +62,22 @@ public class SQLParser {
 			Schema newSchema = selectItemScan.getSelectedColumns();
 			Aggregator[] aggrs = selectItemScan.getAggregators();
 			
-			/*********************    Group By    ********************/
+			/*********************    Group By + Aggregate   ********************/
 			if(pselect.getGroupByColumnReferences() != null){  //have group by
 				@SuppressWarnings("unchecked")
 				List colRefs = pselect.getGroupByColumnReferences();
 				OperatorGroupBy groupby = new OperatorGroupBy(oper, colRefs, aggrs);
 				List<Tuple> tuples = groupby.getTuples();
+				
+			 }else{
+				//Only aggregate
+				List<Tuple> tuples = dump(oper);
+				for(Tuple t : tuples){
+					for(Aggregator aggr : aggrs){
+						aggr.aggregate(t, "");	//"" means no group by
+					}
+				}
+				
 				oper = new OperatorCache(tuples);
 			 }
 			 

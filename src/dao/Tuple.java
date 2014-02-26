@@ -45,61 +45,16 @@ public class Tuple{
 		}
 	}
 	
+	public Tuple(Datum[] dataIn, Schema schemaIn){
+		dataArr = dataIn;
+		schema = schemaIn;
+	}
+	
 	
 	public Datum[] getTuple(){
 		return dataArr;
 	}
-	
-	/**
-	 * Change tuple by new schema
-	 * @param newSchema
-	 * @return
-	 */
-	public void changeTuple(Schema newSchema){
-		int length = newSchema.getLength();
-		Datum[] newDataArr = new Datum[length];
-		Column[] newColNames = newSchema.getColumnNames();
-		Expression[] newColSources = newSchema.getColumnSources();
-		
-		for(int i=0; i<length; i++){
-			//Get data from old tuple
-			Datum data = null;
-			Expression newSource = newColSources[i];
-			Column newName = newColNames[i]; 
-			if(newSource instanceof Column){
-				//is a column
-				data = getDataByName(newName.getColumnName());
-			}else if(newSource instanceof Function){ 
-				//is an aggregate function
-				Function func = (Function)newSource;
-		
-				//find the key
-				Aggregator aggre = newSchema.getAggregator(func);
-				StringBuilder groupbyKey = new StringBuilder("");
-				for(String colName : aggre.getGroupByColumns()){
-					if(colName.equals(""))	//no group by
-						break;
-					Datum groupbyColumn = getDataByName(colName);
-					groupbyKey.append(groupbyColumn.toString());
-				}
-				//map to the aggregated Datum value
-				data = aggre.getValue(groupbyKey.toString());
-				
-			}else{
-				//should be a constant or expression
-				Evaluator eval = new Evaluator(this);
-				newSource.accept(eval);
-				data = eval.copyDatum();
-				if(data.getNumericValue()==1168){
-					System.out.println("!!");
-				}
-				
-			}
-			newDataArr[i] = data;
-		}
-		dataArr = newDataArr;
-		schema = newSchema;
-	}
+
 	
 	/**
 	 * Get specific data block by column index
