@@ -68,7 +68,7 @@ public class SQLParser {
 				List colRefs = pselect.getGroupByColumnReferences();
 				OperatorGroupBy groupby = new OperatorGroupBy(oper, colRefs, aggrs);
 				List<Tuple> tuples = groupby.getTuples();
-				
+				oper = new OperatorCache(tuples);
 			 }else{
 				//Only aggregate
 				List<Tuple> tuples = dump(oper);
