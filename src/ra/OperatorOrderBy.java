@@ -167,8 +167,10 @@ public class OperatorOrderBy{
 			eles.add(ele2);
 			OperatorOrderBy ob = new OperatorOrderBy(tuples, eles);
 
-			for(Tuple t : ob.getResults())
+			for(Tuple t : ob.getResults()){
 				t.printTuple();
+			}
+				
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

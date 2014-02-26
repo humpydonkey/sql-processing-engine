@@ -117,7 +117,7 @@ public abstract class Datum implements Comparable<Datum> {
 		Datum d2 = new DatumString("abc");
 		Datum d3 = new DatumDate("1989-09-29");
 		Datum d4 = new DatumBool(false);
-		Datum d5 = new DatumFloat(0.23f);
+		Datum d5 = new DatumFloat(0.23d);
 		Datum d6 = new DatumLong(112112);
 		Datum d7 = new DatumInt(12);
 		try {

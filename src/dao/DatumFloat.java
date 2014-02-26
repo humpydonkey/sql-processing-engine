@@ -2,35 +2,35 @@ package dao;
 
 
 public class DatumFloat extends Datum{
-	private float value;
+	private double value;
 	
 	public DatumFloat(String dataIn){
 		super(DatumType.Float);
-		value = Float.parseFloat(dataIn);
+		value = Double.parseDouble(dataIn);
 	}
 	
-	public DatumFloat(float dataIn){
+	public DatumFloat(double dataIn){
 		super(DatumType.Float);
 		value = dataIn;
 	}
 	
-	public float getValue(){
+	public double getValue(){
 		return value;
 	}
 	
 	@Override
 	public double getNumericValue() {
-		return (double)value;
+		return value;
 	}
 
 	@Override
 	public void setNumericValue(double valueIn) {
-		value = (float)valueIn;
+		value = valueIn;
 	}
 	
 	@Override
 	public String toString(){
-			return String.valueOf(Math.round(value));
+			return String.valueOf(value);
 	}
 
 	@Override
