@@ -30,7 +30,7 @@ public class DatumFloat extends Datum{
 	
 	@Override
 	public String toString(){
-			return String.valueOf(value);
+			return String.valueOf(Math.round(value));
 	}
 
 	@Override
