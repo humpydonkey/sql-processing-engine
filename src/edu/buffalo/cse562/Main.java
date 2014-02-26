@@ -30,6 +30,10 @@ public class Main {
         		sqlFilePath
         };
         
+        
+        
+        
+        
         ArrayList<File> sqlFiles = new ArrayList<File>();
         HashMap<String,CreateTable> tables = new HashMap<String, CreateTable>();
         
