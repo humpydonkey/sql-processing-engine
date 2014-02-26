@@ -82,7 +82,7 @@ public class Tuple{
 				//should be a constant or expression
 				Evaluator eval = new Evaluator(this);
 				newSource.accept(eval);
-				oldData = eval.copyDatum();
+				oldData = eval.getData();
 				if(oldData.getNumericValue()==1168){
 					System.out.println("!!");
 				}
