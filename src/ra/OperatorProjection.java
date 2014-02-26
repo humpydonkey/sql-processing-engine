@@ -2,10 +2,6 @@ package ra;
 
 import java.util.List;
 
-import net.sf.jsqlparser.expression.Expression;
-import net.sf.jsqlparser.expression.Function;
-import net.sf.jsqlparser.schema.Column;
-import dao.Datum;
 import dao.Schema;
 import dao.Tuple;
 
