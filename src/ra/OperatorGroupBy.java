@@ -13,21 +13,23 @@ import dao.Tuple;
 public class OperatorGroupBy implements Operator{
 
 	private Operator input;
+	private Aggregator[] aggregators;
 	private Map<String, Integer> groupMap;
 	private List<Tuple> groupTuples;
-	private List<Column> columns;	//group by columns
-	private Aggregator[] aggregators;
+	private List<Column> groupbyCols;	//group by columns
+
+
 	
 	@SuppressWarnings("rawtypes")
 	public OperatorGroupBy(Operator inputIn, List columnsIn, Aggregator... aggregatorsIn){
 		input = inputIn;
 		groupMap = new HashMap<String, Integer>();
 		groupTuples = new LinkedList<Tuple>();
-		columns = new ArrayList<Column>(columnsIn.size());
+		groupbyCols = new ArrayList<Column>(columnsIn.size());
 		
 		if(columnsIn.get(0) instanceof Column){
 			for(Object obj : columnsIn)
-				columns.add((Column)obj);
+				groupbyCols.add((Column)obj);
 		}else{
 			//should be the object of ColumnIndex
 			throw new UnsupportedOperationException("Not supported yet."); 
@@ -37,6 +39,7 @@ public class OperatorGroupBy implements Operator{
 			aggregators = aggregatorsIn;
 		}
 	}
+	
 	
 	public List<Tuple> getTuples(){
 		
@@ -79,7 +82,7 @@ public class OperatorGroupBy implements Operator{
 	
 	private String generateKey(Tuple tuple){
 		StringBuffer sb = new StringBuffer();
-		for(Column col : columns){
+		for(Column col : groupbyCols){
 			Datum data = tuple.getDataByName(col.getColumnName());
 			sb.append(data.toString());
 		}
