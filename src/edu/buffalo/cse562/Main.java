@@ -66,7 +66,7 @@ public class Main {
         			else {
         				
         			 if(stmt instanceof Select){
-        				System.out.println("I would now evaluate:" + stmt);
+        				//System.out.println("I would now evaluate:" + stmt);
         				Select sel = (Select)stmt;
         				List<Tuple> tuples = SQLParser.select(sel.getSelectBody(),fromscan);
         				for(Tuple tuple : tuples)
