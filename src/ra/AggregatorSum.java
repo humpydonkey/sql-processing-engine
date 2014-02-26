@@ -31,7 +31,7 @@ public class AggregatorSum extends Aggregator {
 	public void aggregate(Tuple tuple, String key) {
 		Evaluator eval = new Evaluator(tuple);
 		paraExpr.accept(eval);
-		Datum sumValue = eval.copyDatum();
+		Datum sumValue = eval.getData();
 		
 		if(!sumMap.containsKey(key)){
 			//insert new

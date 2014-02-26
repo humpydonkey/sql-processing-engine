@@ -73,18 +73,22 @@ public class Evaluator implements ExpressionVisitor{
 		return evalResult;
 	}
 	
-	public Datum copyDatum(){
+	public Datum getData(){
 		Datum d = data.clone();
 		data = null;
 		return d;
 	}
 	
 	public Column getColumn(){
-		return column;
+		Column col = column;
+		column = null;
+		return col;
 	}
 	
 	public Function getFunc(){
-		return func;
+		Function f = func;
+		func = null;
+		return f;
 	}
 	
 	
