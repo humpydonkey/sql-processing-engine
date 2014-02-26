@@ -72,16 +72,18 @@ public class SQLParser {
 				oper = new OperatorCache(tuples);
 			 }else{
 				//Only aggregate
-				List<Tuple> tuples = dump(oper);
-				for(Tuple t : tuples){
-					for(Aggregator aggr : aggrs){
-						aggr.aggregate(t, "");	//"" means no group by
-					}
-				}
-				Tuple t = tuples.get(tuples.size()-1);	//get the last tuple
-				tuples = new ArrayList<Tuple>();
-				tuples.add(t);
-				oper = new OperatorCache(tuples);
+				 if(aggrs.length>0){
+					 List<Tuple> tuples = dump(oper);
+						for(Tuple t : tuples){
+							for(Aggregator aggr : aggrs){
+								aggr.aggregate(t, "");	//"" means no group by
+							}
+						}
+						Tuple t = tuples.get(tuples.size()-1);	//get the last tuple
+						tuples = new ArrayList<Tuple>();
+						tuples.add(t);
+						oper = new OperatorCache(tuples);
+				 }				
 			 }
 			 
 			
