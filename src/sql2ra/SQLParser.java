@@ -1,5 +1,6 @@
 package sql2ra;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -77,7 +78,9 @@ public class SQLParser {
 						aggr.aggregate(t, "");	//"" means no group by
 					}
 				}
-				
+				Tuple t = tuples.get(tuples.size()-1);	//get the last tuple
+				tuples = new ArrayList<Tuple>();
+				tuples.add(t);
 				oper = new OperatorCache(tuples);
 			 }
 			 
