@@ -119,7 +119,7 @@ public class Evaluator implements ExpressionVisitor{
 
 	@Override
 	public void visit(DoubleValue arg) {
-		data = new DatumFloat((float)arg.getValue());
+		data = new DatumFloat(arg.getValue());
 	}
 
 	@Override
@@ -160,7 +160,7 @@ public class Evaluator implements ExpressionVisitor{
 		arg.getRightExpression().accept(this);
 		Datum right = data;
 		
-		data = new DatumFloat((float)(left.getNumericValue() + right.getNumericValue()));
+		data = new DatumFloat(left.getNumericValue() + right.getNumericValue());
 	}
 
 	@Override
@@ -171,7 +171,7 @@ public class Evaluator implements ExpressionVisitor{
 		arg.getRightExpression().accept(this);
 		Datum right = data;
 		
-		data = new DatumFloat((float)(left.getNumericValue() / right.getNumericValue()));
+		data = new DatumFloat(left.getNumericValue() / right.getNumericValue());
 	}
 
 	@Override
@@ -182,7 +182,7 @@ public class Evaluator implements ExpressionVisitor{
 		arg.getRightExpression().accept(this);
 		Datum right = data;
 		
-		data = new DatumFloat((float)(left.getNumericValue() * right.getNumericValue()));
+		data = new DatumFloat(left.getNumericValue() * right.getNumericValue());
 	}
 
 	@Override
@@ -193,7 +193,7 @@ public class Evaluator implements ExpressionVisitor{
 		arg.getRightExpression().accept(this);
 		Datum right = data;
 		
-		data = new DatumFloat((float)(left.getNumericValue() - right.getNumericValue()));
+		data = new DatumFloat(left.getNumericValue() - right.getNumericValue());
 	}
 
 	@Override

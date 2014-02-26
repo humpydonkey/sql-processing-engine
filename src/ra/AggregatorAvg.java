@@ -20,7 +20,7 @@ public class AggregatorAvg extends Aggregator{
 	public Datum getValue(String key) {
 		Datum total = sumer.getValue(key);
 		Datum number = counter.getValue(key);		
-		return new DatumFloat((float)(total.getNumericValue()/number.getNumericValue()));
+		return new DatumFloat(total.getNumericValue()/number.getNumericValue());
 	}
 
 	@Override

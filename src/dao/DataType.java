@@ -19,6 +19,8 @@ public class DataType {
 			return DataType.LONG;
 		}else if(typeIn.toUpperCase().contains("DATE")){
 			return DataType.DATE;
+		}else if(typeIn.toUpperCase().contains("FLOAT")){
+			return DataType.FLOAT;
 		}else if(typeIn.toUpperCase().contains("DOUBLE")){
 			return DataType.FLOAT;
 		}else if(typeIn.toUpperCase().contains("STRING")){
