@@ -13,7 +13,6 @@ import net.sf.jsqlparser.parser.ParseException;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.create.table.ColDataType;
 import net.sf.jsqlparser.statement.create.table.ColumnDefinition;
-import net.sf.jsqlparser.statement.select.OrderByElement;
 import dao.Datum;
 import dao.Schema;
 import dao.Tuple;
