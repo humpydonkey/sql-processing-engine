@@ -58,7 +58,6 @@ public class Evaluator implements ExpressionVisitor{
 	private boolean evalResult;
 	private Datum data;
 	private Column column;
-	
 
 	public Evaluator(Tuple tupleIn){
 		evalResult = true;
