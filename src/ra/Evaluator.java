@@ -42,6 +42,7 @@ import net.sf.jsqlparser.expression.operators.relational.MinorThan;
 import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
 import net.sf.jsqlparser.expression.operators.relational.NotEqualsTo;
 import net.sf.jsqlparser.schema.Column;
+import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.SubSelect;
 import dao.Datum;
 import dao.DatumDate;
@@ -182,7 +183,7 @@ public class Evaluator implements ExpressionVisitor{
 		else
 			data = new DatumDouble(0);
 		
-		data.setNumericValue(left.getNumericValue() - right.getNumericValue());
+		data.setNumericValue(left.getNumericValue() + right.getNumericValue());
 	}
 
 	@Override
@@ -198,7 +199,10 @@ public class Evaluator implements ExpressionVisitor{
 		else
 			data = new DatumDouble(0);
 		
-		data.setNumericValue(left.getNumericValue() - right.getNumericValue());
+		if(right.getNumericValue()==0)
+			data.setNumericValue(0);
+		else
+			data.setNumericValue(left.getNumericValue() / right.getNumericValue());
 	}
 
 	@Override
@@ -215,7 +219,7 @@ public class Evaluator implements ExpressionVisitor{
 		else
 			data = new DatumDouble(0);
 		
-		data.setNumericValue(left.getNumericValue() - right.getNumericValue());
+		data.setNumericValue(left.getNumericValue() * right.getNumericValue());
 	}
 
 	@Override
@@ -438,16 +442,18 @@ public class Evaluator implements ExpressionVisitor{
 			data = new DatumString(arg.getColumnName());
 			return;
 		}else{
-			String argTableName = arg.getTable().toString();
-			String tupTableName = tuple.getTableName();
-			
-			if((tupTableName!=null) && (!argTableName.equals("null")) &&(!argTableName.equalsIgnoreCase(tupTableName))){
-				//in order to mask the where condition includes columns from different tables 
-				//Column arg is not the from the tuple's table, just ignore it
-				differentTable = true;
-				return;
+			Table argTable = arg.getTable();
+			if(argTable!=null){
+				String argTableName = arg.getTable().toString();
+				String tupTableName = tuple.getTableName();
+				
+				if((tupTableName!=null) && (!argTableName.equals("null")) &&(!argTableName.equalsIgnoreCase(tupTableName))){
+					//in order to mask the where condition includes columns from different tables 
+					//Column arg is not the from the tuple's table, just ignore it
+					differentTable = true;
+					return;
+				}
 			}
-		
 			
 			Datum var = tuple.getDataByName(arg.getColumnName());
 			if(var==null){
