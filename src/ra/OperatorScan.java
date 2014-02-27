@@ -25,12 +25,11 @@ import dao.Tuple;
  * @author Asia
  *
  */
-public class OperatorScan implements Operator, Iterable<Tuple>, Iterator<Tuple> {
+public class OperatorScan implements Operator {
 
-	protected BufferedReader inputReader;
-	protected File file;
-	protected Tuple tuple = null;
-	protected Schema schema;
+	private BufferedReader inputReader;
+	private File file;
+	private Schema schema;
 	private final static int BLOCKSIZE =  100000;  // 100000000;	//100MB
 	
 	public OperatorScan(File f, Schema schemaIn){
@@ -62,6 +61,7 @@ public class OperatorScan implements Operator, Iterable<Tuple>, Iterator<Tuple> 
 	@Override
 	public Tuple readOneTuple() {
 		checkInput();
+		Tuple tuple = null;
 		try {
 			String line = inputReader.readLine();
 			if(line==null)
@@ -79,7 +79,6 @@ public class OperatorScan implements Operator, Iterable<Tuple>, Iterator<Tuple> 
 	public void reset() {
 		try {
 			inputReader = new BufferedReader(new FileReader(file));
-			tuple = null;
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -102,32 +101,6 @@ public class OperatorScan implements Operator, Iterable<Tuple>, Iterator<Tuple> 
 			return false;
 		}else
 			return true;
-	}
-
-	@Override
-	public boolean hasNext() {
-		readOneTuple();
-		return (tuple!=null);
-	}
-
-	@Override
-	public Tuple next() {
-		return tuple;
-	}
-
-	@Override
-	public void remove() {
-		try {
-			throw new UnsupportedOperationException("Remove not supported on BufferedReader iteration.");
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
-
-	@Override
-	public Iterator<Tuple> iterator() {
-		return this;
 	}
 
 	

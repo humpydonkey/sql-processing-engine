@@ -127,6 +127,7 @@ public class SelectItemScanner implements SelectItemVisitor{
 		colTypes.add(DatumType.String);
 		
 		if(exp instanceof Column){
+			/***** original column *****/
 			col =(Column)exp;
 			if(alias!=null)
 				col.setColumnName(alias);
@@ -134,6 +135,7 @@ public class SelectItemScanner implements SelectItemVisitor{
 			colNames.add(col);
 			colSources.add(col);
 		}else if(exp instanceof Function){
+			/***** aggregate function *****/
 			col = new Column();
 			if(alias!=null)
 				col.setColumnName(alias);
@@ -143,7 +145,7 @@ public class SelectItemScanner implements SelectItemVisitor{
 			Function func = (Function)exp;
 			colNames.add(col);
 			colSources.add(func);
-			
+
 			//sum, count, avg, max, min
 			String funcName = func.getName().toUpperCase();
 			switch(funcName){
@@ -171,6 +173,7 @@ public class SelectItemScanner implements SelectItemVisitor{
 				
 			}
 		}else if(exp instanceof Parenthesis){
+			/***** could be a arithmetic expression *****/
 			Parenthesis paren = (Parenthesis)exp; 
 
 			col = new Column();
@@ -180,7 +183,7 @@ public class SelectItemScanner implements SelectItemVisitor{
 				col.setColumnName(exp.toString());
 			
 			colSources.add(paren);
-			colNames.add(col);			 
+			colNames.add(col);
 		}else{
 			throw new UnsupportedOperationException("Not supported yet. Class:" + exp.getClass().getCanonicalName());
 		}

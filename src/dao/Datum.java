@@ -27,12 +27,31 @@ public abstract class Datum implements Comparable<Datum> {
 				DatumBool valBool = (DatumBool)this;
 				return String.valueOf(valBool.getValue());
 			case Float:
-				DatumFloat valFloat = (DatumFloat)this;
+				DatumDouble valFloat = (DatumDouble)this;
 				return valFloat.toString();
 			default:	//Int or Long
 				return String.valueOf((long)this.getNumericValue());
 		}
 	}
+	
+	
+	/**
+	 * they are equal if they have the same value and type.
+	 */
+	@Override
+	public boolean equals(Object obj){
+		if(obj==null)
+			return false;
+		
+		if(obj instanceof Datum){
+			Datum compData = (Datum)obj;
+			int compResult = this.compareTo(compData);
+			return (compResult==0);
+		}else{
+			return false;	
+		}
+	}
+	
 	
 	public abstract double getNumericValue();
 	public abstract void setNumericValue(double valueIn);
@@ -65,8 +84,8 @@ public abstract class Datum implements Comparable<Datum> {
 			DatumDate date2 = (DatumDate)data2;
 			if(compare(date1,date2)==0)	return true;
 			else return false;	
-		}else if(data1 instanceof DatumInt||data1 instanceof DatumLong||data1 instanceof DatumFloat){
-			if(data2 instanceof DatumInt||data1 instanceof DatumLong||data1 instanceof DatumFloat){
+		}else if(data1 instanceof DatumLong||data1 instanceof DatumDouble){
+			if(data1 instanceof DatumLong||data1 instanceof DatumDouble){
 				if(compare(data1,data2)==0)	return true;
 				else return false;	
 			}else
@@ -101,7 +120,7 @@ public abstract class Datum implements Comparable<Datum> {
 				else
 					return 0;
 			}else
-				throw new Exception("can not compare two different type.");
+				throw new Exception("DatumDate can not compare two different type.");
 		}else{
 			double val1 = data1.getNumericValue();
 			double val2 = data2.getNumericValue();
@@ -114,21 +133,17 @@ public abstract class Datum implements Comparable<Datum> {
 	
 	public static void main(String[] args){
 		Datum d1 = new DatumString("ABc");
-		Datum d2 = new DatumString("abc");
-		Datum d3 = new DatumDate("1989-09-29");
+		Datum d2 = new DatumString("Abc");
+		Datum d3 = new DatumString("abc");
 		Datum d4 = new DatumBool(false);
-		Datum d5 = new DatumFloat(0.23d);
-		Datum d6 = new DatumLong(112112);
-		Datum d7 = new DatumInt(12);
+		Datum d5 = new DatumDouble(0.23d);
+		Datum d6 = new DatumLong(1);
+		Datum d7 = new DatumLong(1);
 		try {
 			System.out.println(Datum.equals(d2, d1) + "\n");
-			System.out.println(d1.toString());
-			System.out.println(d2.toString());
-			System.out.println(d3.toString());
-			System.out.println(d4.toString());
-			System.out.println(d5.toString());
-			System.out.println(d6.toString());
-			System.out.println(d7.toString());
+			System.out.println(d6.equals(d7));
+			System.out.println(d6.hashCode() + "\n" + d7.hashCode());
+	
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

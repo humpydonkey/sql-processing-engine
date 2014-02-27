@@ -1,7 +1,7 @@
 package ra;
 
 import dao.Datum;
-import dao.DatumFloat;
+import dao.DatumDouble;
 import dao.Tuple;
 import net.sf.jsqlparser.expression.Function;
 
@@ -20,7 +20,7 @@ public class AggregatorAvg extends Aggregator{
 	public Datum getValue(String key) {
 		Datum total = sumer.getValue(key);
 		Datum number = counter.getValue(key);		
-		return new DatumFloat(total.getNumericValue()/number.getNumericValue());
+		return new DatumDouble(total.getNumericValue()/number.getNumericValue());
 	}
 
 	@Override

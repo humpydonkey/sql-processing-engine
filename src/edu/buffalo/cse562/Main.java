@@ -12,7 +12,6 @@ import net.sf.jsqlparser.parser.ParseException;
 import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.create.table.CreateTable;
 import net.sf.jsqlparser.statement.select.Select;
-import sql2ra.FromScanner;
 import sql2ra.SQLParser;
 import dao.Tuple;
 
@@ -20,7 +19,7 @@ public class Main {
 
 	public static void main(String args[]){
 		String dataDirStr = "data/tpch/";//"data/NBA/";  //"/data/tpch/";
-		String sqlFilePath = "data/cp1_graded_sqls/tpch1.sql";
+		String sqlFilePath = "data/cp1_graded_sqls/tpch5.sql";
 		
 		File dataDir = null;
 		//set arguments
@@ -31,8 +30,6 @@ public class Main {
 //        };
 
         ArrayList<File> sqlFiles = new ArrayList<File>();
-        HashMap<String,CreateTable> tables = new HashMap<String, CreateTable>();
-        
         for(int i = 0; i<args.length;i++){
             if(args[i].equals("--data")){
                 dataDir = new File(args[i+1]);
@@ -42,24 +39,23 @@ public class Main {
             }
         }
         
-        SQLParser.setFromScanner(new FromScanner(dataDir, tables));
-        FromScanner fromscan = SQLParser.getFromScanner();
-        
         for (File sql : sqlFiles){
         	try{
         		FileReader stream = new FileReader(sql);   		
         		CCJSqlParser parser = new CCJSqlParser(stream);
         		Statement stmt;
 
+        		SQLParser myParser = new SQLParser(dataDir);
+        		
         		while((stmt = parser.Statement()) !=null){		
         			if(stmt instanceof CreateTable)	
-        				SQLParser.create(stmt,tables);
+        				myParser.create(stmt);
         			else {
         				
         			 if(stmt instanceof Select){
         				//System.out.println("I would now evaluate:" + stmt);
         				Select sel = (Select)stmt;
-        				List<Tuple> tuples = SQLParser.select(sel.getSelectBody(),fromscan);
+        				List<Tuple> tuples = myParser.select(sel.getSelectBody());
         				for(Tuple tuple : tuples)
         					tuple.printTuple();
         			 }

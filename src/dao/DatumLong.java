@@ -38,24 +38,25 @@ public class DatumLong extends Datum{
 				return -1;
 			}else
 				return 0;
-		} else if(o instanceof DatumInt || o instanceof DatumFloat){
-			double obj = o.getNumericValue();
-			if(this.value>obj)
+		} else if(o instanceof DatumDouble){
+			DatumDouble obj = (DatumDouble)o;
+			if(this.value>obj.getValue())
 				return 1;
-			else if(this.value<obj){
+			else if(this.value<obj.getValue()){
 				return -1;
 			}else
 				return 0;
-		} else{
+		}else{
 			try {
 				throw new IllegalArgumentException("Wrong type (" + o.getClass().getCanonicalName() + ") of this Object.");
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			return 0;
+			return -99;
 		}
 	}
+	
 	
 	@Override
 	public Datum clone() {

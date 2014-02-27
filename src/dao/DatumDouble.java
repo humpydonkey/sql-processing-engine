@@ -1,65 +1,70 @@
 package dao;
 
-public class DatumInt extends Datum{
+
+public class DatumDouble extends Datum{
+	private double value;
 	
-	private int value;
-	
-	public DatumInt(String dataIn){
-		super(DatumType.Int);
-		value = Integer.parseInt(dataIn);
+	public DatumDouble(String dataIn){
+		super(DatumType.Float);
+		value = Double.parseDouble(dataIn);
 	}
 	
-	public DatumInt(int dataIn){
-		super(DatumType.Int);
+	public DatumDouble(double dataIn){
+		super(DatumType.Float);
 		value = dataIn;
 	}
 	
-	public int getValue() {
+	public double getValue(){
+		return value;
+	}
+	
+	@Override
+	public double getNumericValue() {
 		return value;
 	}
 
 	@Override
-	public double getNumericValue() {
-		return (double)value;
-	}
-
-	@Override
 	public void setNumericValue(double valueIn) {
-		value = (int)valueIn;
+		value = valueIn;
 	}
 	
 	@Override
+	public String toString(){
+			return String.valueOf(value);
+	}
+
+	@Override
 	public int compareTo(Datum o) {
-		if(o instanceof DatumInt){
-			DatumInt obj = (DatumInt)o;
+		if(o instanceof DatumDouble){
+			DatumDouble obj = (DatumDouble)o;
 			if(this.value>obj.value)
 				return 1;
 			else if(this.value<obj.value){
 				return -1;
 			}else
 				return 0;
-		} else if(o instanceof DatumLong || o instanceof DatumFloat){
-			double obj = o.getNumericValue();
-			if(this.value>obj)
+		} else if(o instanceof DatumLong){
+			DatumLong obj = (DatumLong)o;
+			if(this.value>obj.getValue())
 				return 1;
-			else if(this.value<obj){
+			else if(this.value<obj.getValue()){
 				return -1;
 			}else
 				return 0;
-		} else{
+		}else{
 			try {
 				throw new IllegalArgumentException("Wrong type (" + o.getClass().getCanonicalName() + ") of this Object.");
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			return 0;
+			return -99;
 		}
 	}
 	
 	@Override
 	public Datum clone() {
-		Datum copy = new DatumInt(value);
+		Datum copy = new DatumDouble(value);
 		return copy;
 	}
 }

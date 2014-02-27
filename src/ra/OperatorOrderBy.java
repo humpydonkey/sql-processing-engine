@@ -58,9 +58,10 @@ public class OperatorOrderBy{
 			return;
 		}
 
-		Datum pivot = list.get(left).getDataByName(firstColName);
+		Datum pivot = null;
 		int center = left;
 		for (int j = left + 1; j <= right; j++) {
+			pivot = list.get(left).getDataByName(firstColName);
 			Datum movingData = list.get(j).getDataByName(firstColName);
 			int compResult = movingData.compareTo(pivot);
 			if (compResult > 0) {
@@ -89,7 +90,7 @@ public class OperatorOrderBy{
 			return;
 		}
 
-		Datum pivot;
+		Datum pivot = null;
 		int center = left;
 		for (int j = left + 1; j <= right; j++) {
 			pivot = list.get(left).getDataByName(firstColName);

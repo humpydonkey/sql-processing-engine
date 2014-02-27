@@ -1,6 +1,5 @@
 package ra;
 
-import java.util.Date;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -46,11 +45,14 @@ import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.select.SubSelect;
 import dao.Datum;
 import dao.DatumDate;
-import dao.DatumFloat;
+import dao.DatumDouble;
 import dao.DatumLong;
 import dao.DatumString;
+import dao.DatumType;
 import dao.Tuple;
 
+//it will ignore the comparison of a column from a different table
+//and ignore equal join condition
 public class Evaluator implements ExpressionVisitor{
 
 	private Function func;
@@ -58,33 +60,49 @@ public class Evaluator implements ExpressionVisitor{
 	private boolean evalResult;
 	private Datum data;
 	private Column column;
+	private boolean differentTable;
+
 
 	public Evaluator(Tuple tupleIn){
 		evalResult = true;
 		tuple = tupleIn;
+		differentTable = false;
 	}
 	
 	public Evaluator(){
 		evalResult = true;
+		differentTable = false;
 	}
 	
 	public boolean getResult(){	
 		return evalResult;
 	}
+
 	
 	public Datum getData(){
-		Datum d = data.clone();
+		Datum d = data;
 		data = null;
 		return d;
 	}
 	
-	public Column getColumn(){
+	public Column getColumn(){	
 		Column col = column;
 		column = null;
 		return col;
 	}
 	
 	public Function getFunc(){
+		if(func==null){
+			try {
+				throw new Exception("Expression analysis error!");
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			return null;
+		}
+		
+		
 		Function f = func;
 		func = null;
 		return f;
@@ -118,7 +136,7 @@ public class Evaluator implements ExpressionVisitor{
 
 	@Override
 	public void visit(DoubleValue arg) {
-		data = new DatumFloat(arg.getValue());
+		data = new DatumDouble(arg.getValue());
 	}
 
 	@Override
@@ -154,56 +172,76 @@ public class Evaluator implements ExpressionVisitor{
 	@Override
 	public void visit(Addition arg) {
 		arg.getLeftExpression().accept(this);
-		Datum left = data;
+		Datum left = getData();
 		
 		arg.getRightExpression().accept(this);
-		Datum right = data;
+		Datum right = getData();
 		
-		data = new DatumFloat(left.getNumericValue() + right.getNumericValue());
+		if(left.getType()==DatumType.Long&&right.getType()==DatumType.Long)
+			data = new DatumLong(0);
+		else
+			data = new DatumDouble(0);
+		
+		data.setNumericValue(left.getNumericValue() - right.getNumericValue());
 	}
 
 	@Override
 	public void visit(Division arg) {
 		arg.getLeftExpression().accept(this);
-		Datum left = data;
+		Datum left = getData();
 		
 		arg.getRightExpression().accept(this);
-		Datum right = data;
+		Datum right = getData();
 		
-		data = new DatumFloat(left.getNumericValue() / right.getNumericValue());
+		if(left.getType()==DatumType.Long&&right.getType()==DatumType.Long)
+			data = new DatumLong(0);
+		else
+			data = new DatumDouble(0);
+		
+		data.setNumericValue(left.getNumericValue() - right.getNumericValue());
 	}
 
 	@Override
 	public void visit(Multiplication arg) {
 		arg.getLeftExpression().accept(this);
-		Datum left = data;
+		Datum left = getData();
 		
 		arg.getRightExpression().accept(this);
-		Datum right = data;
+		Datum right = getData();
+	
+	
+		if(left.getType()==DatumType.Long&&right.getType()==DatumType.Long)
+			data = new DatumLong(0);
+		else
+			data = new DatumDouble(0);
 		
-		data = new DatumFloat(left.getNumericValue() * right.getNumericValue());
+		data.setNumericValue(left.getNumericValue() - right.getNumericValue());
 	}
 
 	@Override
 	public void visit(Subtraction arg) {
 		arg.getLeftExpression().accept(this);
-		Datum left = data;
+		Datum left = getData();
 		
 		arg.getRightExpression().accept(this);
-		Datum right = data;
+		Datum right = getData();
 		
-		data = new DatumFloat(left.getNumericValue() - right.getNumericValue());
+		if(left.getType()==DatumType.Long&&right.getType()==DatumType.Long)
+			data = new DatumLong(0);
+		else
+			data = new DatumDouble(0);
+		
+		data.setNumericValue(left.getNumericValue() - right.getNumericValue());
 	}
 
 	@Override
 	public void visit(AndExpression arg) {
 		arg.getLeftExpression().accept(this);
 		boolean left = evalResult;
-		if(left==false)
-			return;
 		
 		arg.getRightExpression().accept(this);
 		boolean right = evalResult;
+		
 		evalResult = (left&&right);
 	}
 
@@ -218,203 +256,96 @@ public class Evaluator implements ExpressionVisitor{
 
 	@Override
 	public void visit(Between arg) {
-	arg.getLeftExpression().accept(this);
-	DatumString colName = (DatumString)data;
+		arg.getLeftExpression().accept(this);
+		Column col = getColumn();
 	
-		Datum var = tuple.getDataByName(colName.getValue());
+		Datum var = tuple.getDataByName(col.getColumnName());
 		if(var==null)
 			throw new NullPointerException();
 		
 		arg.getBetweenExpressionStart().accept(this);
-		Datum start = data;
+		Datum start = getData();
 		arg.getBetweenExpressionEnd().accept(this);
-		Datum end = data;
+		Datum end = getData();
 		
-		if(var instanceof DatumDate){
-			DatumDate dateData = (DatumDate)var;
-			Date date = dateData.getValue();
-
-			DatumDate startDatum = (DatumDate)start;
-			Date startDate = startDatum.getValue();
-			
-			DatumDate endDatum = (DatumDate)end;
-			Date endDate = endDatum.getValue();
-			
-			if(date.compareTo(startDate)>0&&date.compareTo(endDate)<0){
-				evalResult = true;
-			}else
-				evalResult = false;
-			
-		}else{
-			double varVal = var.getNumericValue();				
-			double startVal= start.getNumericValue();
-			double endVal = end.getNumericValue();
-			
-			if(varVal>startVal&&varVal<endVal)
-				evalResult = true;
-			else
-				evalResult = false;
-		}
-		
+		throw new UnsupportedOperationException("Not supported yet."); 
 	}
 
 	@Override
 	public void visit(EqualsTo arg) {
 		arg.getLeftExpression().accept(this);
-		Datum left = data;
+		Datum left = getData();
+		Column leftCol = getColumn();
 		arg.getRightExpression().accept(this);
-		Datum right = data;
-		int compResult = left.compareTo(right);
-		if(compResult==0)
-			evalResult = true;
-		else
-			evalResult = false;
+		Datum right = getData();
+		Column rightCol = getColumn();	
 		
-//		if(left instanceof DatumString){
-//			DatumString leftVar = (DatumString)left;
-//
-//			if(right instanceof DatumString){
-//				//two variables
-//				DatumString rightVar = (DatumString)right;
-//				try {
-//					Datum leftDatum = tuple.getDataByName(leftVar.getValue());
-//					Datum rightDatum = tuple.getDataByName(rightVar.getValue());
-//					if(leftDatum==null||rightDatum==null)
-//						throw new NullPointerException();
-//					evalResult = Datum.equals(leftDatum, rightDatum);
-//					return;
-//				} catch (Exception e) {
-//					// TODO Auto-generated catch block
-//					e.printStackTrace();
-//				}
-//			}else{
-//				//one variable, one constant
-//				try {
-//					Datum leftDatum = tuple.getDataByName(leftVar.getValue());
-//					evalResult = Datum.equals(leftDatum, right);
-//					return;
-//				} catch (Exception e) {
-//					// TODO Auto-generated catch block
-//					e.printStackTrace();
-//				}
-//			}
-//		}else{
-//			//two constant
-//			try {
-//				evalResult = Datum.equals(left, right);
-//				return;
-//			} catch (Exception e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}		
-//		}
+		if(differentTable){//mask
+			//ignore comparison of columns of different table
+			evalResult = true;
+			differentTable = false;
+			return;
+		}
+		
+		//if they have same column name
+		if(leftCol!=null&&rightCol!=null){
+			if(leftCol.getColumnName().equalsIgnoreCase(rightCol.getColumnName())){
+				//it is a equal join, ignore it
+				differentTable = true;
+				return;
+			}
+		}else{	//common equals expression			
+			int compResult = left.compareTo(right);
+			if(compResult==0)
+				evalResult = true;
+			else
+				evalResult = false;
+		}
 	}
 
 	
 	@Override
 	public void visit(GreaterThan arg) {
 		arg.getLeftExpression().accept(this);
-		Datum left = data;
+		Datum left = getData();
 		arg.getRightExpression().accept(this);
-		Datum right = data;
+		Datum right = getData();
+		
+		if(differentTable){//mask
+			//ignore comparison of columns of different table
+			evalResult = true;
+			differentTable = false;
+			return;
+		}
+		
 		
 		int compResult = left.compareTo(right);
 		if(compResult>0)
 			evalResult = true;
 		else
 			evalResult = false;
-		
-//		if(left instanceof DatumString){
-//			DatumString leftVar = (DatumString)left;
-//
-//			if(right instanceof DatumString){
-//				//two variables
-//				DatumString rightVar = (DatumString)right;
-//				try {
-//					Datum leftDatum = tuple.getDataByName(leftVar.getValue());
-//					Datum rightDatum = tuple.getDataByName(rightVar.getValue());
-//					if(leftDatum==null||rightDatum==null)
-//						throw new NullPointerException();
-//					evalResult = (Datum.compare(leftDatum, rightDatum)>0);
-//					return;
-//				} catch (Exception e) {
-//					// TODO Auto-generated catch block
-//					e.printStackTrace();
-//				}
-//			}else{
-//				//one variable, one constant
-//				try {
-//					Datum leftDatum = tuple.getDataByName(leftVar.getValue());
-//					evalResult = (Datum.compare(leftDatum, right)>0);
-//					return;
-//				} catch (Exception e) {
-//					// TODO Auto-generated catch block
-//					e.printStackTrace();
-//				}
-//			}
-//		}else{
-//			//two constant
-//			try {
-//				evalResult = (Datum.compare(left, right)>0);
-//				return;
-//			} catch (Exception e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}		
-//		}
 	}
 
 	@Override
 	public void visit(GreaterThanEquals arg) {
 		arg.getLeftExpression().accept(this);
-		Datum left = data;
+		Datum left = getData();
 		arg.getRightExpression().accept(this);
-		Datum right = data;
+		Datum right = getData();
+		
+		if(differentTable){//mask
+			//ignore comparison of columns of different table
+			evalResult = true;
+			differentTable = false;
+			return;
+		}
+		
 		
 		int compResult = left.compareTo(right);
 		if(compResult>=0)
 			evalResult = true;
 		else
 			evalResult = false;
-		
-//		if(left instanceof DatumString){
-//			DatumString leftVar = (DatumString)left;
-//
-//			if(right instanceof DatumString){
-//				//two variables
-//				DatumString rightVar = (DatumString)right;
-//				try {
-//					Datum leftDatum = tuple.getDataByName(leftVar.getValue());
-//					Datum rightDatum = tuple.getDataByName(rightVar.getValue());
-//					if(leftDatum==null||rightDatum==null)
-//						throw new NullPointerException();
-//					evalResult = (Datum.compare(leftDatum, rightDatum)>=0);
-//					return;
-//				} catch (Exception e) {
-//					// TODO Auto-generated catch block
-//					e.printStackTrace();
-//				}
-//			}else{
-//				//one variable, one constant
-//				try {
-//					Datum leftDatum = tuple.getDataByName(leftVar.getValue());
-//					evalResult = (Datum.compare(leftDatum, right)>=0);
-//					return;
-//				} catch (Exception e) {
-//					// TODO Auto-generated catch block
-//					e.printStackTrace();
-//				}
-//			}
-//		}else{
-//			//two constant
-//			try {
-//				evalResult = (Datum.compare(left, right)>=0);
-//				return;
-//			} catch (Exception e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}		
-//		} 
 	}
 
 	@Override
@@ -435,115 +366,63 @@ public class Evaluator implements ExpressionVisitor{
 	@Override
 	public void visit(MinorThan arg) {
 		arg.getLeftExpression().accept(this);
-		Datum left = data;
+		Datum left = getData();
 		arg.getRightExpression().accept(this);
-		Datum right = data;
+		Datum right = getData();
+		
+		if(differentTable){//mask
+			//ignore comparison of columns of different table
+			evalResult = true;
+			differentTable = false;
+			return;
+		}
+		
 		
 		int compResult = left.compareTo(right);
 		if(compResult<0)
 			evalResult = true;
 		else
 			evalResult = false;
-		
-//		if(left instanceof DatumString){
-//			DatumString leftVar = (DatumString)left;
-//
-//			if(right instanceof DatumString){
-//				//two variables
-//				DatumString rightVar = (DatumString)right;
-//				try {
-//					Datum leftDatum = tuple.getDataByName(leftVar.getValue());
-//					Datum rightDatum = tuple.getDataByName(rightVar.getValue());
-//					if(leftDatum==null||rightDatum==null)
-//						throw new NullPointerException();
-//					evalResult = (Datum.compare(leftDatum, rightDatum)<0);
-//					return;
-//				} catch (Exception e) {
-//					// TODO Auto-generated catch block
-//					e.printStackTrace();
-//				}
-//			}else{
-//				//one variable, one constant
-//				try {
-//					Datum leftDatum = tuple.getDataByName(leftVar.getValue());
-//					evalResult = (Datum.compare(leftDatum, right)<0);
-//					return;
-//				} catch (Exception e) {
-//					// TODO Auto-generated catch block
-//					e.printStackTrace();
-//				}
-//			}
-//		}else{
-//			//two constant
-//			try {
-//				evalResult = (Datum.compare(left, right)<0);
-//				return;
-//			} catch (Exception e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}		
-//		}
 	}
 
 	@Override
 	public void visit(MinorThanEquals arg) {
 		arg.getLeftExpression().accept(this);
-		Datum left = data;
+		Datum left = getData();
 		arg.getRightExpression().accept(this);
-		Datum right = data;
+		Datum right = getData();
+		
+		
+		if(differentTable){//mask
+			//ignore comparison of columns of different table
+			evalResult = true;
+			differentTable = false;
+			return;
+		}
+		
 		
 		int compResult = left.compareTo(right);
 		if(compResult<=0)
 			evalResult = true;
 		else
 			evalResult = false;
-		
-//		if(left instanceof DatumString){
-//			DatumString leftVar = (DatumString)left;
-//
-//			if(right instanceof DatumString){
-//				//two variables
-//				DatumString rightVar = (DatumString)right;
-//				try {
-//					Datum leftDatum = tuple.getDataByName(leftVar.getValue());
-//					Datum rightDatum = tuple.getDataByName(rightVar.getValue());
-//					if(leftDatum==null||rightDatum==null)
-//						throw new NullPointerException();
-//					evalResult = (Datum.compare(leftDatum, rightDatum)<=0);
-//					return;
-//				} catch (Exception e) {
-//					// TODO Auto-generated catch block
-//					e.printStackTrace();
-//				}
-//			}else{
-//				//one variable, one constant
-//				try {
-//					Datum leftDatum = tuple.getDataByName(leftVar.getValue());
-//					evalResult = (Datum.compare(leftDatum, right)<=0);
-//					return;
-//				} catch (Exception e) {
-//					// TODO Auto-generated catch block
-//					e.printStackTrace();
-//				}
-//			}
-//		}else{
-//			//two constant
-//			try {
-//				evalResult = (Datum.compare(left, right)<=0);
-//				return;
-//			} catch (Exception e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}		
-//		}
 	}
 
 	@Override
 	public void visit(NotEqualsTo arg) {
 		arg.getLeftExpression().accept(this);
-		Datum left = data;
+		Datum left = getData();
 		arg.getRightExpression().accept(this);
-		Datum right = data;
+		Datum right = getData();
+		
+		
+		if(differentTable){//mask
+			//ignore comparison of columns of different table
+			evalResult = true;
+			differentTable = false;
+			return;
+		}
+		
 		
 		int compResult = left.compareTo(right);
 		if(compResult!=0)
@@ -557,13 +436,26 @@ public class Evaluator implements ExpressionVisitor{
 		column = arg;
 		if(tuple==null){
 			data = new DatumString(arg.getColumnName());
+			return;
 		}else{
+			String argTableName = arg.getTable().toString();
+			String tupTableName = tuple.getTableName();
+			
+			if((tupTableName!=null) && (!argTableName.equals("null")) &&(!argTableName.equalsIgnoreCase(tupTableName))){
+				//in order to mask the where condition includes columns from different tables 
+				//Column arg is not the from the tuple's table, just ignore it
+				differentTable = true;
+				return;
+			}
+		
+			
 			Datum var = tuple.getDataByName(arg.getColumnName());
 			if(var==null){
 				StringBuilder sb = new StringBuilder();
 				Map<String, Integer> schemaMap = tuple.getSchema().getIndexMap();
 				for(Entry<String, Integer> entry : schemaMap.entrySet())
 					sb.append(entry.getKey() + " | ");
+				
 				throw new NullPointerException("ColumnName : " +arg.getColumnName() + "\n" + sb.toString());
 			}
 				

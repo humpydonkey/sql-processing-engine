@@ -46,7 +46,7 @@ public class DatumBool extends Datum {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			return 0;
+			return -99;
 		}
 	}
 
@@ -54,5 +54,10 @@ public class DatumBool extends Datum {
 	public Datum clone() {
 		Datum copy = new DatumBool(this.getValue());
 		return copy;
+	}
+	
+	public static void main(String[] args){
+		DatumBool bool1 = new DatumBool(true);
+		bool1.compareTo(null);
 	}
 }
