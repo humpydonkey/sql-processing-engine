@@ -1,6 +1,6 @@
 package dao;
 
-import java.util.Date;
+
 
 public class DatumString extends Datum {
 	private String value;
@@ -52,4 +52,6 @@ public class DatumString extends Datum {
 		Datum copy = new DatumString(new String(value));
 		return copy;
 	}
+	
+
 }

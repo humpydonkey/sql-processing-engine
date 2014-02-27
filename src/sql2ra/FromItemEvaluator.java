@@ -25,7 +25,7 @@ import dao.Tuple;
  */
 public class FromItemEvaluator implements FromItemVisitor{
 	private final File basePath;
-	private final Map<String,CreateTable> tables;
+	private Map<String,CreateTable> tables;
 	private String tableName;
 	
 	private Schema schema = null;

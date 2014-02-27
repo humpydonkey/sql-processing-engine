@@ -33,11 +33,12 @@ import dao.Tuple;
 
 public class SQLParser {
 	private File basePath;
-	private Map<String, CreateTable> globalCreateTables;
+	private static Map<String, CreateTable> globalCreateTables;
 	
 	public SQLParser(File basePathIn){
 		basePath = basePathIn;
-		globalCreateTables = new HashMap<String, CreateTable>();
+		if(globalCreateTables==null)
+			globalCreateTables = new HashMap<String, CreateTable>();
 	}
 	
 	public void create(Statement stmt)
