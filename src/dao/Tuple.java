@@ -95,7 +95,7 @@ public class Tuple{
 	}
 	
 	
-	public Datum[] getTuple(){
+	public Datum[] getDataArr(){
 		return dataArr;
 	}
 
@@ -121,9 +121,12 @@ public class Tuple{
 	 * @throws Exception
 	 */
 	public Datum getDataByName(String colName){
-		int index = schema.getIndex(colName.toUpperCase());
+		colName = colName.toUpperCase();
+
+		int index = schema.getColIndex(colName);
 		if(index<0){
 			try {
+				System.out.println(this.toString());
 				throw new Exception("Cannot find column : "+colName);
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
@@ -140,11 +143,15 @@ public class Tuple{
 	 * @return
 	 */
 	public DatumType getDataTypeByName(String colName){
-		int index = schema.getIndex(colName);
+		int index = schema.getColIndex(colName);
 		if(index<0)
 			return null;
 		else
 			return schema.getColType(index);
+	}
+	
+	public String getTableName(){
+		return schema.getTableName();
 	}
 	
 	

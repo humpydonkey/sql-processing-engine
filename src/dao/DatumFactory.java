@@ -5,10 +5,8 @@ public class DatumFactory {
 		switch(type){
 		case Long:
 			return new DatumLong(dataIn);
-		case Int:
-			return new DatumInt(dataIn);
 		case Float:
-			return new DatumFloat(dataIn);
+			return new DatumDouble(dataIn);
 		case Bool:
 			return new DatumBool(dataIn);
 		case String:

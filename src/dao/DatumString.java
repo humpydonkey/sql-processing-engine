@@ -43,7 +43,7 @@ public class DatumString extends Datum {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			return 0;
+			return -99;
 		}
 	}
 	

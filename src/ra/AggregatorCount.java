@@ -7,7 +7,7 @@ import java.util.Set;
 
 import net.sf.jsqlparser.expression.Function;
 import dao.Datum;
-import dao.DatumInt;
+import dao.DatumLong;
 import dao.Tuple;
 
 public class AggregatorCount extends Aggregator{
@@ -50,7 +50,7 @@ public class AggregatorCount extends Aggregator{
 			//because it is countAll, no specific column 	
 			if(!countMap.containsKey(key)){
 				//insert new
-				countMap.put(key, new DatumInt(1));
+				countMap.put(key, new DatumLong(1));
 			}else{
 				//else count ++
 				countPlusPlus(key);
@@ -73,7 +73,7 @@ public class AggregatorCount extends Aggregator{
 				}else{	//no distinct
 					if(!countMap.containsKey(key)){
 						//insert new
-						countMap.put(key, new DatumInt(1));
+						countMap.put(key, new DatumLong(1));
 					}else{
 						//else count ++
 						countPlusPlus(key);
