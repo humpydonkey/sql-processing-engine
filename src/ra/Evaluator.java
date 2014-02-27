@@ -268,9 +268,9 @@ public class Evaluator implements ExpressionVisitor{
 			throw new NullPointerException();
 		
 		arg.getBetweenExpressionStart().accept(this);
-		Datum start = getData();
+		//Datum start = getData();
 		arg.getBetweenExpressionEnd().accept(this);
-		Datum end = getData();
+		//Datum end = getData();
 		
 		throw new UnsupportedOperationException("Not supported yet."); 
 	}

@@ -9,15 +9,14 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.StringReader;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+import net.sf.jsqlparser.parser.CCJSqlParser;
+import net.sf.jsqlparser.statement.create.table.CreateTable;
+
 import common.TimeCalc;
 
-import net.sf.jsqlparser.parser.CCJSqlParser;
-import net.sf.jsqlparser.statement.Statement;
-import net.sf.jsqlparser.statement.create.table.CreateTable;
 import dao.Schema;
 import dao.Tuple;
 
@@ -116,10 +115,9 @@ public class OperatorScan implements Operator {
 			CreateTable ct = parser.CreateTable();
 			OperatorScan scan = new OperatorScan(new File("data/tpch/orders.tbl"), new Schema(ct, null));
 			List<Tuple> tuples;
-			int i=0;
+
 			TimeCalc.begin(0);
 			do{
-				i++;
 				tuples = scan.readOneBlock();
 			}while(tuples.size()!=0);
 			TimeCalc.end(0);
@@ -127,7 +125,7 @@ public class OperatorScan implements Operator {
 			
 			scan = new OperatorScan(new File("data/tpch/orders.tbl"), new Schema(ct, null));
 			TimeCalc.begin(1);
-			tuples = new LinkedList();
+			tuples = new LinkedList<Tuple>();
 			Tuple t;
 			while((t = scan.readOneTuple())!=null)
 				tuples.add(t);
