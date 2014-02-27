@@ -19,7 +19,7 @@ public class Main {
 
 	public static void main(String args[]){
 		String dataDirStr = "data/tpch/";//"data/NBA/";  //"/data/tpch/";
-		String sqlFilePath = "data/cp1_graded_sqls/tpch6.sql";
+		String sqlFilePath = "data/cp1_graded_sqls/tpch1.sql";
 		
 		File dataDir = null;
 		//set arguments
