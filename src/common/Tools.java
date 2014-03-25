@@ -1,5 +1,9 @@
 package common;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -131,6 +135,34 @@ public class Tools {
 	}
 	
 	public static void main(String[] args){
+		String file = "D:/db.txt";
+		FileOutputStream fos;
+		try {
+			fos = new FileOutputStream(new File(file));
+			for(int i=0; i<5; i++){
+				String row = String.valueOf(i) + "\n";
+				fos.write(row.getBytes());
+			}
+			fos.close();	
+			
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		try {
+			fos = new FileOutputStream(new File(file));
+			for(int i=10; i<15; i++){
+				String row = String.valueOf(i) + "\r\n";
+				fos.write(row.getBytes());
+			}
+			fos.close();	
+			
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 		String[] data = new String[]{"E","F","A","C","B"};
 		//int[] data = new int[]{5,2,3,4,1};
 		List<String> list = new ArrayList<String>(data.length);
