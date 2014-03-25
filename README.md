@@ -6,7 +6,7 @@ Query Processing Engine (Course project of Database Systems)
 Check point 1
 In this project, you will implement a simple SQL query evaluator with support for
 Select, Project, Join, Union, and Aggregate operations. That is, your code will receive a
-SQL le with a set of CREATE TABLE statements dening a schema for your data, and one
+SQL file with a set of CREATE TABLE statements defining a schema for your data, and one
 or more SELECT statements.
 Your code is expected to evaluate the SELECT statements on provided data, and produce
 output in a standardized form. Your code will be evaluated for both correctness and
