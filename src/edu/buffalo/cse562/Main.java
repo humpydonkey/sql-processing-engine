@@ -20,12 +20,31 @@ public class Main {
 		//input example: --data [data] [sqlfile1] [sqlfile2] ...
 		//           or  --data [data] --swap [swap] [sqlfile1] [sqlfile2] ...
 		
-		if(args.length>2){
+		if(args.length>=3){
 			if(args[0].equalsIgnoreCase("--data")){
+				//data directory
 				String dataDirStr = args[1];
 				File dataDir = new File(dataDirStr);
 				
+				int i=2;	//index of of argument sqlfile
+
+				//swap directory
+				File swapDir = null;
+				if(args[2].equalsIgnoreCase("--swap")){
+					if(args.length>3){
+						swapDir = new File(args[3]);
+						i = 4;
+					}
+					else
+						System.out.println("Input error: "+args.toString());
+				}
+				
+				//sql files
 				List<File> sqlFiles = new ArrayList<File>();
+				for(; i<args.length; i++){
+					
+				}
+				
 				//sqlFiles.add();
 				
 			}else
