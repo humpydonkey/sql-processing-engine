@@ -20,8 +20,6 @@ import ra.Aggregator;
 import ra.AggregatorAvg;
 import ra.AggregatorCount;
 import ra.AggregatorSum;
-import ra.Evaluator;
-import ra.Operator;
 import dao.DatumType;
 import dao.Schema;
 
@@ -40,7 +38,6 @@ public class SelectItemScanner implements SelectItemVisitor{
 	private boolean ifSelectAll;
 	private List<Aggregator> aggregators;
 	
-	private Evaluator eval;	
 	private List<Column> colNames;
 	private List<DatumType> colTypes;
 	private List<Expression> colSources;
@@ -48,12 +45,11 @@ public class SelectItemScanner implements SelectItemVisitor{
 	private String[] groupbyNames;
 	
 	@SuppressWarnings("unchecked")
-	public SelectItemScanner(PlainSelect select, Operator inputIn){
+	public SelectItemScanner(PlainSelect select){
 		items = select.getSelectItems();
 		ifSelectAll = false;
 		
 		//initialization
-		eval = new Evaluator();
 		colNames = new LinkedList<Column>();
 		colTypes = new LinkedList<DatumType>();
 		colSources = new LinkedList<Expression>();
