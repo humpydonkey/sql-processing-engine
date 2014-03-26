@@ -102,14 +102,13 @@ public class Evaluator implements ExpressionVisitor{
 			}
 			return null;
 		}
-		
-		
+
 		Function f = func;
 		func = null;
 		return f;
 	}
-	
-	
+
+
 	@Override
 	public void visit(NullValue arg) {
 		throw new UnsupportedOperationException("Not supported yet."); 

@@ -145,7 +145,7 @@ public class SQLParser {
 					
 			
 			/*********************    Parsing selected items    ********************/
-			SelectItemScanner selectItemScan = new SelectItemScanner(pselect, oper);
+			SelectItemScanner selectItemScan = new SelectItemScanner(pselect);
 			Schema newSchema = selectItemScan.getSelectedColumns();
 			Aggregator[] aggrs = selectItemScan.getAggregators();
 

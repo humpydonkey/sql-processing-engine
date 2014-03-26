@@ -5,6 +5,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
 import net.sf.jsqlparser.parser.CCJSqlParser;
 import net.sf.jsqlparser.parser.ParseException;
@@ -42,34 +43,60 @@ public class Main {
 				//sql files
 				List<File> sqlFiles = new ArrayList<File>();
 				for(; i<args.length; i++){
-					
+					sqlFiles.add(new File(args[i]));
 				}
 				
-				//sqlFiles.add();
+				runSQL(dataDir, swapDir, sqlFiles);
 				
 			}else
 				System.out.println("Input error: "+args.toString());
 		}
 		
 		
-		
-		testAllSQL();
+		testSpecificSQL();
+		//testAll_CP1();
 	}
 	
-	public static void testAllSQL(){
+	
+	public static void testSpecificSQL(){
+		//mocking input
+		String dataDirStr = "test/data/";//"data/NBA/";  //"/data/tpch/";
+		File sqlFile = new File("test/cp1_sqls/tpch3.sql");
+		
+		File dataDir = new File(dataDirStr);
+		File swapDir = null;
+		List<File> sqlfiles = new ArrayList<File>();
+		sqlfiles.add(sqlFile);
+		System.out.println("SQL file: "+sqlFile.getName());
+		runSQL(dataDir, swapDir, sqlfiles);
+		System.out.println("\nEnd.");
+	}
+
+	
+	public static void testAll_CP1(){
 		//mocking input
 		String dataDirStr = "test/data/";//"data/NBA/";  //"/data/tpch/";
 		String sqlFilePath = "test/cp1_sqls/";
 		
-		String[] args = new String[]{
-        		"--data",
-        		dataDirStr,
-        		"--swap",
-        		sqlFilePath
-        };
+		File dataDir = new File(dataDirStr);
+		File swapDir = null;
+
+		File sqlDir = new File(sqlFilePath);
+		File[] sqls = sqlDir.listFiles();
+		
+		for(File sqlfile : sqls){
+			List<File> sqlfiles = new ArrayList<File>();
+			sqlfiles.add(sqlfile);
+			System.out.println("SQL file: "+sqlfile.getName());
+			runSQL(dataDir, swapDir, sqlfiles);
+			
+			pauseConsole();
+		}
+		System.out.println("\nEnd.");
 	}
+
 	
-	public static void runSQL(File dataDir, ArrayList<File> sqlFiles){	        	        
+	public static void runSQL(File dataDir, File swapDir, List<File> sqlFiles){
 		for (File sql : sqlFiles){
 			try{
 				FileReader stream = new FileReader(sql);   		
@@ -104,4 +131,12 @@ public class Main {
 		}//end for
 	}
 
+	
+	public static void pauseConsole(){
+		//pause console
+		System.out.println("Press Enter to continue...");
+		Scanner keyboard = new Scanner(System.in);
+		keyboard.nextLine();
+		System.out.println();	
+	}
 }
