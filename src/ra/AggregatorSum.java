@@ -1,20 +1,12 @@
 package ra;
 
-import java.io.FileNotFoundException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.Function;
-import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
-import net.sf.jsqlparser.parser.ParseException;
-import net.sf.jsqlparser.schema.Column;
-import net.sf.jsqlparser.statement.create.table.ColDataType;
-import net.sf.jsqlparser.statement.create.table.ColumnDefinition;
 import dao.Datum;
-import dao.Schema;
 import dao.Tuple;
 
 public class AggregatorSum extends Aggregator {
@@ -37,9 +29,9 @@ public class AggregatorSum extends Aggregator {
 
 	@Override
 	public void aggregate(Tuple tuple, String key) {
-		Evaluator eval = new Evaluator(tuple);
+		EvaluatorConditionExpres eval = new EvaluatorConditionExpres(tuple);
 		paraExpr.accept(eval);
-		Datum newVal = eval.getData().clone();
+		Datum newVal = eval.getData();
 		
 		if(!sumMap.containsKey(key)){
 			//insert new

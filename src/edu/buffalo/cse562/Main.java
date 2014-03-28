@@ -1,5 +1,7 @@
 package edu.buffalo.cse562;
 
+import io.FileAccessor;
+
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
@@ -7,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
+import common.TimeCalc;
 import net.sf.jsqlparser.parser.CCJSqlParser;
 import net.sf.jsqlparser.parser.ParseException;
 import net.sf.jsqlparser.statement.Statement;
@@ -58,18 +61,32 @@ public class Main {
 	}
 	
 	
-	public static void testSpecificSQL(){
+	public static List<Tuple> testSpecificSQL(){
 		//mocking input
-		String dataDirStr = "test/data/";//"data/NBA/";  //"/data/tpch/";
-		File sqlFile = new File("test/cp1_sqls/tpch3.sql");
+		String sqlFilePath = "test/cp1_sqls/tpch1.sql";
+		for(String sql :FileAccessor.getInstance().readAllSqls(sqlFilePath))
+			System.out.println(sql);
+		System.out.println();
+		List<Tuple> tups = testSpecificSQL(sqlFilePath);
+		for(Tuple t : tups)
+			t.printTuple();
+		System.out.println("End.");
+		return tups;
+	}
+	
+	public static List<Tuple> testSpecificSQL(String sqlFilePath){
+		//mocking input
+		String dataDirStr = "test/data/";
+		File sqlFile = new File(sqlFilePath);
 		
 		File dataDir = new File(dataDirStr);
 		File swapDir = null;
 		List<File> sqlfiles = new ArrayList<File>();
 		sqlfiles.add(sqlFile);
 		System.out.println("SQL file: "+sqlFile.getName());
-		runSQL(dataDir, swapDir, sqlfiles);
-		System.out.println("\nEnd.");
+		List<Tuple> results = runSQL(dataDir, swapDir, sqlfiles);
+		
+		return results;
 	}
 
 	
@@ -96,7 +113,10 @@ public class Main {
 	}
 
 	
-	public static void runSQL(File dataDir, File swapDir, List<File> sqlFiles){
+	public static List<Tuple> runSQL(File dataDir, File swapDir, List<File> sqlFiles){
+		TimeCalc.begin(1);
+		List<Tuple> results = null;
+		
 		for (File sql : sqlFiles){
 			try{
 				FileReader stream = new FileReader(sql);   		
@@ -113,9 +133,9 @@ public class Main {
 					 if(stmt instanceof Select){
 						//System.out.println("I would now evaluate:" + stmt);
 						Select sel = (Select)stmt;
-						List<Tuple> tuples = myParser.select(sel.getSelectBody());
-						for(Tuple tuple : tuples)
-							tuple.printTuple();
+						results = myParser.select(sel.getSelectBody());
+//						for(Tuple tuple : results)
+//							tuple.printTuple();
 					 }
 					 else 
 						System.out.println("PANIC! I don't know how to handle" + stmt);
@@ -129,6 +149,9 @@ public class Main {
 		    	}
 			
 		}//end for
+		
+		TimeCalc.end(1);
+		return results;
 	}
 
 	

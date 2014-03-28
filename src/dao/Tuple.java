@@ -4,7 +4,8 @@ import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.Function;
 import net.sf.jsqlparser.schema.Column;
 import ra.Aggregator;
-import ra.Evaluator;
+import ra.EvaluatorConditionExpres;
+import ra.OperatorGroupBy;
 
 
 public class Tuple{
@@ -68,10 +69,14 @@ public class Tuple{
 		
 				//find the key
 				Aggregator aggre = newSchema.getAggregator(func);
-				StringBuilder groupbyKey = new StringBuilder("");
+				StringBuilder groupbyKey = new StringBuilder();
 				for(String colName : aggre.getGroupByColumns()){
-					if(colName.equals(""))	//no group by
+					if(colName.equals(OperatorGroupBy.NOGROUPBYKEY)){
+						//no group by
+						groupbyKey.append(OperatorGroupBy.NOGROUPBYKEY);
 						break;
+					}
+						
 					Datum groupbyColumn = getDataByName(colName);
 					groupbyKey.append(groupbyColumn.toString());
 				}
@@ -80,13 +85,9 @@ public class Tuple{
 				
 			}else{
 				//should be a constant or expression
-				Evaluator eval = new Evaluator(this);
+				EvaluatorConditionExpres eval = new EvaluatorConditionExpres(this);
 				newSource.accept(eval);
 				oldData = eval.getData();
-				if(oldData.getNumericValue()==1168){
-					System.out.println("!!");
-				}
-				
 			}
 			newDataArr[i] = oldData;
 		}
