@@ -110,6 +110,35 @@ public class FileAccessor {
 	}
 	
 	
+	/**
+	 * Read all content from a file
+	 * @param addr : file path
+	 * @return : String content
+	 */
+	public List<Tuple> readSpecificBlock(String addr, Schema schema, int beginLine, int endLine){
+		List<Tuple> tuples = new LinkedList<Tuple>();
+		try {
+			int current = 0;	//current line number
+			BufferedReader reader = getBR(addr);
+			String line = null;
+			while((line = reader.readLine())!=null){
+				current++;
+				if(current<beginLine)
+					continue;
+				if(current>endLine)
+					break;
+				
+				String [] data = line.split("\\|");
+				tuples.add(new Tuple(data, schema));
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return tuples;
+	}
+	
+	
 	public StringBuilder readPartOfFile(File f, int parts){
 		StringBuilder sb = new StringBuilder();
 		try {

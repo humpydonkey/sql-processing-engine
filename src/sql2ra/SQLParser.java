@@ -142,40 +142,24 @@ public class SQLParser {
 					oper = new OperatorSelection(oper,where);
 				}
 			}
-					
-			
+
+
 			/*********************    Parsing selected items    ********************/
 			SelectItemScanner selectItemScan = new SelectItemScanner(pselect);
 			Schema newSchema = selectItemScan.getSelectedColumns();
 			Aggregator[] aggrs = selectItemScan.getAggregators();
 
-			
-			
+
 			/*********************    Group By + Aggregate   ********************/
-			if(pselect.getGroupByColumnReferences() != null){  //have group by
-				@SuppressWarnings("rawtypes")
-				List colRefs = pselect.getGroupByColumnReferences();
-				OperatorGroupBy groupby = new OperatorGroupBy(oper, colRefs, aggrs);
-				List<Tuple> tuples = groupby.getTuples();
-				oper = new OperatorCache(tuples);
-			 }else{
-				//Only aggregate
-				 if(aggrs.length>0){
-					 List<Tuple> tuples = dump(oper);
-						for(Tuple t : tuples){
-							for(Aggregator aggr : aggrs){
-								aggr.aggregate(t, "");	//"" means no group by
-							}
-						}
-						if(tuples.size()>0){
-							Tuple t = tuples.get(tuples.size()-1);	//get the last tuple
-							tuples = new ArrayList<Tuple>();
-							tuples.add(t);
-						}						
-						oper = new OperatorCache(tuples);
-				 }		
-			 }
-			 
+			@SuppressWarnings("rawtypes")
+			List groupbyCols = pselect.getGroupByColumnReferences();
+			if(aggrs.length>0 || groupbyCols!=null){
+				//if aggregate function exist or group by column exist
+				OperatorGroupBy groupby = new OperatorGroupBy(oper, groupbyCols, aggrs);
+				List<Tuple> tuples = groupby.dump();
+				oper = new OperatorCache(tuples);	
+			}
+
 
 			/*********************    Projection    ********************/
 			if(!selectItemScan.getIfSelectAll()){

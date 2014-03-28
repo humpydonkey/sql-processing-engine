@@ -20,6 +20,7 @@ import ra.Aggregator;
 import ra.AggregatorAvg;
 import ra.AggregatorCount;
 import ra.AggregatorSum;
+import ra.OperatorGroupBy;
 import dao.DatumType;
 import dao.Schema;
 
@@ -57,13 +58,17 @@ public class SelectItemScanner implements SelectItemVisitor{
 		aggregators = new ArrayList<Aggregator>();
 		
 		//get group by column names
+		@SuppressWarnings("rawtypes")
 		List groupbys = select.getGroupByColumnReferences();
-		if(groupbys!=null){
+		if(groupbys!=null && groupbys.size()!=0){
 			groupbyNames = new String[groupbys.size()];
 			for(int i=0; i<groupbys.size(); i++){
 				Column col = (Column)groupbys.get(i);
 				groupbyNames[i] = col.getColumnName();
-			}	
+			}
+		}else{
+			groupbyNames = new String[1];
+			groupbyNames[0] = OperatorGroupBy.NOGROUPBYKEY;
 		}
 				
 		for(SelectItem item : items){
@@ -85,7 +90,7 @@ public class SelectItemScanner implements SelectItemVisitor{
 	
 	public Aggregator[] getAggregators(){
 		if(aggregators==null)
-			return null;
+			return new Aggregator[]{};
 		else{
 			Aggregator[] aggrArr = new Aggregator[aggregators.size()];
 			return aggregators.toArray(aggrArr);

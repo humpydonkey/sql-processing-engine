@@ -54,7 +54,7 @@ import dao.Tuple;
 
 //it will ignore the comparison of a column from a different table
 //and ignore equal join condition
-public class Evaluator implements ExpressionVisitor{
+public class EvaluatorConditionExpres implements ExpressionVisitor{
 
 	private Function func;
 	private Tuple tuple;
@@ -64,16 +64,12 @@ public class Evaluator implements ExpressionVisitor{
 	private boolean differentTable;
 
 
-	public Evaluator(Tuple tupleIn){
+	public EvaluatorConditionExpres(Tuple tupleIn){
 		evalResult = true;
 		tuple = tupleIn;
 		differentTable = false;
 	}
 	
-	public Evaluator(){
-		evalResult = true;
-		differentTable = false;
-	}
 	
 	public boolean getResult(){	
 		return evalResult;
@@ -83,7 +79,11 @@ public class Evaluator implements ExpressionVisitor{
 	public Datum getData(){
 		Datum d = data;
 		data = null;
-		return d;
+		
+		if(d==null)
+			return null;
+		else
+			return d.clone();
 	}
 	
 	public Column getColumn(){	

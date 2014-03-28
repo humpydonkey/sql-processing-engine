@@ -13,7 +13,7 @@ public class TimeCalc {
 	}
 	
 	public static void begin(int id){
-		 errMsg = new StringBuilder("\n");
+		 errMsg = new StringBuilder();
 		if(exist(id)){
 			errMsg.append("TimeCalc.begin() : Error! There is alread exist such id: " + id + " \n");
 		}else if(size>=10){

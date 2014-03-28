@@ -25,7 +25,7 @@ public class OperatorSelection implements Operator{
 		List<Tuple> tuples = input.readOneBlock();
 		for(Tuple tuple : tuples){
 			
-			Evaluator evaluator = new Evaluator(tuple);
+			EvaluatorConditionExpres evaluator = new EvaluatorConditionExpres(tuple);
 			condition.accept(evaluator);
 			if(evaluator.getResult()){
 				selectedTuples.add(tuple);
@@ -45,7 +45,7 @@ public class OperatorSelection implements Operator{
 			if(tuple == null)
 				return null;
 			
-			Evaluator evaluator = new Evaluator(tuple);
+			EvaluatorConditionExpres evaluator = new EvaluatorConditionExpres(tuple);
 			condition.accept(evaluator);
 			if(!evaluator.getResult()){
 				tuple = null;
