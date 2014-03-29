@@ -4,6 +4,7 @@ import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.Function;
 import net.sf.jsqlparser.schema.Column;
 import ra.Aggregator;
+import ra.EvaluatorArithmeticExpres;
 import ra.EvaluatorConditionExpres;
 import ra.OperatorGroupBy;
 
@@ -85,7 +86,7 @@ public class Tuple{
 				
 			}else{
 				//should be a constant or expression
-				EvaluatorConditionExpres eval = new EvaluatorConditionExpres(this);
+				EvaluatorArithmeticExpres eval = new EvaluatorArithmeticExpres(this);
 				newSource.accept(eval);
 				oldData = eval.getData();
 			}
