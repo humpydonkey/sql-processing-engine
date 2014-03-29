@@ -29,7 +29,7 @@ public class AggregatorSum extends Aggregator {
 
 	@Override
 	public void aggregate(Tuple tuple, String key) {
-		EvaluatorConditionExpres eval = new EvaluatorConditionExpres(tuple);
+		EvaluatorArithmeticExpres eval = new EvaluatorArithmeticExpres(tuple);
 		paraExpr.accept(eval);
 		Datum newVal = eval.getData();
 		
