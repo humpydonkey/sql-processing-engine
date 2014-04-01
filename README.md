@@ -1,7 +1,9 @@
 sql-processing-engine
 =====================
 
-Query Processing Engine (Course project of Database Systems) 
+Query Processing Engine 
+This is my course project of Database Systems, our purpose is to implement a simple SQL engine that can executing SQL correctly and retrieving data efficiently. It has three check points to finally achieve the purpose.
+
 
 Check point 1
 In this project, you will implement a simple SQL query evaluator with support for
