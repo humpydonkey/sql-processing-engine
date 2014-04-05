@@ -3,7 +3,7 @@ package dao;
 public enum DatumType {
 	Bool, 
 	Long, 
-	Float, 
+	Double, 
 	String, 
 	Date;
 }

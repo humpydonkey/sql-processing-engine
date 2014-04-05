@@ -1,8 +1,10 @@
 package ra;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import sql2ra.SQLEngine;
 import net.sf.jsqlparser.expression.AllComparisonExpression;
 import net.sf.jsqlparser.expression.AnyComparisonExpression;
 import net.sf.jsqlparser.expression.CaseExpression;
@@ -56,7 +58,6 @@ import dao.Tuple;
 //and ignore equal join condition
 public class EvaluatorConditionExpres implements ExpressionVisitor{
 
-	private Function func;
 	private Tuple tuple;
 	private boolean evalResult;
 	private Datum data;
@@ -92,21 +93,6 @@ public class EvaluatorConditionExpres implements ExpressionVisitor{
 		return col;
 	}
 	
-	public Function getFunc(){
-		if(func==null){
-			try {
-				throw new Exception("Expression analysis error!");
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			return null;
-		}
-
-		Function f = func;
-		func = null;
-		return f;
-	}
 
 
 	@Override
@@ -120,8 +106,7 @@ public class EvaluatorConditionExpres implements ExpressionVisitor{
 			String date = arg.getParameters().toString();
 			String tmp = date.substring(2, date.length()-2);
 			data = new DatumDate(tmp);
-		}else
-			func = arg;
+		}
 	}
 
 	@Override
@@ -257,21 +242,26 @@ public class EvaluatorConditionExpres implements ExpressionVisitor{
 		evalResult = (left||right);
 	}
 
+	/*
+	 * The range of start and end include equal value
+	 * @see net.sf.jsqlparser.expression.ExpressionVisitor#visit(net.sf.jsqlparser.expression.operators.relational.Between)
+	 */
 	@Override
 	public void visit(Between arg) {
 		arg.getLeftExpression().accept(this);
-		Column col = getColumn();
-	
-		Datum var = tuple.getDataByName(col.getColumnName());
+		Datum var = getData();
 		if(var==null)
 			throw new NullPointerException();
 		
 		arg.getBetweenExpressionStart().accept(this);
-		//Datum start = getData();
+		Datum start = getData();
 		arg.getBetweenExpressionEnd().accept(this);
-		//Datum end = getData();
+		Datum end = getData();
 		
-		throw new UnsupportedOperationException("Not supported yet."); 
+		if(var.compareTo(start)>=0&&var.compareTo(end)<=0)
+			evalResult = true;
+		else
+			evalResult = false;
 	}
 
 	@Override
@@ -363,7 +353,16 @@ public class EvaluatorConditionExpres implements ExpressionVisitor{
 
 	@Override
 	public void visit(LikeExpression arg) {
-		throw new UnsupportedOperationException("Not supported yet."); 
+		arg.getLeftExpression().accept(this);
+		Datum left = getData();	//column
+		arg.getRightExpression().accept(this);
+		Datum right = getData();//pattern
+		
+		String leftStr = left.toString();
+		String rightStr = right.toString();
+		
+		rightStr = rightStr.replace("%", ".*");
+		evalResult = leftStr.matches(rightStr);
 	}
 
 	@Override
@@ -437,40 +436,44 @@ public class EvaluatorConditionExpres implements ExpressionVisitor{
 	@Override
 	public void visit(Column arg) {
 		column = arg;
-		if(tuple==null){
-			data = new DatumString(arg.getColumnName());
-			return;
-		}else{
-			Table argTable = arg.getTable();
-			if(argTable!=null){
-				String argTableName = arg.getTable().toString();
-				String tupTableName = tuple.getTableName();
-				
-				if((tupTableName!=null) && (!argTableName.equals("null")) &&(!argTableName.equalsIgnoreCase(tupTableName))){
-					//in order to mask the where condition includes columns from different tables 
-					//Column arg is not the from the tuple's table, just ignore it
-					differentTable = true;
-					return;
-				}
-			}
+
+		Table argTable = arg.getTable();
+		if(argTable!=null){
+			String argTableName = arg.getTable().toString();
+			String tupTableName = tuple.getTableName();
 			
-			Datum var = tuple.getDataByName(arg.getColumnName());
-			if(var==null){
-				StringBuilder sb = new StringBuilder();
-				Map<String, Integer> schemaMap = tuple.getSchema().getIndexMap();
-				for(Entry<String, Integer> entry : schemaMap.entrySet())
-					sb.append(entry.getKey() + " | ");
-				
-				throw new NullPointerException("ColumnName : " +arg.getColumnName() + "\n" + sb.toString());
+			if((tupTableName!=null) && (!argTableName.equals("null")) &&(!argTableName.equalsIgnoreCase(tupTableName))){
+				//in order to mask the where condition includes columns from different tables 
+				//Column arg is not the from the tuple's table, just ignore it
+				differentTable = true;
+				return;
 			}
-				
-			data = var;
 		}
+		
+		Datum var = tuple.getDataByName(arg);
+		if(var==null){
+			StringBuilder sb = new StringBuilder();
+			Map<String, Integer> schemaMap = tuple.getSchema().getIndexMap();
+			for(Entry<String, Integer> entry : schemaMap.entrySet())
+				sb.append(entry.getKey() + " | ");
+			
+			throw new NullPointerException("ColumnName : " +arg.getColumnName() + "\n" + sb.toString());
+		}
+
+		data = var;
 	}
+	
 
 	@Override
-	public void visit(SubSelect arg) {
-		throw new UnsupportedOperationException("Not supported yet."); 
+	public void visit(SubSelect subselect) {	
+		SQLEngine parser = new SQLEngine(null, null);
+		List<Tuple> tuples = parser.select(subselect.getSelectBody());
+		try {
+			Datum data = tuples.get(0).getData(0);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	@Override

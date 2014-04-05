@@ -1,11 +1,12 @@
 package dao;
 
+
 public class DatumFactory {
 	public static Datum create(String dataIn, DatumType type){
 		switch(type){
 		case Long:
 			return new DatumLong(dataIn);
-		case Float:
+		case Double:
 			return new DatumDouble(dataIn);
 		case Bool:
 			return new DatumBool(dataIn);

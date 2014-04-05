@@ -10,6 +10,7 @@ import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.Function;
 import net.sf.jsqlparser.expression.Parenthesis;
 import net.sf.jsqlparser.schema.Column;
+import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.AllColumns;
 import net.sf.jsqlparser.statement.select.AllTableColumns;
 import net.sf.jsqlparser.statement.select.PlainSelect;
@@ -42,8 +43,12 @@ public class SelectItemScanner implements SelectItemVisitor{
 	private List<Column> colNames;
 	private List<DatumType> colTypes;
 	private List<Expression> colSources;
+	private Table table;
 	private Map<Function, Aggregator> aggreMap;
 	private String[] groupbyNames;
+	
+	private static final String TABLE_NAME = "";
+	
 	
 	@SuppressWarnings("unchecked")
 	public SelectItemScanner(PlainSelect select){
@@ -54,6 +59,7 @@ public class SelectItemScanner implements SelectItemVisitor{
 		colNames = new LinkedList<Column>();
 		colTypes = new LinkedList<DatumType>();
 		colSources = new LinkedList<Expression>();
+		table = new Table(null, TABLE_NAME);
 		aggreMap = new HashMap<Function, Aggregator>();
 		aggregators = new ArrayList<Aggregator>();
 		
@@ -64,7 +70,10 @@ public class SelectItemScanner implements SelectItemVisitor{
 			groupbyNames = new String[groupbys.size()];
 			for(int i=0; i<groupbys.size(); i++){
 				Column col = (Column)groupbys.get(i);
-				groupbyNames[i] = col.getColumnName();
+				if(col.getTable()==null)
+					groupbyNames[i] = col.getColumnName();
+				else
+					groupbyNames[i] = col.toString();
 			}
 		}else{
 			groupbyNames = new String[1];
@@ -130,6 +139,7 @@ public class SelectItemScanner implements SelectItemVisitor{
 		if(exp instanceof Column){
 			/***** original column *****/
 			col =(Column)exp;
+			col.setTable(table);
 			if(alias!=null)
 				col.setColumnName(alias);
 			
@@ -138,6 +148,7 @@ public class SelectItemScanner implements SelectItemVisitor{
 		}else if(exp instanceof Function){
 			/***** aggregate function *****/
 			col = new Column();
+			col.setTable(table);
 			if(alias!=null)
 				col.setColumnName(alias);
 			else
@@ -178,6 +189,7 @@ public class SelectItemScanner implements SelectItemVisitor{
 			Parenthesis paren = (Parenthesis)exp; 
 
 			col = new Column();
+			col.setTable(table);
 			if(alias!=null)
 				col.setColumnName(alias);
 			else

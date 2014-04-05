@@ -1,4 +1,4 @@
-package sql2ra;
+package ra;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,21 +43,22 @@ import net.sf.jsqlparser.expression.operators.relational.NotEqualsTo;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.select.SubSelect;
 
-public class EqualJoinScanner implements ExpressionVisitor{
+public class EvaluatorEqualJoin implements ExpressionVisitor{
 	
 	private Column column;
-	private List<Column> joins;
+	private List<EqualJoin> ejList;
 	
-	public EqualJoinScanner(){
-		joins = new ArrayList<Column>();
+	public EvaluatorEqualJoin(){
+		ejList = new ArrayList<EqualJoin>();
 	}
 	
-	public List<Column> getJoins(){
-		List<Column> results = joins;
+	public List<EqualJoin> getJoins(){
+		List<EqualJoin> results = ejList;
+		ejList = new ArrayList<EqualJoin>();
 		return results;
 	}
 	
-	public Column getColumn(){	
+	private Column getColumn(){	
 		Column col = column;
 		column = null;
 		return col;
@@ -181,10 +182,8 @@ public class EqualJoinScanner implements ExpressionVisitor{
 		if(leftCol!=null&&rightCol!=null){
 			if(leftCol.getColumnName().equalsIgnoreCase(rightCol.getColumnName())){
 				if(!leftCol.getTable().getName().equalsIgnoreCase(rightCol.getTable().getName())){
-					//get equal join column pairs
-					joins.add(leftCol);
-					joins.add(rightCol);
-					return;
+					EqualJoin ej = new EqualJoin(leftCol, rightCol);
+					ejList.add(ej);
 				}
 			}
 		}

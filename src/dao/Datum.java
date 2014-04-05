@@ -26,7 +26,7 @@ public abstract class Datum implements Comparable<Datum> {
 			case Bool:
 				DatumBool valBool = (DatumBool)this;
 				return String.valueOf(valBool.getValue());
-			case Float:
+			case Double:
 				DatumDouble valFloat = (DatumDouble)this;
 				return valFloat.toString();
 			default:	//Int or Long

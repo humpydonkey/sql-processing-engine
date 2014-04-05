@@ -5,12 +5,12 @@ public class DatumDouble extends Datum{
 	private double value;
 	
 	public DatumDouble(String dataIn){
-		super(DatumType.Float);
+		super(DatumType.Double);
 		value = Double.parseDouble(dataIn);
 	}
 	
 	public DatumDouble(double dataIn){
-		super(DatumType.Float);
+		super(DatumType.Double);
 		value = dataIn;
 	}
 	
