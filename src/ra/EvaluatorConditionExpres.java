@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import sql2ra.SQLEngine;
 import net.sf.jsqlparser.expression.AllComparisonExpression;
 import net.sf.jsqlparser.expression.AnyComparisonExpression;
 import net.sf.jsqlparser.expression.CaseExpression;
@@ -46,6 +45,7 @@ import net.sf.jsqlparser.expression.operators.relational.NotEqualsTo;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.SubSelect;
+import sql2ra.SQLEngine;
 import dao.Datum;
 import dao.DatumDate;
 import dao.DatumDouble;
@@ -353,16 +353,22 @@ public class EvaluatorConditionExpres implements ExpressionVisitor{
 
 	@Override
 	public void visit(LikeExpression arg) {
+
 		arg.getLeftExpression().accept(this);
 		Datum left = getData();	//column
 		arg.getRightExpression().accept(this);
 		Datum right = getData();//pattern
 		
-		String leftStr = left.toString();
-		String rightStr = right.toString();
+		String attribute = left.toString();
+		String likeStr = right.toString();
 		
-		rightStr = rightStr.replace("%", ".*");
-		evalResult = leftStr.matches(rightStr);
+		likeStr = likeStr.replaceAll("%", "(.*)");
+		likeStr = likeStr.replaceAll("_", "(.)");
+
+		boolean matchResult = attribute.matches(likeStr);
+		// NOT LIKE or LIKE
+		evalResult = arg.isNot()?!matchResult:matchResult;
+		return;
 	}
 
 	@Override
