@@ -2,6 +2,8 @@ package ra;
 
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import net.sf.jsqlparser.expression.AllComparisonExpression;
 import net.sf.jsqlparser.expression.AnyComparisonExpression;
@@ -363,7 +365,31 @@ public class EvaluatorConditionExpres implements ExpressionVisitor{
 
 	@Override
 	public void visit(LikeExpression arg) {
-		throw new UnsupportedOperationException("Not supported yet."); 
+		
+		String expression;
+		expression = arg.getStringExpression();
+		System.out.println("expression: " + expression);// I want the condition in '',without %
+		String expRall = expression.replaceAll("%", "(.*)");
+		String expRone = expRall.replaceAll("_", "(.)");
+//		"[ ]" and "[^]" are the same
+		
+		Datum att;
+		att = tuple.getDataByName(expression);
+		String attribute;
+		attribute = att.toString();
+	
+		// LIKE
+		if(!arg.isNot()){
+			if(attribute.matches(expRone)){evalResult = true;return;}
+			else evalResult = false; 
+		}
+		
+		// NOT LIKE
+		if(arg.isNot()){
+			if(attribute.matches(expRone)){evalResult = false;return;}
+			else evalResult = true; 
+		}
+		
 	}
 
 	@Override
