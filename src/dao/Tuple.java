@@ -63,7 +63,7 @@ public class Tuple{
 			Column newName = newColNames[i]; 
 			if(newSource instanceof Column){
 				//is a column
-				oldData = getDataByName(newName.getColumnName());
+				oldData = getDataByName(newName);
 			}else if(newSource instanceof Function){ 
 				//is an aggregate function
 				Function func = (Function)newSource;
@@ -123,20 +123,33 @@ public class Tuple{
 	 * @throws Exception
 	 */
 	public Datum getDataByName(String colName){
-		colName = colName.toUpperCase();
-
 		int index = schema.getColIndex(colName);
 		if(index<0){
-			try {
-				System.out.println(this.toString());
-				throw new Exception("Cannot find column : "+colName);
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			return null;	
+			if(colName.contains(".")){
+				colName = colName.split("\\.")[1];
+				index = schema.getColIndex(colName);
+				if(index>=0)
+					return dataArr[index];
+				else
+					return null;
+			}else
+				return null;	
 		}else
 			return dataArr[index];
+	}
+	
+	
+	public Datum getDataByName(Column col){
+		if(col.getTable()==null)
+			return getDataByName(col.getColumnName());
+		else{
+			//return full name
+			Datum data = getDataByName(col.toString());
+			if(data==null)
+				data = getDataByName(col.getColumnName());
+			return data;
+		}
+			
 	}
 	
 	/**
@@ -144,13 +157,16 @@ public class Tuple{
 	 * @param colName
 	 * @return
 	 */
-	public DatumType getDataTypeByName(String colName){
-		int index = schema.getColIndex(colName);
+	public DatumType getDataTypeByName(Column colName){
+		String name = colName.getTable()==null?colName.getColumnName():colName.toString();
+		int index = schema.getColIndex(name);
 		if(index<0)
 			return null;
 		else
 			return schema.getColType(index);
 	}
+	
+	
 	
 	public String getTableName(){
 		return schema.getTableName();

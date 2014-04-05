@@ -1,9 +1,11 @@
 package io;
 
 import java.io.BufferedReader;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -13,6 +15,10 @@ import java.util.List;
 
 import common.TimeCalc;
 
+import dao.Datum;
+import dao.DatumBool;
+import dao.DatumDouble;
+import dao.DatumLong;
 import dao.Schema;
 import dao.Tuple;
 
@@ -32,7 +38,7 @@ public class FileAccessor {
 		String add0 = "data/NBA/";
 		String add1 = "data/NBA/nba11.sql";
 		String add2 = "data/NBA/nba16.expected.dat";
-		String add3 = "data/tpch/partsupp.dat";
+		String add3 = "test/data/partsupp.dat";
 		System.out.println("start");
 		
 		TimeCalc.begin(1);
@@ -53,6 +59,7 @@ public class FileAccessor {
 		System.out.println("end");
 	}
 	
+
 	
 	/**
 	 * Get a file list with a specified type of file
@@ -161,11 +168,6 @@ public class FileAccessor {
 		return sb;
 	}
 	
-	public void writeFile(StringBuilder sb, String fileName) throws IOException{
-		FileWriter writer = new FileWriter(new File("data/tpch/" + fileName));
-		writer.write(sb.toString());
-		writer.close();
-	}
 	
 	/**
 	 * Read all the SQLs from a file
@@ -186,6 +188,89 @@ public class FileAccessor {
 		}
 		
 		return sqls;
+	}
+	
+	public void writeFile(StringBuilder sb, String fileName) throws IOException{
+		FileWriter writer = new FileWriter(new File("data/tpch/" + fileName));
+		writer.write(sb.toString());
+		writer.close();
+	}
+
+	
+	
+	/**
+	 * Write tuple into a file
+	 * @param tups
+	 * @param fileDir
+	 * @throws IOException 
+	 */
+	public void writeTuples(List<Tuple> tups, File fileDir) throws IOException{
+		BufferedRandomAccessFile writer = getBraf(fileDir,"rw");
+		//RandomAccessFile writer = new RandomAccessFile(fileDir, "rw");
+		int count = 0;
+		writer.seek(writer.length());
+		for(Tuple tup : tups){
+			//finish writing one tuple
+			System.out.println("pointer:"+writer.getFilePointer());
+			writer.writeUTF(tup.toString()+"\n");
+			System.out.println(tup.toString());
+			count++;
+			if(count==10)
+				break;
+			//get offset
+			long offset = writer.getFilePointer();
+			System.out.println(offset);
+		}
+		
+		try{
+			writer.close();
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+	}
+	
+	
+	private void writeDatum(BufferedRandomAccessFile writer, Datum data) throws IOException{
+		switch(data.getType()){
+		case Long:
+			DatumLong dl = (DatumLong)data;
+			writer.writeLong(dl.getValue());
+			return;
+		case Double:
+			DatumDouble doub = (DatumDouble)data;
+			writer.writeDouble(doub.getValue());
+			return;
+		case Bool:
+			DatumBool bool = (DatumBool)data;
+			writer.writeBoolean(bool.getValue());
+			return;
+		default:
+			//String and Date
+			writer.writeUTF(data.toString());
+			return;
+		}
+	}
+	
+	
+	private DataOutputStream getDOS(File file){
+		try {
+			return new DataOutputStream(new FileOutputStream(file));
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null;
+		}
+	}
+	
+	
+	private BufferedRandomAccessFile getBraf(File file, String mode){
+		try {
+			return new BufferedRandomAccessFile(file, mode);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null;
+		}
 	}
 	
 	

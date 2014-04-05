@@ -20,8 +20,9 @@ import ra.Aggregator;
 public class Schema {
 
 	private Map<String, Integer> indexMap;
+	private Map<String, Integer> fullNameIndexMap;
 	private int length;
-	private String tableName;
+	private Table tableName;
 	private Column[] columnNames;
 	private Expression[] columnSources;
 	private DatumType[] colTypes;
@@ -40,10 +41,10 @@ public class Schema {
 		columnNames = cols;
 		colTypes = new DatumType[length];
 		columnSources = new Expression[length];
-		indexMap = new HashMap<String, Integer>(length);
+//		indexMap = new HashMap<String, Integer>(length);
 		
 		for(int i=0; i<length; i++){
-			indexMap.put(columnNames[i].getColumnName().toUpperCase(), i);
+//			indexMap.put(columnNames[i].getColumnName().toUpperCase(), i);
 			colTypes[i] = convertColType(i, colDefs.get(i));
 			columnSources[i] = cols[i];	//assign it as a column
 			//compare the Column[] and ColumnDefinition has the same order index, if not throw exception 
@@ -51,6 +52,7 @@ public class Schema {
 				throw new Exception("Column[] and ColumnDefinition has not the same order index.");
 		}
 		
+		initialIndexMap(length, columnNames);
 		initialTableName();
 	}
 	
@@ -64,10 +66,10 @@ public class Schema {
 		columnNames = colsIn;
 		colTypes = new DatumType[length];
 		columnSources = new Expression[length];
-		indexMap = new HashMap<String, Integer>(length);
+//		indexMap = new HashMap<String, Integer>(length);
 		
 		for(int i=0; i<length; i++){
-			indexMap.put(columnNames[i].getColumnName().toUpperCase(), i);
+//			indexMap.put(columnNames[i].getColumnName().toUpperCase(), i);
 			colTypes[i] = convertColType(i, colDefsIn.get(i));
 			columnSources[i] = colsIn[i];	//assign it as a column
 			//compare the Column[] and ColumnDefinition has the same order index, if not throw exception 
@@ -75,6 +77,7 @@ public class Schema {
 				throw new Exception("Column[] and ColumnDefinition has not the same order index.");
 		}
 		
+		initialIndexMap(length, columnNames);
 		initialTableName();
 	}
 	
@@ -88,12 +91,15 @@ public class Schema {
 		columnNames = colsIn;
 		colTypes = colTypesIn;
 		columnSources = columnSourcesIn;
-		indexMap = new HashMap<String, Integer>(length);
+
+		initialIndexMap(length, columnNames);
 		
-		for(int i=0; i<length; i++){
-			indexMap.put(columnNames[i].getColumnName().toUpperCase(), i);
-		}
-		
+//		indexMap = new HashMap<String, Integer>(length);
+//		
+//		for(int i=0; i<length; i++){
+//			indexMap.put(columnNames[i].getColumnName().toUpperCase(), i);
+//		}
+//		
 		if(aggreMapIn!=null)
 			aggregatorMap = aggreMapIn;
 		
@@ -101,38 +107,26 @@ public class Schema {
 	}
 	
 	
-	
-	private void initialTableName(){
-		Table firstColTable = columnNames[0].getTable();
-		if(firstColTable==null){
-			tableName=null;
-			return;
-		}
+	private void initialIndexMap(int size, Column[] columnNamesIn){
+		indexMap = new HashMap<String, Integer>(size);
+		fullNameIndexMap = new HashMap<String, Integer>(size);
+		
+		for(int i=0; i<size; i++){
+			String currentColName = columnNamesIn[i].getColumnName().toUpperCase();
+			indexMap.put(currentColName, i);
 			
-		tableName = firstColTable.getName();
-		if(tableName==null){
-			tableName=null;
-			return;
-		}
-			
-		for(Column col : columnNames){
-			Table t = col.getTable();
-			if(t==null){
-				//the column's table equals null means the schema is combined from different tables
-				tableName=null;
-				return;
-			}else{
-				if(!tableName.equalsIgnoreCase(t.getName())){
-					//different table names means the schema is combined from different tables
-					tableName=null;
-					return;
-				}
-			}
+			if(columnNamesIn[i].getTable()!=null)
+				fullNameIndexMap.put(columnNamesIn[i].toString().toUpperCase(), i);
 		}
 	}
 	
+	private void initialTableName(){
+		Table firstColTable = columnNames[0].getTable();
+		tableName = firstColTable;
+	}
+	
 	public String getTableName(){
-		return tableName;
+		return tableName.getName();
 	}
 	
 	/**
@@ -187,7 +181,7 @@ public class Schema {
 			return type;
 			
 		case DataType.DOUBLE:
-			type = DatumType.Float;
+			type = DatumType.Double;
 			return type;
 			
 		case DataType.BOOL:
@@ -233,8 +227,19 @@ public class Schema {
 		return colTypes;
 	}
 	
+	/*
+	 * First search full name index,if not found,
+	 * then search attribute name index
+	 */
 	public int getColIndex(String colName){
-		Integer index = indexMap.get(colName.toUpperCase());
+		colName = colName.toUpperCase();
+		
+		Integer index = fullNameIndexMap.get(colName);
+		if(index!=null)
+			return index;
+		else
+			index = indexMap.get(colName);
+		
 		if(index==null)
 			return -1;
 		else

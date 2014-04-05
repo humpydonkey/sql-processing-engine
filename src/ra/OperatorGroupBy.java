@@ -89,7 +89,7 @@ public class OperatorGroupBy implements Operator{
 	private String generateKey(Tuple tuple){
 		StringBuffer sb = new StringBuffer();
 		for(Column col : groupbyCols){
-			Datum data = tuple.getDataByName(col.getColumnName());
+			Datum data = tuple.getDataByName(col);
 			sb.append(data.toString());
 		}
 		return sb.toString();

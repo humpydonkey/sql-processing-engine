@@ -3,6 +3,9 @@
  */
 package ra;
 
+import io.BufferedRandomAccessFile;
+import io.FileAccessor;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -40,8 +43,7 @@ public class OperatorScan implements Operator {
 	@Override
 	public List<Tuple> readOneBlock() {
 		List<Tuple> tuples = new LinkedList<Tuple>();
-//		StringBuilder sb = new StringBuilder();
-//		char[] content = new char[BLOCKSIZE];
+
 		try {
 			int i=0;
 			String line;
@@ -73,11 +75,12 @@ public class OperatorScan implements Operator {
 		}
 		return tuple;
 	}
+	
 
 	@Override
 	public void reset() {
 		try {
-			inputReader = new BufferedReader(new FileReader(file));
+			inputReader = new BufferedReader(new FileReader(file)); //new BufferedReader(new FileReader(file));
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -104,32 +107,42 @@ public class OperatorScan implements Operator {
 
 	
 	public static void main(String[] args){
-		System.out.println("test");
-		String text = "wgaweg|gaweg|bqeqwg|12|fqweg2|23fasdf|fs.w';eg \n\n qwegqwdasg\n asdfasd";
-		System.out.println(text+"\n\n\n");
+		try {
+			BufferedRandomAccessFile braf = new BufferedRandomAccessFile(new File("test/cache.dat"),"rw");
+			for(int i=0; i<5; i++)
+				System.out.println(braf.readLine());
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		
+				
 		
 		StringReader stream = new StringReader("CREATE TABLE ORDERS (orderkey INT,custkey INT,orderstatus CHAR(1),totalprice DECIMAL,orderdate  DATE,orderpriority CHAR(15),clerk CHAR(15),shippriority INT,comment VARCHAR(79));");
 		CCJSqlParser parser = new CCJSqlParser(stream);
-		
+		File dataFile = new File("test/data/orders.dat");
 		try {
 			CreateTable ct = parser.CreateTable();
-			OperatorScan scan = new OperatorScan(new File("data/tpch/orders.tbl"), new Schema(ct, null));
+			OperatorScan scan = new OperatorScan(dataFile, new Schema(ct, null));
 			List<Tuple> tuples;
-
+			int size = 0;
 			TimeCalc.begin(0);
 			do{
 				tuples = scan.readOneBlock();
+				FileAccessor.getInstance().writeTuples(tuples, new File("test/cache.dat"));
+				size = size+tuples.size();
 			}while(tuples.size()!=0);
+			System.out.println("ReadOneBlock: "+size);
 			TimeCalc.end(0);
 			
 			
-			scan = new OperatorScan(new File("data/tpch/orders.tbl"), new Schema(ct, null));
+			scan = new OperatorScan(dataFile, new Schema(ct, null));
 			TimeCalc.begin(1);
 			tuples = new LinkedList<Tuple>();
 			Tuple t;
 			while((t = scan.readOneTuple())!=null)
 				tuples.add(t);
-			System.out.println(tuples.size());
+			System.out.println("ReadOneTuple: "+tuples.size());
 			TimeCalc.end(1);
 			System.out.println("End");
 		} catch (Exception e) {

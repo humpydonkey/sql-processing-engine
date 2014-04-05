@@ -9,13 +9,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
-import common.TimeCalc;
 import net.sf.jsqlparser.parser.CCJSqlParser;
 import net.sf.jsqlparser.parser.ParseException;
 import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.create.table.CreateTable;
 import net.sf.jsqlparser.statement.select.Select;
-import sql2ra.SQLParser;
+import sql2ra.SQLEngine;
+
+import common.TimeCalc;
+
 import dao.Tuple;
 
 public class Main {
@@ -23,7 +25,7 @@ public class Main {
 	public static void main(String args[]){
 		//input example: --data [data] [sqlfile1] [sqlfile2] ...
 		//           or  --data [data] --swap [swap] [sqlfile1] [sqlfile2] ...
-		
+
 		if(args.length>=3){
 			if(args[0].equalsIgnoreCase("--data")){
 				//data directory
@@ -55,7 +57,6 @@ public class Main {
 				System.out.println("Input error: "+args.toString());
 		}
 		
-		
 		testSpecificSQL();
 		//testAll_CP1();
 	}
@@ -63,7 +64,7 @@ public class Main {
 	
 	public static List<Tuple> testSpecificSQL(){
 		//mocking input
-		String sqlFilePath = "test/cp1_sqls/tpch1.sql";
+		String sqlFilePath = "test/cp1_sqls/tpch5.sql";
 		for(String sql :FileAccessor.getInstance().readAllSqls(sqlFilePath))
 			System.out.println(sql);
 		System.out.println();
@@ -77,10 +78,11 @@ public class Main {
 	public static List<Tuple> testSpecificSQL(String sqlFilePath){
 		//mocking input
 		String dataDirStr = "test/data/";
+		String swapPath = "test/";
 		File sqlFile = new File(sqlFilePath);
 		
 		File dataDir = new File(dataDirStr);
-		File swapDir = null;
+		File swapDir = new File(swapPath);
 		List<File> sqlfiles = new ArrayList<File>();
 		sqlfiles.add(sqlFile);
 		System.out.println("SQL file: "+sqlFile.getName());
@@ -94,6 +96,7 @@ public class Main {
 		//mocking input
 		String dataDirStr = "test/data/";//"data/NBA/";  //"/data/tpch/";
 		String sqlFilePath = "test/cp1_sqls/";
+		String swapPath = "test/";
 		
 		File dataDir = new File(dataDirStr);
 		File swapDir = null;
@@ -119,11 +122,11 @@ public class Main {
 		
 		for (File sql : sqlFiles){
 			try{
-				FileReader stream = new FileReader(sql);   		
+				FileReader stream = new FileReader(sql);
 				CCJSqlParser parser = new CCJSqlParser(stream);
 				Statement stmt;
-		
-				SQLParser myParser = new SQLParser(dataDir);
+				
+				SQLEngine myParser = new SQLEngine(dataDir,swapDir);
 				
 				while((stmt = parser.Statement()) !=null){		
 					if(stmt instanceof CreateTable)	
@@ -134,10 +137,8 @@ public class Main {
 						//System.out.println("I would now evaluate:" + stmt);
 						Select sel = (Select)stmt;
 						results = myParser.select(sel.getSelectBody());
-//						for(Tuple tuple : results)
-//							tuple.printTuple();
 					 }
-					 else 
+					 else
 						System.out.println("PANIC! I don't know how to handle" + stmt);
 		    			}
 		    		}

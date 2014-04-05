@@ -249,7 +249,7 @@ public class EvaluatorArithmeticExpres implements ExpressionVisitor{
 
 	@Override
 	public void visit(Column arg) {
-		data = tuple.getDataByName(arg.getColumnName());
+		data = tuple.getDataByName(arg);
 	}
 
 	@Override

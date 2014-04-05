@@ -24,16 +24,18 @@ import dao.Tuple;
  *
  */
 public class FromItemEvaluator implements FromItemVisitor{
-	private final File basePath;
+	private final File dataPath;
+	private final File swapDir;
 	private Map<String,CreateTable> tables;
 	private String tableName;
 	
 	private Schema schema = null;
 	private Operator source = null;
 	
-	public FromItemEvaluator(File basePath, Map<String,CreateTable> tables)
+	public FromItemEvaluator(File basePath, File swapDir, Map<String,CreateTable> tables)
 	{
-		this.basePath = basePath;
+		this.dataPath = basePath;
+		this.swapDir = swapDir;
 		this.tables = tables;
 	}
 	
@@ -51,13 +53,18 @@ public class FromItemEvaluator implements FromItemVisitor{
 	
 	public void visit (SubJoin subjoin)
 	{
+		System.out.println(subjoin.getLeft()+","+subjoin.getJoin());
 		this.tableName = subjoin.toString();
 	}
 	
 	public void visit(SubSelect subselect)
 	{
-		this.tableName = subselect.toString();
-		SQLParser parser = new SQLParser(basePath);
+		if(subselect.getAlias()==null)
+			this.tableName = subselect.toString();
+		else
+			this.tableName = subselect.getAlias();
+		
+		SQLEngine parser = new SQLEngine(dataPath, swapDir);
 		List<Tuple> tuples = parser.select(subselect.getSelectBody());
 		source = new OperatorCache(tuples); 
 	}
@@ -85,11 +92,9 @@ public class FromItemEvaluator implements FromItemVisitor{
 		try {
 			schema = new Schema(columns, colDefs);
 			source = new OperatorScan(
-					new File(basePath, tableName.getName() + ".dat"),
+					new File(dataPath, tableName.getName() + ".dat"),
 					schema
 				);
-//			List<Tuple> tuples = FileAccessor.getInstance().readBlock(basePath +"/" + tableName.getName() + ".dat", schema);
-//			source = new OperatorCache(tuples);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
