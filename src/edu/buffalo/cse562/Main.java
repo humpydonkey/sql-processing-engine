@@ -56,7 +56,7 @@ public class Main {
 				System.out.println("Input error: "+args.toString());
 		}
 		
-		testSpecificCP2();
+		//testSpecificCP2();
 		//testAll_CP1();
 	}
 
