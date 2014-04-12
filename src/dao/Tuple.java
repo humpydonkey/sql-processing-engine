@@ -1,16 +1,22 @@
 package dao;
 
+import java.io.Serializable;
+
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.Function;
 import net.sf.jsqlparser.schema.Column;
 import ra.Aggregator;
 import ra.EvaluatorArithmeticExpres;
-import ra.EvaluatorConditionExpres;
 import ra.OperatorGroupBy;
 
 
-public class Tuple{
+public class Tuple implements Serializable{
 	
+	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -6349689782189417493L;
 	private Datum[] dataArr;
 	private Schema schema;
 	
@@ -38,8 +44,8 @@ public class Tuple{
 		schema = schemaIn;
 		
 		for(int i=0; i<splitedData.length; i++){
-			if(splitedData[i].equals(""))
-				continue;
+			if(splitedData[i].equalsIgnoreCase("1995-04"))
+				System.out.println("why?");
 			DatumType type = schemaIn.getColType(i);
 			dataArr[i] = DatumFactory.create(splitedData[i], type);
 		}
@@ -53,17 +59,18 @@ public class Tuple{
 	public void changeTuple(Schema newSchema){
 		int length = newSchema.getLength();
 		Datum[] newDataArr = new Datum[length];
-		Column[] newColNames = newSchema.getColumnNames();
+
 		Expression[] newColSources = newSchema.getColumnSources();
 		//Get new data from newSchema.source
 		for(int i=0; i<length; i++){
 			//Get data from old tuple
 			Datum oldData = null;
 			Expression newSource = newColSources[i];
-			Column newName = newColNames[i]; 
+
 			if(newSource instanceof Column){
 				//is a column
-				oldData = getDataByName(newName);
+				Column ns = (Column)newSource;
+				oldData = getDataByName(ns);
 			}else if(newSource instanceof Function){ 
 				//is an aggregate function
 				Function func = (Function)newSource;
@@ -172,6 +179,10 @@ public class Tuple{
 		return schema.getTableName();
 	}
 	
+	public String getTableAlias(){
+		return schema.getTableAlias();
+	}
+	
 	
 	/**
 	 * Print tuple on screen
@@ -197,6 +208,14 @@ public class Tuple{
 	
 	public Schema getSchema(){
 		return schema;
+	}
+	
+	public long getBytes(){
+		long size = 0;
+		for(Datum data : dataArr){
+			size += data.getBytes();
+		}
+		return size;
 	}
 	
 //	public static void main(String[] args){

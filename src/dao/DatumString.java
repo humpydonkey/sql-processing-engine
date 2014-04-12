@@ -3,6 +3,8 @@ package dao;
 
 
 public class DatumString extends Datum {
+ 
+	private static final long serialVersionUID = 6843611218396643951L;
 	private String value;
 	
 	public DatumString(String dataIn){
@@ -37,13 +39,7 @@ public class DatumString extends Datum {
 			String obj2 = obj.getValue();
 			return obj1.compareTo(obj2);
 		} else{
-			try {
 				throw new IllegalArgumentException("Wrong type (" + o.getClass().getCanonicalName() + ") of this Object.");
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			return -99;
 		}
 	}
 	
@@ -54,4 +50,13 @@ public class DatumString extends Datum {
 	}
 	
 
+	@Override
+	public long getBytes() {
+		return value.getBytes().length;
+	}
+
+	@Override
+	public String toString() {
+		return value;
+	}
 }

@@ -1,6 +1,8 @@
 package dao;
 
 public class DatumLong extends Datum{
+ 
+	private static final long serialVersionUID = -4625153744377548371L;
 	private long value;
 	
 	public DatumLong(String dataIn){
@@ -46,15 +48,9 @@ public class DatumLong extends Datum{
 				return -1;
 			}else
 				return 0;
-		}else{
-			try {
-				throw new IllegalArgumentException("Wrong type (" + o.getClass().getCanonicalName() + ") of this Object.");
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			return -99;
-		}
+		}else
+			throw new IllegalArgumentException("Wrong type (" + o.getClass().getCanonicalName() + ") of this Object.");
+
 	}
 	
 	
@@ -63,4 +59,16 @@ public class DatumLong extends Datum{
 		Datum copy = new DatumLong(value);
 		return copy;
 	}
+	
+
+	@Override
+	public long getBytes() {
+		return 64;
+	}
+	
+	@Override
+	public String toString(){
+		return String.valueOf(value);
+	}
+	
 }

@@ -1,14 +1,17 @@
 package ra;
 
+import java.io.StringReader;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.AllComparisonExpression;
 import net.sf.jsqlparser.expression.AnyComparisonExpression;
 import net.sf.jsqlparser.expression.CaseExpression;
 import net.sf.jsqlparser.expression.DateValue;
 import net.sf.jsqlparser.expression.DoubleValue;
+import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.ExpressionVisitor;
 import net.sf.jsqlparser.expression.Function;
 import net.sf.jsqlparser.expression.InverseExpression;
@@ -42,8 +45,13 @@ import net.sf.jsqlparser.expression.operators.relational.Matches;
 import net.sf.jsqlparser.expression.operators.relational.MinorThan;
 import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
 import net.sf.jsqlparser.expression.operators.relational.NotEqualsTo;
+import net.sf.jsqlparser.parser.CCJSqlParserManager;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
+import net.sf.jsqlparser.statement.Statement;
+import net.sf.jsqlparser.statement.select.PlainSelect;
+import net.sf.jsqlparser.statement.select.Select;
+import net.sf.jsqlparser.statement.select.SelectBody;
 import net.sf.jsqlparser.statement.select.SubSelect;
 import sql2ra.SQLEngine;
 import dao.Datum;
@@ -63,12 +71,15 @@ public class EvaluatorConditionExpres implements ExpressionVisitor{
 	private Datum data;
 	private Column column;
 	private boolean differentTable;
-
+	private EvaluatorSubSelectGlobalAttr subselecttAttrFinder;
+	private CCJSqlParserManager subselectParser;
 
 	public EvaluatorConditionExpres(Tuple tupleIn){
 		evalResult = true;
 		tuple = tupleIn;
 		differentTable = false;
+		subselecttAttrFinder = new EvaluatorSubSelectGlobalAttr(tupleIn);
+		subselectParser = new CCJSqlParserManager();
 	}
 	
 	
@@ -269,6 +280,13 @@ public class EvaluatorConditionExpres implements ExpressionVisitor{
 		arg.getLeftExpression().accept(this);
 		Datum left = getData();
 		Column leftCol = getColumn();
+		if(differentTable){//mask
+			//ignore comparison of columns of different table
+			evalResult = true;
+			differentTable = false;
+			return;
+		}
+		
 		arg.getRightExpression().accept(this);
 		Datum right = getData();
 		Column rightCol = getColumn();	
@@ -358,6 +376,13 @@ public class EvaluatorConditionExpres implements ExpressionVisitor{
 		Datum left = getData();	//column
 		arg.getRightExpression().accept(this);
 		Datum right = getData();//pattern
+
+		if(differentTable){//mask
+			//ignore comparison of columns of different table
+			evalResult = true;
+			differentTable = false;
+			return;
+		}
 		
 		String attribute = left.toString();
 		String likeStr = right.toString();
@@ -445,10 +470,10 @@ public class EvaluatorConditionExpres implements ExpressionVisitor{
 
 		Table argTable = arg.getTable();
 		if(argTable!=null){
-			String argTableName = arg.getTable().toString();
-			String tupTableName = tuple.getTableName();
+			String argTableName = argTable.getAlias()==null?argTable.getName():argTable.getAlias();
+			String tupTableName = tuple.getTableAlias()==null?tuple.getTableName():tuple.getTableAlias();
 			
-			if((tupTableName!=null) && (!argTableName.equals("null")) &&(!argTableName.equalsIgnoreCase(tupTableName))){
+			if((tupTableName!=null) && (argTableName!=null) && (!argTableName.equals("null")) &&(!argTableName.equalsIgnoreCase(tupTableName))){
 				//in order to mask the where condition includes columns from different tables 
 				//Column arg is not the from the tuple's table, just ignore it
 				differentTable = true;
@@ -471,15 +496,50 @@ public class EvaluatorConditionExpres implements ExpressionVisitor{
 	
 
 	@Override
-	public void visit(SubSelect subselect) {	
-		SQLEngine parser = new SQLEngine(null, null);
-		List<Tuple> tuples = parser.select(subselect.getSelectBody());
+	public void visit(SubSelect subselect) {
+		
+		SelectBody sb = subselect.getSelectBody();
+		
+		if(sb instanceof PlainSelect){
+			PlainSelect psel = (PlainSelect)sb;
+			SelectBody newSB = replaceAttrToValue(psel);
+			if(newSB!=null)
+				sb = newSB;
+
+			SQLEngine.globalTuple = tuple;
+			SQLEngine parser = new SQLEngine(null, null);
+			List<Tuple> tuples = parser.select(sb);
+			
+			try {
+				data = tuples.get(0).getData(0);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	private SelectBody replaceAttrToValue(PlainSelect subselect){
+		String sql = subselect.toString();
+		Expression exprs = subselect.getWhere();
+		exprs.accept(subselecttAttrFinder);
+		List<Column> cols = subselecttAttrFinder.getSameColumn();
+		for(Column col : cols){
+			col.accept(this);
+			Datum replaceData = getData();
+			sql = sql.replaceAll(col.toString(), replaceData.toString());
+		}
 		try {
-			Datum data = tuples.get(0).getData(0);
-		} catch (Exception e) {
+			Statement stmt = subselectParser.parse(new StringReader(sql));
+			if(stmt instanceof Select){
+				Select sel = (Select)stmt;
+				return sel.getSelectBody();
+			}
+		} catch (JSQLParserException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		return null;
 	}
 
 	@Override

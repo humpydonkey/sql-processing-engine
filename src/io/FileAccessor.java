@@ -6,12 +6,21 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+
+import net.sf.jsqlparser.JSQLParserException;
+import net.sf.jsqlparser.parser.CCJSqlParserManager;
+import net.sf.jsqlparser.statement.Statement;
+import net.sf.jsqlparser.statement.select.PlainSelect;
+import net.sf.jsqlparser.statement.select.Select;
+import net.sf.jsqlparser.statement.select.SelectBody;
 
 import common.TimeCalc;
 
@@ -48,18 +57,29 @@ public class FileAccessor {
 		//List<String> sqls = FileAccessor.getInstance().readAllSqls(add1);
 		
 		StringBuilder sb = FileAccessor.getInstance().readPartOfFile(new File(add3), 2);
-		try {
-			FileAccessor.getInstance().writeFile(sb,"partsupp.dat");
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
+
+		FileAccessor.getInstance().writeFile(sb,"partsupp.dat");
+
 		TimeCalc.end(1);
 		System.out.println("end");
 	}
 	
 
+	
+	public PlainSelect parsePSelect(File f) throws JSQLParserException, FileNotFoundException{
+		CCJSqlParserManager parser = new CCJSqlParserManager();
+		FileReader reader = new FileReader(f);
+		Statement stmt = parser.parse(reader);
+		
+		if(stmt instanceof Select){
+			Select sel = (Select)stmt;
+			SelectBody sb = sel.getSelectBody();
+			if(sb instanceof PlainSelect)
+				return (PlainSelect)sb;
+		}
+		
+		return null;
+	}
 	
 	/**
 	 * Get a file list with a specified type of file
@@ -88,8 +108,7 @@ public class FileAccessor {
 	 */
 	public List<Tuple> readBlock(String addr, Schema schema){
 		List<Tuple> tuples = new LinkedList<Tuple>();
-		try {
-			BufferedReader reader = getBR(addr);
+		try(BufferedReader reader = getBR(addr)){
 			String line = null;
 			while((line = reader.readLine())!=null){
 				String [] data = line.split("\\|");
@@ -105,8 +124,8 @@ public class FileAccessor {
 	public StringBuilder readBlock(File f){
 		StringBuilder sb = new StringBuilder();
 		char[] content = new char[BUFFERSIZE];
-		try {
-			BufferedReader reader = getBR(f);
+		try(BufferedReader reader = getBR(f)){
+			
 			reader.read(content);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -124,9 +143,9 @@ public class FileAccessor {
 	 */
 	public List<Tuple> readSpecificBlock(String addr, Schema schema, int beginLine, int endLine){
 		List<Tuple> tuples = new LinkedList<Tuple>();
-		try {
+		try(BufferedReader reader = getBR(addr)){
 			int current = 0;	//current line number
-			BufferedReader reader = getBR(addr);
+			
 			String line = null;
 			while((line = reader.readLine())!=null){
 				current++;
@@ -148,8 +167,7 @@ public class FileAccessor {
 	
 	public StringBuilder readPartOfFile(File f, int parts){
 		StringBuilder sb = new StringBuilder();
-		try {
-			BufferedReader reader = getBR(f);
+		try(BufferedReader reader = getBR(f)){
 			String line = "";
 			int i=0;
 			while((line = reader.readLine())!=null){
@@ -170,30 +188,32 @@ public class FileAccessor {
 	
 	
 	/**
-	 * Read all the SQLs from a file
+	 * Read all the Lines from a file
 	 * @param addr : file path
 	 * @return
 	 */
-	public List<String> readAllSqls(String addr){
-		List<String> sqls = new ArrayList<String>();
-		try {
-			BufferedReader br = getBR(addr);
+	public List<String> readAllLines(String addr){
+		List<String> lines = new ArrayList<String>();
+		try(BufferedReader br = getBR(addr)){
 			String line = "";
 			while((line = br.readLine())!=null){
-				sqls.add(line);
+				lines.add(line);
 			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
-		return sqls;
+		return lines;
 	}
 	
-	public void writeFile(StringBuilder sb, String fileName) throws IOException{
-		FileWriter writer = new FileWriter(new File("data/tpch/" + fileName));
-		writer.write(sb.toString());
-		writer.close();
+	public void writeFile(StringBuilder sb, String fileName){
+		try(FileWriter writer = new FileWriter(new File("data/tpch/" + fileName))){
+			writer.write(sb.toString());
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	
@@ -205,7 +225,7 @@ public class FileAccessor {
 	 * @throws IOException 
 	 */
 	public void writeTuples(List<Tuple> tups, File fileDir) throws IOException{
-		BufferedRandomAccessFile writer = getBraf(fileDir,"rw");
+		RandomAccessFile writer = getRaf(fileDir,"rw");
 		//RandomAccessFile writer = new RandomAccessFile(fileDir, "rw");
 		int count = 0;
 		writer.seek(writer.length());
@@ -230,7 +250,7 @@ public class FileAccessor {
 	}
 	
 	
-	private void writeDatum(BufferedRandomAccessFile writer, Datum data) throws IOException{
+	private void writeDatum(BufferedRandomReader writer, Datum data) throws IOException{
 		switch(data.getType()){
 		case Long:
 			DatumLong dl = (DatumLong)data;
@@ -263,9 +283,9 @@ public class FileAccessor {
 	}
 	
 	
-	private BufferedRandomAccessFile getBraf(File file, String mode){
+	private RandomAccessFile getRaf(File file, String mode){
 		try {
-			return new BufferedRandomAccessFile(file, mode);
+			return new RandomAccessFile(file, mode);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

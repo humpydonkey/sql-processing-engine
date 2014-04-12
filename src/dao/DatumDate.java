@@ -6,6 +6,9 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class DatumDate extends Datum {
+
+	private static final long serialVersionUID = 4697762788088326757L;
+
 	private static DateFormat format = new SimpleDateFormat("yyyy-MM-dd");
 	
 	private Date value;
@@ -52,20 +55,20 @@ public class DatumDate extends Datum {
 			Date obj1 = this.getValue();
 			Date obj2 = obj.getValue();
 			return obj1.compareTo(obj2);
-		} else{
-			try {
-				throw new IllegalArgumentException("Wrong type (" + o.getClass().getCanonicalName() + ") of this Object.");
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			return -99;
-		}
+		} else
+			throw new IllegalArgumentException("Wrong type (" + o.getClass().getCanonicalName() + ") of this Object.");
+
 	}
 	
 	@Override
 	public Datum clone() {
 		Datum copy = new DatumDate((Date)value.clone());
 		return copy;
+	}
+	
+
+	@Override
+	public long getBytes() {
+		return 32;
 	}
 }

@@ -1,14 +1,20 @@
 package common;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import sql2ra.Config;
+
 public class Tools {
 
+	public static void debug(String msg){
+		if(Config.PrintRuningTime)
+			System.out.println(msg);
+	}
+	
 	public static boolean arrayContains(Long[] a, Long target) {
 		for (int i = 0; i < a.length; i++) {
 			if (a.equals(target))

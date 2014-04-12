@@ -1,6 +1,6 @@
 package edu.buffalo.cse562;
 
-import io.FileAccessor;
+import io.FileTypeFilter;
 
 import java.io.File;
 import java.io.FileReader;
@@ -15,9 +15,8 @@ import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.create.table.CreateTable;
 import net.sf.jsqlparser.statement.select.Select;
 import sql2ra.SQLEngine;
-
 import common.TimeCalc;
-
+import common.Tools;
 import dao.Tuple;
 
 public class Main {
@@ -57,62 +56,72 @@ public class Main {
 				System.out.println("Input error: "+args.toString());
 		}
 		
-		testSpecificSQL();
+		testSpecificCP2();
 		//testAll_CP1();
 	}
+
 	
-	
-	public static List<Tuple> testSpecificSQL(){
-		//mocking input
-		String sqlFilePath = "test/cp1_sqls/tpch5.sql";
-		for(String sql :FileAccessor.getInstance().readAllSqls(sqlFilePath))
-			System.out.println(sql);
-		System.out.println();
-		List<Tuple> tups = testSpecificSQL(sqlFilePath);
-		for(Tuple t : tups)
-			t.printTuple();
-		System.out.println("End.");
-		return tups;
-	}
-	
-	public static List<Tuple> testSpecificSQL(String sqlFilePath){
-		//mocking input
-		String dataDirStr = "test/data/";
-		String swapPath = "test/";
-		File sqlFile = new File(sqlFilePath);
-		
+	public static List<Tuple> testSpecificSQL(String dataDirStr, String... sqlPaths){	
+		String swapPath = "test";
 		File dataDir = new File(dataDirStr);
 		File swapDir = new File(swapPath);
 		List<File> sqlfiles = new ArrayList<File>();
-		sqlfiles.add(sqlFile);
-		System.out.println("SQL file: "+sqlFile.getName());
+		for(String sqlPath : sqlPaths){
+			sqlfiles.add(new File(sqlPath));
+			Tools.debug("SQL file: "+sqlPath);
+		}
+			
 		List<Tuple> results = runSQL(dataDir, swapDir, sqlfiles);
 		
 		return results;
 	}
 
 	
+	public static List<Tuple> testSpecificCP2(){
+		//mocking input
+		String dataDirStr = "test/cp2_littleBig/";
+		String[] sqlFilePaths = {"test/cp2_littleBig/tpch07a.sql"};
+
+		List<Tuple> tups = testSpecificSQL(dataDirStr, sqlFilePaths);
+		for(Tuple t : tups)
+			t.printTuple();
+		Tools.debug("End.\n");
+		return tups;
+	}
+	
+	public static List<Tuple> testSpecificCP1(){
+		//mocking input
+		String dataDirStr = "test/cp1/";
+		String[] sqlFilePaths = {"test/cp1/tpch5.sql"};
+
+		List<Tuple> tups = testSpecificSQL(dataDirStr, sqlFilePaths);
+		for(Tuple t : tups)
+			t.printTuple();
+		Tools.debug("End.\n");
+		return tups;
+	}
+	
 	public static void testAll_CP1(){
 		//mocking input
-		String dataDirStr = "test/data/";//"data/NBA/";  //"/data/tpch/";
-		String sqlFilePath = "test/cp1_sqls/";
-		String swapPath = "test/";
+		String dataDirStr = "test/cp1/";//"data/NBA/";  //"/data/tpch/";
+		String sqlFilePath = "test/cp1/";
+		String swapPath = null;
 		
 		File dataDir = new File(dataDirStr);
 		File swapDir = null;
 
 		File sqlDir = new File(sqlFilePath);
-		File[] sqls = sqlDir.listFiles();
+		File[] sqls = sqlDir.listFiles(new FileTypeFilter("sql"));
 		
 		for(File sqlfile : sqls){
 			List<File> sqlfiles = new ArrayList<File>();
 			sqlfiles.add(sqlfile);
-			System.out.println("SQL file: "+sqlfile.getName());
+			Tools.debug("SQL file: "+sqlfile.getName());
 			runSQL(dataDir, swapDir, sqlfiles);
 			
 			pauseConsole();
 		}
-		System.out.println("\nEnd.");
+		Tools.debug("\nEnd.");
 	}
 
 	
