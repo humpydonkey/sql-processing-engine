@@ -3,6 +3,7 @@ package dao;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,8 +18,9 @@ import net.sf.jsqlparser.statement.create.table.ColumnDefinition;
 import net.sf.jsqlparser.statement.create.table.CreateTable;
 import ra.Aggregator;
 
-public class Schema {
+public class Schema  implements Serializable {
 
+	private static final long serialVersionUID = -3104984314917863119L;
 	private Map<String, Integer> indexMap;
 	private Map<String, Integer> fullNameIndexMap;
 	private int length;
@@ -112,21 +114,55 @@ public class Schema {
 		fullNameIndexMap = new HashMap<String, Integer>(size);
 		
 		for(int i=0; i<size; i++){
-			String currentColName = columnNamesIn[i].getColumnName().toUpperCase();
-			indexMap.put(currentColName, i);
+			String colName = columnNamesIn[i].getColumnName().toUpperCase();
+			indexMap.put(colName, i);
 			
-			if(columnNamesIn[i].getTable()!=null)
-				fullNameIndexMap.put(columnNamesIn[i].toString().toUpperCase(), i);
+			Table colTab = columnNamesIn[i].getTable();
+			if(colTab!=null){
+				if(colTab.getAlias()!=null)	//alias + colName
+					fullNameIndexMap.put(colTab.getAlias().toUpperCase()+"."+colName, i);
+				else						//table name + colName
+					fullNameIndexMap.put(columnNamesIn[i].toString().toUpperCase(), i);
+			}
+				
 		}
 	}
 	
 	private void initialTableName(){
-		Table firstColTable = columnNames[0].getTable();
-		tableName = firstColTable;
+		StringBuilder tname = new StringBuilder("");		
+		StringBuilder talias = new StringBuilder("");;
+		
+		for(int i=1; i<columnNames.length; i++){
+			Table currColTab = columnNames[i].getTable();
+			Table lastColTab = columnNames[i-1].getTable();
+			if(currColTab!=null&&lastColTab!=null){
+				if(currColTab.getAlias()!=null&&lastColTab.getAlias()!=null){
+					if(!lastColTab.getAlias().equals(currColTab.getAlias())){
+						talias.append('^');
+						talias.append(currColTab.getAlias());
+					}	
+				}
+				
+				if(currColTab.getName()!=null&&lastColTab.getName()!=null){
+					if(!lastColTab.getName().equals(currColTab.getName())){
+						tname.append('^');
+						tname.append(currColTab.getName());		
+					}	
+				}			
+			}		
+		}
+		tableName = new Table();
+		tableName.setName(tname.toString());
+		if(talias.length()!=0)
+			tableName.setAlias(talias.toString());
 	}
 	
 	public String getTableName(){
 		return tableName.getName();
+	}
+	
+	public String getTableAlias(){
+		return tableName.getAlias();
 	}
 	
 	/**

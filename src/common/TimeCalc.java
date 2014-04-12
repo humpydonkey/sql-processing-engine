@@ -1,15 +1,22 @@
 package common;
 
+import sql2ra.Config;
+
 public class TimeCalc {
 	
 	private static int[] ids = new int[10];
 	private static long[] startTimes = new long[10];
 	private static int size = 0;
 	private static StringBuilder errMsg;
+	private static boolean ifPrint = Config.PrintRuningTime;
 	
 	static{
 		for(int i=0; i<ids.length; i++)
 			ids[i] = -1;
+	}
+	
+	public static void setPrint(boolean print){
+		ifPrint = print;
 	}
 	
 	public static void begin(int id){
@@ -26,22 +33,28 @@ public class TimeCalc {
 	}
 	
 	public static int end(int id){
+		return end(id,"");
+	}
+	
+	public static int end(int id, String userMsg){
 		int index = findIndex(id);
 		if(index<0){
 			errMsg.append("TimeCalc.end() : Error! There is no such id! \n");
-			System.out.print(errMsg.toString());
+			if(ifPrint)
+				System.out.print(errMsg.toString());
 			return 0;
 		}
 		else{
 			long span_ms = System.currentTimeMillis() - startTimes[index];
-			String msg;
+			String content;
 			if(span_ms>1000){
 				float span_s = (float)span_ms/1000;
-				msg = id + " running time : " + span_s + "s.";
+				content = id + " " + userMsg + " running time : " + span_s + "s.";
 			}else
-				msg = id + " running time : " + span_ms + "ms.";
-				
-			System.out.println(msg + errMsg.toString());
+				content = id + " " + userMsg + " running time : " + span_ms + "ms.";
+			
+			if(ifPrint)
+				System.out.println(content + errMsg.toString());
 			
 			ids[index] = -1;	
 			size--;

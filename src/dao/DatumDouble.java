@@ -1,7 +1,10 @@
 package dao;
 
 
+
 public class DatumDouble extends Datum{
+ 
+	private static final long serialVersionUID = 6695592229704647336L;
 	private double value;
 	
 	public DatumDouble(String dataIn){
@@ -29,11 +32,6 @@ public class DatumDouble extends Datum{
 	}
 	
 	@Override
-	public String toString(){
-			return String.valueOf(value);
-	}
-
-	@Override
 	public int compareTo(Datum o) {
 		if(o instanceof DatumDouble){
 			DatumDouble obj = (DatumDouble)o;
@@ -51,20 +49,24 @@ public class DatumDouble extends Datum{
 				return -1;
 			}else
 				return 0;
-		}else{
-			try {
-				throw new IllegalArgumentException("Wrong type (" + o.getClass().getCanonicalName() + ") of this Object.");
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			return -99;
-		}
+		}else
+			throw new IllegalArgumentException("Wrong type (" + o.getClass().getCanonicalName() + ") of this Object.");
 	}
 	
 	@Override
 	public Datum clone() {
 		Datum copy = new DatumDouble(value);
 		return copy;
+	}
+	
+
+	@Override
+	public long getBytes() {
+		return 64;
+	}
+
+	@Override
+	public String toString() {
+		return String.valueOf(value);
 	}
 }

@@ -1,58 +1,30 @@
 package ra;
 
-import java.util.LinkedList;
-import java.util.List;
-
 import net.sf.jsqlparser.expression.Expression;
+import dao.Schema;
 import dao.Tuple;
 
 public class OperatorSelection implements Operator{
 
 	private Operator input;
 	private Expression condition;
+	private EvaluatorConditionExpres_Pure evaluator;
 	
 	public OperatorSelection(Operator inputIn,  Expression conditionIn){
 		input = inputIn;
 		condition = conditionIn;
+		evaluator = new EvaluatorConditionExpres_Pure(null);
 	}
-	
-
-	@Override
-	public List<Tuple> readOneBlock() {
-		
-		List<Tuple> selectedTuples = new LinkedList<Tuple>();
-
-		List<Tuple> tuples = input.readOneBlock();
-		for(Tuple tuple : tuples){
-			
-			EvaluatorConditionExpres evaluator = new EvaluatorConditionExpres(tuple);
-			condition.accept(evaluator);
-			if(evaluator.getResult()){
-				selectedTuples.add(tuple);
-			}
-		}
-
-	
-		return selectedTuples;
-	}
-	
 	
 	@Override
 	public Tuple readOneTuple() {
 		Tuple tuple = null;
-		do{
-			tuple = input.readOneTuple();
-			if(tuple == null)
-				return null;
-			
-			EvaluatorConditionExpres evaluator = new EvaluatorConditionExpres(tuple);
+		while((tuple=input.readOneTuple())!=null){
+			evaluator.updateTuple(tuple);
 			condition.accept(evaluator);
-			if(!evaluator.getResult()){
-				tuple = null;
-			}
-		
-		}while(tuple == null);
-		
+			if(evaluator.getResult())
+				break;		
+		}
 		return tuple;
 	}
 	
@@ -60,5 +32,16 @@ public class OperatorSelection implements Operator{
 	@Override
 	public void reset() {
 		input.reset();
-	}	
+	}
+
+	@Override
+	public long getLength() {
+		return input.getLength();
+	}
+	
+
+	@Override
+	public Schema getSchema() {
+		return input.getSchema();
+	}
 }

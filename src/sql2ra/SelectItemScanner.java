@@ -8,7 +8,6 @@ import java.util.Map;
 
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.Function;
-import net.sf.jsqlparser.expression.Parenthesis;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.AllColumns;
@@ -132,22 +131,24 @@ public class SelectItemScanner implements SelectItemVisitor{
 	public void visit(SelectExpressionItem arg0) {
 		String alias = arg0.getAlias();
 		Expression exp = arg0.getExpression();
-		
-		Column col = null;
+
 		colTypes.add(DatumType.String);
 		
 		if(exp instanceof Column){
 			/***** original column *****/
-			col =(Column)exp;
-			col.setTable(table);
-			if(alias!=null)
-				col.setColumnName(alias);
-			
-			colNames.add(col);
-			colSources.add(col);
+			Column source =(Column)exp;
+			Column name;
+			if(alias!=null){
+				name = new Column(table,alias);
+			}else{
+				name = source;
+			}
+
+			colNames.add(name);
+			colSources.add(source);
 		}else if(exp instanceof Function){
 			/***** aggregate function *****/
-			col = new Column();
+			Column col = new Column();
 			col.setTable(table);
 			if(alias!=null)
 				col.setColumnName(alias);
@@ -184,21 +185,17 @@ public class SelectItemScanner implements SelectItemVisitor{
 				return;
 				
 			}
-		}else if(exp instanceof Parenthesis){
+		}else{
 			/***** could be a arithmetic expression *****/
-			Parenthesis paren = (Parenthesis)exp; 
-
-			col = new Column();
+			Column col = new Column();
 			col.setTable(table);
 			if(alias!=null)
 				col.setColumnName(alias);
 			else
 				col.setColumnName(exp.toString());
 			
-			colSources.add(paren);
+			colSources.add(exp);
 			colNames.add(col);
-		}else{
-			throw new UnsupportedOperationException("Not supported yet. Class:" + exp.getClass().getCanonicalName());
 		}
 	}
 }

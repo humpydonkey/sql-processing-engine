@@ -23,7 +23,7 @@ import dao.Tuple;
  * @author Asia
  *
  */
-public class FromItemEvaluator implements FromItemVisitor{
+public class SourceOperatorScanner implements FromItemVisitor{
 	private final File dataPath;
 	private final File swapDir;
 	private Map<String,CreateTable> tables;
@@ -32,7 +32,7 @@ public class FromItemEvaluator implements FromItemVisitor{
 	private Schema schema = null;
 	private Operator source = null;
 	
-	public FromItemEvaluator(File basePath, File swapDir, Map<String,CreateTable> tables)
+	public SourceOperatorScanner(File basePath, File swapDir, Map<String,CreateTable> tables)
 	{
 		this.dataPath = basePath;
 		this.swapDir = swapDir;
@@ -47,14 +47,13 @@ public class FromItemEvaluator implements FromItemVisitor{
 		return schema;
 	}
 	
-	public Operator getSource(){
+	public Operator getSourceOperator(){
 		return source;
 	}
 	
 	public void visit (SubJoin subjoin)
 	{
-		System.out.println(subjoin.getLeft()+","+subjoin.getJoin());
-		this.tableName = subjoin.toString();
+		throw new UnsupportedOperationException("Unexpected......"); 
 	}
 	
 	public void visit(SubSelect subselect)
@@ -71,7 +70,13 @@ public class FromItemEvaluator implements FromItemVisitor{
 	
 	public void visit(Table tableName)
 	{
-		this.tableName = tableName.getName();
+		String alias = tableName.getAlias();
+		if(alias!=null){
+			this.tableName = alias;
+		}else{
+			this.tableName =tableName.getName();
+		}
+		
 		CreateTable table = tables.get(tableName.getName().toUpperCase());
 		if(table==null)
 			try {

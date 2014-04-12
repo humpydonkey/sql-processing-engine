@@ -1,82 +1,68 @@
 package ra;
 
-import java.rmi.UnexpectedException;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import sql2ra.SQLEngine;
-import dao.Datum;
+import common.TimeCalc;
+import common.Tools;
+
 import dao.Tuple;
 
 public class OperatorHashJoin_Mem extends OperatorHashJoin{
 
-	private Operator input;
-	private Map<String, LinkedList<Tuple>> joinMap;
-	//private String hashedTableName;
 	private String equalColName;
+	private Operator joinResult;
 	
-	public OperatorHashJoin_Mem(String equalColIn, Operator hashMapSource, Operator inputIn){
-		input = inputIn;
+	public OperatorHashJoin_Mem(String equalColIn,  Operator smallInput, Operator largeInput){
+		Tools.debug("[Mem Join] " + smallInput.getSchema().getTableName() + " "
+				+ smallInput.getLength() + " *" +equalColIn+"* "
+				+ largeInput.getSchema().getTableName() + " "
+				+ largeInput.getLength() + " Created!");
 		
-		List<Tuple> tups = SQLEngine.dump(hashMapSource);
-		
-		joinMap = new HashMap<String, LinkedList<Tuple>>(tups.size());
 		equalColName = equalColIn;
-		//hashedTableName = equalColIn.getTable().getName();
-		for(int i=0; i<tups.size(); i++){
-			Tuple tuple = tups.get(i);
-			Datum keyData = tuple.getDataByName(equalColName);
-			if(keyData==null){
-				try {
-					throw new UnexpectedException("Can't get data from tuple : " + tuple.toString());
-				} catch (UnexpectedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
-			
-			String key = keyData.toString();
-			LinkedList<Tuple> list = joinMap.get(key);
-			if(list==null){
-				list = new LinkedList<Tuple>();
-				list.add(tuple);
-				joinMap.put(key, list);
-			}else
-				list.add(tuple);
-				joinMap.put(key, list);
+		//keep the order of input argument as the same in joinTuples() method
+		Operator hashSource = smallInput;
+		Operator dataSource = largeInput;
+		
+		//construct hashMap
+		TimeCalc.begin(7);
+		Map<String, List<Tuple>> hashMap = new HashMap<String, List<Tuple>>();
+		Tuple hashTup;
+		while((hashTup = hashSource.readOneTuple())!=null){
+			addTuple(equalColName, hashTup, hashMap);
 		}
+		TimeCalc.end(7,"construct hash map");
+		
+		//do join
+		List<Tuple> buffer = new LinkedList<Tuple>();
+		Tuple data;
+		//store all in buffer
+		TimeCalc.begin(7);
+		while((data=dataSource.readOneTuple())!=null){
+			joinAndBuffer(equalColName, data, hashMap, buffer);
+		}
+		
+		joinResult = new OperatorCache(buffer);
+		TimeCalc.end(7, "join and buffer all");
 	}
 	
-	@Override
-	public Tuple readOneTuple() {
-		// TODO Auto-generated method stub
-		return null;
-	}
 
 	@Override
-	public List<Tuple> readOneBlock() {
-		List<Tuple> results = new LinkedList<Tuple>();
-		List<Tuple> inputTups = input.readOneBlock();
-		for(Tuple inputTup : inputTups){
-			Datum keyData = inputTup.getDataByName(equalColName);
-			String key = keyData.toString();
-			if(joinMap.containsKey(key)){
-				List<Tuple> matches = joinMap.get(key);
-				for(Tuple matchTup : matches){
-					Tuple joined = joinTuple(inputTup, matchTup, equalColName);
-					results.add(joined);
-				}
-			}
-		}
-		return results;
+	public Tuple readOneTuple() {
+		return joinResult.readOneTuple();
 	}
 
 
 	@Override
 	public void reset() {
-		input.reset();
+		joinResult.reset();
+	}
+
+	@Override
+	public long getLength() {
+		return joinResult.getLength();
 	}
 
 }

@@ -1,11 +1,9 @@
 package io;
 
-import java.io.EOFException;
-import java.io.File;
-import java.io.IOException;
-import java.io.RandomAccessFile;
+import java.io.*;
 
-public class BufferedRandomAccessFile{	
+public class BufferedRandomAccessFile
+{
     RandomAccessFile raf;
 
     static final int BUFFER_SIZE = 32768; // must be power of two!
@@ -15,7 +13,9 @@ public class BufferedRandomAccessFile{
     byte[]  buffer = new byte[BUFFER_SIZE];
     long    bufferOffset = -1; // what file offset does this buffer start at?
     int     bufferLength = -1; // how many bytes of the buffer are valid? ( < BUFFER_SIZE near end of file)
+
     int     bufferPosition = -1; // current file position in the buffer [0, BUFFER_SIZE-1]
+
     long    fileLength; // length of the file
 
     /** Invariant: the current file position = bufferOffset +
@@ -266,7 +266,7 @@ public class BufferedRandomAccessFile{
 
     public void writeUTF(String s) throws IOException
     {
-        //writeShort((short) s.length());
+//        writeShort((short) s.length());
         for (int i = 0; i < s.length(); i++) {
             char c = s.charAt(i);
             // XXX BUG, not compliant with DataOutput
@@ -379,7 +379,7 @@ public class BufferedRandomAccessFile{
 
             // suck as much out of this buffer as we can
             while (bufferPosition < bufferLength)
-            {
+                    {
                 char c = (char) (buffer[bufferPosition++]&0xff);
 
                 if (c=='\n') {
@@ -398,7 +398,7 @@ public class BufferedRandomAccessFile{
                     }
                     break;
                 }
-            }
+                    }
 
             // if a piece has been created, then we have found a newline
             if (piece != null)
@@ -432,4 +432,18 @@ public class BufferedRandomAccessFile{
             }
     }
 
+    public static void main(String args[])
+    {
+        try {
+            BufferedRandomAccessFile in = new BufferedRandomAccessFile(args[0],"r");
+            //  BufferedRandomAccessFile out = new BufferedRandomAccessFile(args[1]);
+
+            String l;
+            while ((l = in.readLine())!=null)
+                System.out.printf("^%s$\n", l);
+
+        } catch (IOException ex) {
+            System.out.println("Ex: "+ex);
+        }
+    }
 }

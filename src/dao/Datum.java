@@ -1,9 +1,12 @@
 package dao;
 
+import java.io.Serializable;
 
 
-public abstract class Datum implements Comparable<Datum> {
+
+public abstract class Datum implements Comparable<Datum>, Serializable {
 	
+	private static final long serialVersionUID = 1517024754320323043L;
 	private DatumType type;
 	
 	public Datum(DatumType typeIn){
@@ -15,24 +18,7 @@ public abstract class Datum implements Comparable<Datum> {
 	}
 	
 	@Override
-	public String toString(){
-		switch(type){
-			case String:
-				DatumString valStr = (DatumString)this;
-				return valStr.getValue();
-			case Date:
-				DatumDate valDate = (DatumDate)this;
-				return valDate.toString();
-			case Bool:
-				DatumBool valBool = (DatumBool)this;
-				return String.valueOf(valBool.getValue());
-			case Double:
-				DatumDouble valFloat = (DatumDouble)this;
-				return valFloat.toString();
-			default:	//Int or Long
-				return String.valueOf((long)this.getNumericValue());
-		}
-	}
+	public abstract String toString();
 	
 	
 	/**
@@ -130,23 +116,5 @@ public abstract class Datum implements Comparable<Datum> {
 		}
 	}
 
-	
-	public static void main(String[] args){
-		Datum d1 = new DatumString("ABc");
-		Datum d2 = new DatumString("Abc");
-		Datum d3 = new DatumString("abc");
-		Datum d4 = new DatumBool(false);
-		Datum d5 = new DatumDouble(0.23d);
-		Datum d6 = new DatumLong(1);
-		Datum d7 = new DatumLong(1);
-		try {
-			System.out.println(Datum.equals(d2, d1) + "\n");
-			System.out.println(d6.equals(d7));
-			System.out.println(d6.hashCode() + "\n" + d7.hashCode());
-	
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
+	public abstract long getBytes();
 }

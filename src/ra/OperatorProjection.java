@@ -1,7 +1,5 @@
 package ra;
 
-import java.util.List;
-
 import dao.Schema;
 import dao.Tuple;
 
@@ -13,17 +11,6 @@ public class OperatorProjection implements Operator{
 		input = inputIn;
 		newSchema = schemaIn;
 	}
-
-
-	@Override
-	public List<Tuple> readOneBlock() {
-		List<Tuple> tuples = input.readOneBlock();
-		for(Tuple tuple : tuples)
-			tuple.changeTuple(newSchema);
-		
-		return tuples;
-	}
-	
 	
 	@Override
 	//project only variable in readOneTuple() method
@@ -40,7 +27,15 @@ public class OperatorProjection implements Operator{
 	public void reset() {
 		input.reset();
 	}
+
+	@Override
+	public long getLength() {
+		return input.getLength();
+	}
 	
-	
+	@Override
+	public Schema getSchema() {
+		return input.getSchema();
+	}
 
 }

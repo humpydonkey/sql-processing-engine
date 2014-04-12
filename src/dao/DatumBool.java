@@ -2,6 +2,7 @@ package dao;
 
 public class DatumBool extends Datum {
 
+	private static final long serialVersionUID = -318289153287331084L;
 	private boolean value;
 	
 	public DatumBool(String data) {
@@ -39,15 +40,9 @@ public class DatumBool extends Datum {
 				return 1;
 			}else
 				return -1;
-		} else{
-			try {
-				throw new IllegalArgumentException("Wrong type (" + o.getClass().getCanonicalName() + ") of this Object.");
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			return -99;
-		}
+		} else
+			throw new IllegalArgumentException("Wrong type (" + o.getClass().getCanonicalName() + ") of this Object.");
+
 	}
 
 	@Override
@@ -59,5 +54,15 @@ public class DatumBool extends Datum {
 	public static void main(String[] args){
 		DatumBool bool1 = new DatumBool(true);
 		bool1.compareTo(null);
+	}
+
+	@Override
+	public long getBytes() {
+		return 1;
+	}
+
+	@Override
+	public String toString() {
+		return String.valueOf(value);
 	}
 }

@@ -1,6 +1,11 @@
 package ra;
 
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.rmi.UnexpectedException;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.schema.Column;
@@ -13,27 +18,66 @@ public abstract class OperatorHashJoin implements Operator {
 	private Schema joinedSchema;
 	
 	@Override
-	public Tuple readOneTuple() {
-		// TODO Auto-generated method stub
-		return null;
+	public Schema getSchema() {
+		return joinedSchema;
 	}
-
-	@Override
-	public List<Tuple> readOneBlock() {
-		// TODO Auto-generated method stub
-		return null;
+	
+	protected void joinAndBuffer(String attr, Tuple data, Map<String,List<Tuple>> map,List<Tuple> buffer){
+		Datum keyData = data.getDataByName(attr);
+		if(keyData==null){
+			try {
+				throw new UnexpectedException("Can't get data from tuple : " + data.toString());
+			} catch (UnexpectedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
+		String key = keyData.toString();
+		List<Tuple> matches = map.get(key);
+		if(matches!=null){
+			for(Tuple match : matches){
+				Tuple result = joinTuple(data, match, attr);
+				buffer.add(result);
+			}
+		}
 	}
-
-	@Override
-	public void reset() {
-		// TODO Auto-generated method stub
-
+	
+	
+	protected void flush(BufferedWriter writer, List<Tuple> buffer) throws IOException{
+		for(Tuple tup : buffer){
+			writer.write(tup.toString());
+			writer.newLine();
+		}	
+		buffer.clear();
 	}
-
+	
+	
+	protected void addTuple(String attr, Tuple tuple, Map<String, List<Tuple>> map){
+		Datum keyData = tuple.getDataByName(attr);
+		if(keyData==null){
+			try {
+				throw new UnexpectedException("Can't get data from tuple : " + tuple.toString());
+			} catch (UnexpectedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
+		String key = keyData.toString();
+		List<Tuple> matchList = map.get(key);
+		if(matchList==null){
+			matchList = new LinkedList<Tuple>();
+			matchList.add(tuple);
+			map.put(key, matchList);
+		}else
+			matchList.add(tuple);
+	}
+	
 	
 	public Tuple joinTuple(Tuple t1, Tuple t2, String equalColNameIn){
 		if(joinedSchema==null){
-			joinedSchema = joinSchema(t1.getSchema(), t2.getSchema(),equalColNameIn);
+			joinedSchema = joinSchema(equalColNameIn, t1.getSchema(), t2.getSchema());
 		}
 		
 		int length = joinedSchema.getLength();
@@ -56,7 +100,7 @@ public abstract class OperatorHashJoin implements Operator {
 		return new Tuple(newDataArr, joinedSchema);
 	}
 	
-	public Schema joinSchema(Schema s1, Schema s2, String equalColNameIn){
+	public Schema joinSchema(String equalColNameIn, Schema s1, Schema s2){
 		Column[] colNames1 = s1.getColumnNames();
 		Expression[] colSources1 = s1.getColumnSources();
 		DatumType[] colTypes1 = s1.getColTypes();

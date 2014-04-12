@@ -9,6 +9,7 @@ import java.util.Map.Entry;
 
 import net.sf.jsqlparser.schema.Column;
 import dao.Datum;
+import dao.Schema;
 import dao.Tuple;
 
 public class OperatorGroupBy implements Operator{
@@ -47,7 +48,8 @@ public class OperatorGroupBy implements Operator{
 	
 	
 	public List<Tuple> dump(){
-		while(readOneBlock().size()!=0){}
+		//Doing Group By
+		while((readOneTuple())!=null){}	
 		
 		List<Tuple> groupedTuples = new LinkedList<Tuple>();
 		for(Entry<String, Tuple> entry : groupMap.entrySet()){
@@ -57,25 +59,14 @@ public class OperatorGroupBy implements Operator{
 		return groupedTuples;
 	}
 	
-	
-	@Override
-	public List<Tuple> readOneBlock() {
-		List<Tuple> tuples = input.readOneBlock();
-		for(Tuple tuple : tuples){
-			groupby(tuple);
-		}
-		return tuples;
-	}
-
-	
 	@Override
 	public Tuple readOneTuple() {
 		Tuple tuple = input.readOneTuple();
 		
 		if(tuple==null)
 			return null;		
-
-		return groupby(tuple);
+		else
+			return groupby(tuple);
 	}
 
 	
@@ -84,6 +75,10 @@ public class OperatorGroupBy implements Operator{
 		input.reset();
 	}
 	
+	@Override
+	public Schema getSchema() {
+		return input.getSchema();
+	}
 	
 	//The key is the combined values of group by columns
 	private String generateKey(Tuple tuple){
@@ -110,6 +105,12 @@ public class OperatorGroupBy implements Operator{
 		}
 		
 		return tuple;
+	}
+
+
+	@Override
+	public long getLength() {
+		return input.getLength();
 	}
 
 }
