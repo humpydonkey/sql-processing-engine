@@ -10,5 +10,5 @@ public class Config {
 	public static final long FileThreshold_MB = 10*OneMB;	//MB
 	
 	
-	public static final boolean PrintRuningTime = true;
+	public static final boolean PrintRuningTime = false;
 }
