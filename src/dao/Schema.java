@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,54 +30,66 @@ public class Schema  implements Serializable {
 	private Expression[] columnSources;
 	private DatumType[] colTypes;
 	private Map<Function, Aggregator> aggregatorMap;
+	private int[] rawPosition;
 	
-	public Schema(CreateTable table, Table tableName) throws Exception{	
+	
+	public static Schema schemaFactory(Map<String,Column> colsMapper, CreateTable ct, Table tableName) throws Exception{
 		@SuppressWarnings("unchecked")
-		List<ColumnDefinition> colDefs = table.getColumnDefinitions();
-		Column[] cols = new Column[colDefs.size()];
-		for(int i = 0; i < colDefs.size(); i++){
-			ColumnDefinition col = (ColumnDefinition)colDefs.get(i);
-			cols[i] = new Column(tableName, col.getColumnName());
+		List<ColumnDefinition> allColDefs = ct.getColumnDefinitions();
+		
+		List<Column> colsInUse = new ArrayList<Column>();
+		List<ColumnDefinition> colDefsInUse = new ArrayList<ColumnDefinition>();
+		List<Integer> rawPosition = new ArrayList<Integer>();
+		for(int i = 0; i < allColDefs.size(); i++){
+			ColumnDefinition colDef = allColDefs.get(i);
+			Column col = new Column(tableName, colDef.getColumnName());
+			
+			//if colsMapper == null, it will map all the attributes
+			if(colsMapper!=null){
+				//Add columns that only appeared(in use) in SQL
+				String colFullName = null;
+				if(col.getTable().getAlias()!=null)
+					colFullName = col.getTable().getAlias()+"."+col.getColumnName();
+				else
+					colFullName = col.toString();
+				if(colsMapper.containsKey(colFullName)){
+					//Tools.debug("add column: "+col.toString()+",  position: "+i);
+					rawPosition.add(i);
+					colsInUse.add(col);
+					colDefsInUse.add(colDef);
+				}
+			}
 		}
 		
-		length = cols.length;
-		columnNames = cols;
-		colTypes = new DatumType[length];
-		columnSources = new Expression[length];
-//		indexMap = new HashMap<String, Integer>(length);
+		//to array
+		int size = colsInUse.size();
+		Column[] cols = new Column[size];
+		ColumnDefinition[] colDefs = new ColumnDefinition[size];
+		int[] rawPos = new int[size];
+		colsInUse.toArray(cols);
+		colDefsInUse.toArray(colDefs);
+		for(int i=0; i<size; i++)
+			rawPos[i] = rawPosition.get(i);
 		
-		for(int i=0; i<length; i++){
-//			indexMap.put(columnNames[i].getColumnName().toUpperCase(), i);
-			colTypes[i] = convertColType(i, colDefs.get(i));
-			columnSources[i] = cols[i];	//assign it as a column
-			//compare the Column[] and ColumnDefinition has the same order index, if not throw exception 
-			if(!columnNames[i].getColumnName().equals(colDefs.get(i).getColumnName()))
-				throw new Exception("Column[] and ColumnDefinition has not the same order index.");
-		}
-		
-		initialIndexMap(length, columnNames);
-		initialTableName();
+		return  new Schema(cols, colDefs, rawPos);
 	}
 	
-	public Schema(Column[] colsIn, List<ColumnDefinition> colDefsIn) throws Exception{
-		if(colsIn.length==0||colDefsIn.size()==0)
+	
+	public Schema(Column[] colsIn, ColumnDefinition[] colDefsIn, int[] rawPosIn) throws Exception{
+		if(colsIn.length==0||colDefsIn.length==0)
 			throw new IllegalArgumentException("the number of columns/column definitions is 0.");
-		if(colsIn.length!=colDefsIn.size())
-			throw new IllegalArgumentException("Column[] size and DatumType[] size doesn't match : " + colsIn.length + "," + colDefsIn.size());
+		if(colsIn.length!=colDefsIn.length)
+			throw new IllegalArgumentException("Column[] size and DatumType[] size doesn't match : " + colsIn.length + "," + colDefsIn.length);
 		
 		length = colsIn.length;
 		columnNames = colsIn;
 		colTypes = new DatumType[length];
 		columnSources = new Expression[length];
-//		indexMap = new HashMap<String, Integer>(length);
-		
+		rawPosition = rawPosIn;
+				
 		for(int i=0; i<length; i++){
-//			indexMap.put(columnNames[i].getColumnName().toUpperCase(), i);
-			colTypes[i] = convertColType(i, colDefsIn.get(i));
+			colTypes[i] = convertColType(i, colDefsIn[i]);
 			columnSources[i] = colsIn[i];	//assign it as a column
-			//compare the Column[] and ColumnDefinition has the same order index, if not throw exception 
-			if(!columnNames[i].getColumnName().equals(colDefsIn.get(i).getColumnName()))
-				throw new Exception("Column[] and ColumnDefinition has not the same order index.");
 		}
 		
 		initialIndexMap(length, columnNames);
@@ -93,18 +106,14 @@ public class Schema  implements Serializable {
 		columnNames = colsIn;
 		colTypes = colTypesIn;
 		columnSources = columnSourcesIn;
-
-		initialIndexMap(length, columnNames);
+		rawPosition = new int[length];
+		for(int i=0; i<length; i++)
+			rawPosition[i] = i;
 		
-//		indexMap = new HashMap<String, Integer>(length);
-//		
-//		for(int i=0; i<length; i++){
-//			indexMap.put(columnNames[i].getColumnName().toUpperCase(), i);
-//		}
-//		
 		if(aggreMapIn!=null)
 			aggregatorMap = aggreMapIn;
 		
+		initialIndexMap(length, columnNames);
 		initialTableName();
 	}
 	
@@ -129,8 +138,11 @@ public class Schema  implements Serializable {
 	}
 	
 	private void initialTableName(){
-		StringBuilder tname = new StringBuilder("");		
+		Table tab = columnNames[0].getTable();
+		StringBuilder tname = new StringBuilder(tab.getName());		
 		StringBuilder talias = new StringBuilder("");;
+		if(tab.getAlias()!=null)
+			talias.append(tab.getAlias());
 		
 		for(int i=1; i<columnNames.length; i++){
 			Table currColTab = columnNames[i].getTable();
@@ -288,6 +300,20 @@ public class Schema  implements Serializable {
 		return indexMap;
 	}
 	
+	
+	public int getRawPosition(int i){
+		return rawPosition[i];
+	}
+	
+	public void setRawPosition(int i, int position){
+		rawPosition[i] = position;
+	}
+	
+	public void setRawPosition(String colName, int position){
+		int index= getColIndex(colName);
+		if(index>=0)
+			setRawPosition(index, position);
+	}
 	
 	public static void main(String[] args) {
 

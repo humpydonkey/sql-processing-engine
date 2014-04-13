@@ -6,7 +6,6 @@ import java.util.Map;
 
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
-import net.sf.jsqlparser.statement.create.table.ColumnDefinition;
 import net.sf.jsqlparser.statement.create.table.CreateTable;
 import net.sf.jsqlparser.statement.select.FromItemVisitor;
 import net.sf.jsqlparser.statement.select.SubJoin;
@@ -19,7 +18,7 @@ import dao.Tuple;
 
 
 /**
- * One from item corresponds one table/subselect/subjoin
+ * One FromItem corresponds one table/subselect/subjoin
  * @author Asia
  *
  */
@@ -27,14 +26,15 @@ public class SourceOperatorScanner implements FromItemVisitor{
 	private final File dataPath;
 	private Map<String,CreateTable> tables;
 	private String tableName;
-	
+	private Map<String, Column> colsInUseMapper;
 	private Schema schema = null;
 	private Operator source = null;
 	
-	public SourceOperatorScanner(File basePath, Map<String,CreateTable> tables)
+	public SourceOperatorScanner(File basePath, Map<String,CreateTable> tablesIn, Map<String, Column> allCols)
 	{
-		this.dataPath = basePath;
-		this.tables = tables;
+		colsInUseMapper = allCols;
+		dataPath = basePath;
+		tables = tablesIn;
 	}
 	
 	public String getTableName(){
@@ -75,25 +75,13 @@ public class SourceOperatorScanner implements FromItemVisitor{
 			this.tableName =tableName.getName();
 		}
 		
-		CreateTable table = tables.get(tableName.getName().toUpperCase());
-		if(table==null)
-			try {
-				throw new Exception("No such table : " + tableName.getName());
-			} catch (Exception e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
-		
-		@SuppressWarnings("unchecked")
-		List<ColumnDefinition> colDefs = table.getColumnDefinitions();
-		Column[] columns = new Column[colDefs.size()];
-		for(int i = 0; i < colDefs.size(); i++){
-			ColumnDefinition col = (ColumnDefinition)colDefs.get(i);
-			columns[i] = new Column(tableName, col.getColumnName());
-		}
-		
+		CreateTable ctable = tables.get(tableName.getName().toUpperCase());
+
 		try {
-			schema = new Schema(columns, colDefs);
+			if(ctable==null)
+				throw new Exception("No such table : " + tableName.getName());
+			
+			schema = Schema.schemaFactory(colsInUseMapper, ctable, tableName);
 			source = new OperatorScan(
 					new File(dataPath, tableName.getName() + ".dat"),
 					schema
@@ -103,4 +91,5 @@ public class SourceOperatorScanner implements FromItemVisitor{
 			e.printStackTrace();
 		}
 	}
+
 }

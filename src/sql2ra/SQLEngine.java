@@ -74,10 +74,11 @@ public class SQLEngine {
 			
 			//extract local table into a map
 			extractLocalTable(pselect,localFromItemTable);
-			
-			/*********************    Scan&Selection    ********************/		
+			ColumnFinder cf = new ColumnFinder(pselect);
+	
+			/*********************    Scan&Selection    ********************/
 			//parse scan
-			SourceOperatorScanner fromItemScan = new SourceOperatorScanner(dataPath, globalCreateTables);
+			SourceOperatorScanner fromItemScan = new SourceOperatorScanner(dataPath, globalCreateTables, cf.getColumnMapper());
 			operMap = parseScan(pselect, fromItemScan);
 			//push down selection
 			if(operMap.size()==1){

@@ -8,6 +8,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -235,13 +236,29 @@ public class OperatorGroupBy implements Operator{
 		
 		Table tab = new Table(null,"lineitem");
 		CreateTable ct = SQLEngine.globalCreateTables.get("LINEITEM");
-		Schema schema = new Schema(ct, tab);
-		OperatorScan scan = new OperatorScan(new File(dataDir+"/lineitem.dat"),schema);
 		@SuppressWarnings("rawtypes")
-		List cols = new ArrayList<Column>();
-		cols.add(new Column(tab, "partkey"));
+		List groupCols = new ArrayList<Column>();
+		Column col1 = new Column(tab, "partkey");
+		Column col2 = new Column(tab, "returnflag");
+		Column col3 = new Column(tab, "shipmode");
+		Column col4 = new Column(tab, "orderkey");
+		Column col5 = new Column(tab, "suppkey");
+		Column col6 = new Column(tab, "shipdate");
+		groupCols.add(col1);
+		groupCols.add(col2);
 		
-		OperatorGroupBy gb = new OperatorGroupBy(scan, swap, cols);
+		Map<String, Column> colsMapper = new HashMap<String, Column>();
+		colsMapper.put(col1.toString(), col1);
+		colsMapper.put(col2.toString(), col2);
+		colsMapper.put(col3.toString(), col3);
+		colsMapper.put(col4.toString(), col4);
+		colsMapper.put(col5.toString(), col5);
+		colsMapper.put(col6.toString(), col6);
+		Schema schema = Schema.schemaFactory(colsMapper, ct, tab);
+		OperatorScan scan = new OperatorScan(new File(dataDir+"/lineitem.dat"),schema);
+
+		
+		OperatorGroupBy gb = new OperatorGroupBy(scan, swap, groupCols);
 		List<File> files = gb.dumpToDisk();
 		for(File f : files)
 			System.out.println(f.getPath());
