@@ -2,6 +2,7 @@ package dao;
 
 import java.io.Serializable;
 import java.rmi.UnexpectedException;
+import java.util.Comparator;
 
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.Function;
@@ -14,6 +15,7 @@ import ra.OperatorGroupBy;
 public class Tuple implements Serializable{
 	
 	private static final long serialVersionUID = -6349689782189417493L;
+	
 	private Datum[] dataArr;
 	private Schema schema;
 	
@@ -90,6 +92,37 @@ public class Tuple implements Serializable{
 		}
 		dataArr = newDataArr;
 		schema = newSchema;
+	}
+	
+	
+	public int compareTo(Tuple compTup, CompareAttribute[] attrs){
+		for(CompareAttribute attr : attrs){
+			String colName = attr.getColName();
+			Datum selfVal = this.getDataByName(colName);
+			Datum compVal = compTup.getDataByName(colName);
+			int res = selfVal.compareTo(compVal);
+			if(res==0)
+				continue;
+			
+			//res!=0, two attributes are not equal
+			if(attr.isAsc())
+				return res;
+			else
+				return -res;		
+		}
+		
+		return 0;
+	}
+	
+	
+	public static Comparator<Tuple> getComparator(final CompareAttribute[] attrs){
+		Comparator<Tuple> comptr = new Comparator<Tuple>(){
+			@Override
+			public int compare(Tuple arg0, Tuple arg1) {
+				return arg0.compareTo(arg1, attrs);
+			}
+		};
+		return comptr;
 	}
 	
 	

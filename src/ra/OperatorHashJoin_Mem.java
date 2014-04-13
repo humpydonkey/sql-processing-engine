@@ -30,8 +30,10 @@ public class OperatorHashJoin_Mem extends OperatorHashJoin{
 		TimeCalc.begin(7);
 		Map<String, List<Tuple>> hashMap = new HashMap<String, List<Tuple>>();
 		Tuple hashTup;
+		int hashcount=0;
 		while((hashTup = hashSource.readOneTuple())!=null){
 			addTuple(equalColName, hashTup, hashMap);
+			hashcount++;
 		}
 		TimeCalc.end(7,"construct hash map");
 		
@@ -40,7 +42,9 @@ public class OperatorHashJoin_Mem extends OperatorHashJoin{
 		Tuple data;
 		//store all in buffer
 		TimeCalc.begin(7);
+		int datacount=0;
 		while((data=dataSource.readOneTuple())!=null){
+			datacount++;
 			joinAndBuffer(equalColName, data, hashMap, buffer);
 		}
 		

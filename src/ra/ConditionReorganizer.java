@@ -201,7 +201,7 @@ public class ConditionReorganizer implements ExpressionVisitor{
 		Expression exp = exprs.get(0);
 		
 		for(int i=1; i<exprs.size(); i++){
-			exp = new AndExpression(exp, exprs.get(1));
+			exp = new AndExpression(exp, exprs.get(i));
 		}
 		
 		return exp;
