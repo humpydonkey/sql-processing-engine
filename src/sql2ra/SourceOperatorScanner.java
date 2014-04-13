@@ -25,17 +25,15 @@ import dao.Tuple;
  */
 public class SourceOperatorScanner implements FromItemVisitor{
 	private final File dataPath;
-	private final File swapDir;
 	private Map<String,CreateTable> tables;
 	private String tableName;
 	
 	private Schema schema = null;
 	private Operator source = null;
 	
-	public SourceOperatorScanner(File basePath, File swapDir, Map<String,CreateTable> tables)
+	public SourceOperatorScanner(File basePath, Map<String,CreateTable> tables)
 	{
 		this.dataPath = basePath;
-		this.swapDir = swapDir;
 		this.tables = tables;
 	}
 	
@@ -63,7 +61,7 @@ public class SourceOperatorScanner implements FromItemVisitor{
 		else
 			this.tableName = subselect.getAlias();
 		
-		SQLEngine parser = new SQLEngine(dataPath, swapDir);
+		SQLEngine parser = new SQLEngine(dataPath);
 		List<Tuple> tuples = parser.select(subselect.getSelectBody());
 		source = new OperatorCache(tuples); 
 	}

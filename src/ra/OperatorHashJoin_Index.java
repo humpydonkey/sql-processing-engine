@@ -42,7 +42,7 @@ public class OperatorHashJoin_Index extends OperatorHashJoin{
 		while(readOneTuple()!=null){
 			//while readOneTuple(), joined tuples added to bufferedResult
 			if(bufferedResult.size()>=Config.Buffer_SIZE){
-				resultHashIndex.updateIndex(new OperatorCache(bufferedResult), true);
+				resultHashIndex.insertBlock(new OperatorCache(bufferedResult), true);
 			}
 		}//finish join
 		

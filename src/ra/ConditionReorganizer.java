@@ -63,6 +63,7 @@ import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.create.table.CreateTable;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.SubSelect;
+import sql2ra.Config;
 import sql2ra.SQLEngine;
 
 public class ConditionReorganizer implements ExpressionVisitor{
@@ -74,7 +75,8 @@ public class ConditionReorganizer implements ExpressionVisitor{
 		File swapPath = new File("test/");
 		for(File f : files.listFiles()){
 			try {
-				SQLEngine engine = new SQLEngine(dataFile, swapPath);
+				Config.setSwapDir(swapPath);
+				SQLEngine engine = new SQLEngine(dataFile);
 
 				//create schema
 				FileReader schemaReader = new FileReader(schemaFile);
@@ -293,14 +295,17 @@ public class ConditionReorganizer implements ExpressionVisitor{
 	}
 	
 	public void printResults(){
-		int i=1;
-		for(Entry<String, List<Expression>> entry : getConditionMap().entrySet()){
-			String tName = entry.getKey();
-			System.out.print(i+")."+tName+": ");
-			for(Expression exp:entry.getValue()){
-				System.out.print(exp.toString()+", ");
+		if(Config.DebugMode){
+			int i=1;
+			for(Entry<String, List<Expression>> entry : getConditionMap().entrySet()){
+				String tName = entry.getKey();
+				System.out.print(i+")."+tName+": ");
+				for(Expression exp:entry.getValue()){
+					System.out.print(exp.toString()+", ");
+				}
+				i++;
+				System.out.println();
 			}
-			i++;
 			System.out.println();
 		}	
 	}

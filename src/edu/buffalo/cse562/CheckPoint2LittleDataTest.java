@@ -26,7 +26,8 @@ public class CheckPoint2LittleDataTest {
 			List<String> correctResults = FileAccessor.getInstance().readAllLines(resultPath);
 			
 			for(int i=0; i<results.size(); i++){
-				Assert.assertEquals(results.get(i), correctResults.get(i).toString());
+				System.out.println(correctResults.get(i)+"\n"+results.get(i)+"\n");	
+				Assert.assertEquals(results.get(i).toString(), correctResults.get(i));
 			}
 
 		}else
@@ -45,7 +46,34 @@ public class CheckPoint2LittleDataTest {
 			List<String> correctResults = FileAccessor.getInstance().readAllLines(resultPath);
 			
 			for(int i=0; i<results.size(); i++){
-				Assert.assertEquals(results.get(i), correctResults.get(i).toString());
+				System.out.println(results.get(i));
+				if(i<correctResults.size())
+					System.out.println(correctResults.get(i)+"\n");
+				
+				//Assert.assertEquals(results.get(i), correctResults.get(i).toString());
+			}
+
+		}else
+			Assert.fail("0 result.");
+	}
+	
+	
+	@Test
+	public void testTestSpecificSQL_tpch12a() {
+		String sqlPath = TestFileDir + "/" + "tpch12a.sql";
+		String resultPath = TestFileDir + "/" + "tpch12a.expected.dat";
+		
+		List<Tuple> results = Main.testSpecificSQL(TestFileDir, sqlPath);
+		if(results.size()>0){
+
+			List<String> correctResults = FileAccessor.getInstance().readAllLines(resultPath);
+			
+			for(int i=0; i<results.size(); i++){
+				System.out.println(results.get(i));
+				if(i<correctResults.size())
+					System.out.println(correctResults.get(i)+"\n");
+				
+				//Assert.assertEquals(results.get(i), correctResults.get(i).toString());
 			}
 
 		}else

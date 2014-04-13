@@ -11,7 +11,7 @@ import sql2ra.Config;
 public class Tools {
 
 	public static void debug(String msg){
-		if(Config.PrintRuningTime)
+		if(Config.DebugMode)
 			System.out.println(msg);
 	}
 	

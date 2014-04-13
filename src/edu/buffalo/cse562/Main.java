@@ -14,6 +14,7 @@ import net.sf.jsqlparser.parser.ParseException;
 import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.create.table.CreateTable;
 import net.sf.jsqlparser.statement.select.Select;
+import sql2ra.Config;
 import sql2ra.SQLEngine;
 import common.TimeCalc;
 import common.Tools;
@@ -56,7 +57,8 @@ public class Main {
 				System.out.println("Input error: "+args.toString());
 		}
 		
-		//testSpecificCP2();
+		if(Config.DebugMode)
+			testSpecificCP2();
 		//testAll_CP1();
 	}
 
@@ -80,7 +82,7 @@ public class Main {
 	public static List<Tuple> testSpecificCP2(){
 		//mocking input
 		String dataDirStr = "test/cp2_littleBig/";
-		String[] sqlFilePaths = {"test/cp2_littleBig/tpch07a.sql"};
+		String[] sqlFilePaths = {"test/cp2_littleBig/tpch12a.sql"};
 
 		List<Tuple> tups = testSpecificSQL(dataDirStr, sqlFilePaths);
 		for(Tuple t : tups)
@@ -128,14 +130,15 @@ public class Main {
 	public static List<Tuple> runSQL(File dataDir, File swapDir, List<File> sqlFiles){
 		TimeCalc.begin(1);
 		List<Tuple> results = null;
-		
+		Config.setSwapDir(swapDir);
+
 		for (File sql : sqlFiles){
 			try{
 				FileReader stream = new FileReader(sql);
 				CCJSqlParser parser = new CCJSqlParser(stream);
 				Statement stmt;
 				
-				SQLEngine myParser = new SQLEngine(dataDir,swapDir);
+				SQLEngine myParser = new SQLEngine(dataDir);
 				
 				while((stmt = parser.Statement()) !=null){		
 					if(stmt instanceof CreateTable)	

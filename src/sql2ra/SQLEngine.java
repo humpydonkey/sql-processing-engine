@@ -1,6 +1,7 @@
 package sql2ra;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -28,24 +29,15 @@ import dao.Schema;
 import dao.Tuple;
 
 public class SQLEngine {
-	private boolean ifswap;
 	private Map<String, Table> localFromItemTable;
 	
-	private static File swapDir;
 	private static File dataPath;
 	
 	public static Map<String, CreateTable> globalCreateTables;
 	public static Tuple globalTuple;
 	
-	public SQLEngine(File dataPathIn, File swapDirIn){
+	public SQLEngine(File dataPathIn){
 		localFromItemTable = new HashMap<String, Table>();
-		
-		if(swapDirIn==null)
-			ifswap = false;
-		else{
-			ifswap = true;
-			swapDir = swapDirIn;
-		}
 		
 		if(dataPathIn!=null)
 			dataPath = dataPathIn;
@@ -55,13 +47,6 @@ public class SQLEngine {
 		
 	}
 	
-	public void setSwapDir(File dirIn){
-		swapDir = dirIn;
-	}
-	
-	public File getSwapDir(){
-		return swapDir;
-	}
 	
 	public Map<String, Table> getLocalTables(){
 		return localFromItemTable;
@@ -71,8 +56,7 @@ public class SQLEngine {
 	{
 		if(stmt instanceof CreateTable){
 			CreateTable ct = (CreateTable)stmt;
-			//System.out.println("TABLE: " + ct.getTable().getName());
-			
+
 			globalCreateTables.put(
 				ct.getTable().getName(),
 				ct
@@ -93,7 +77,7 @@ public class SQLEngine {
 			
 			/*********************    Scan&Selection    ********************/		
 			//parse scan
-			SourceOperatorScanner fromItemScan = new SourceOperatorScanner(dataPath, swapDir, globalCreateTables);
+			SourceOperatorScanner fromItemScan = new SourceOperatorScanner(dataPath, globalCreateTables);
 			operMap = parseScan(pselect, fromItemScan);
 			//push down selection
 			if(operMap.size()==1){
@@ -102,18 +86,25 @@ public class SQLEngine {
 					oper = operMap.get(fromItemScan.getTableName());
 					oper = new OperatorSelection(oper, pselect.getWhere());
 					operMap.put(fromItemScan.getTableName(), oper);	
+					pselect.setWhere(null);
 				}else
 					oper = operMap.get(fromItemScan.getTableName());
 			}else{
+				/*********************   Push down Selection   ****************/
+				//resolve and redistribute the big where condition
 				ConditionReorganizer organizer = pushDownSelection(pselect, operMap);
 				
-				/*********************    EqualJoin    ********************/
+				/*********************    Equal Join    ********************/
 				if(pselect.getJoins()!=null){
-					JoinManager jm = new JoinManager(organizer.getJoinList(), operMap, swapDir);
+					JoinManager jm = new JoinManager(organizer.getJoinList(), operMap, Config.getSwapDir());
 					oper = jm.executeJoin();
 				}
 			}
-
+			
+			/*********************    Add filtered where condition  ****************/
+			if(pselect.getWhere()!=null)
+				oper = new OperatorSelection(oper, pselect.getWhere());
+			
 			/*********************    Parsing selected items    ********************/
 			SelectItemScanner selectItemScan = new SelectItemScanner(pselect);
 			Schema newSchema = selectItemScan.getSelectedColumns();
@@ -125,7 +116,7 @@ public class SQLEngine {
 			List groupbyCols = pselect.getGroupByColumnReferences();
 			if(aggrs.length>0 || groupbyCols!=null){
 				//if aggregate function exist or group by column exist
-				OperatorGroupBy groupby = new OperatorGroupBy(oper, groupbyCols, aggrs);
+				OperatorGroupBy groupby = new OperatorGroupBy(oper, Config.getSwapDir(), groupbyCols, aggrs);
 				List<Tuple> tuples = groupby.dump();
 			//	System.out.println("Scanned "+OperatorScan.count+"\nGroup by "+groupby.count+" tuples");
 				oper = new OperatorCache(tuples);	
@@ -145,15 +136,26 @@ public class SQLEngine {
 
 				try {
 					OperatorOrderBy orderby = new OperatorOrderBy(dump(oper),elets);
-					return orderby.getResults();
+					oper = new OperatorCache(orderby.getResults());
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
+			
+			List<Tuple> res = SQLEngine.dump(oper);
+			if(pselect.getLimit()==null)
+				return res;
+			else{
+				int n = (int) pselect.getLimit().getRowCount();
+				List<Tuple> limitedRes = new ArrayList<Tuple>(n);
+				for(int i=0; i<n; i++)
+					limitedRes.add(res.get(i));
+				return limitedRes;
+			}		
 		}
 		
-		return SQLEngine.dump(oper);
+		return null;		
 	}
 	
 	/**
@@ -175,7 +177,7 @@ public class SQLEngine {
 		}
 	}
 	
-	public Map<String, Operator> parseScan(final PlainSelect pselect, SourceOperatorScanner scanGenerator){
+	private Map<String, Operator> parseScan(final PlainSelect pselect, SourceOperatorScanner scanGenerator){
 		/*********************  Create Scan    ********************/
 		Map<String, Operator> operMap = new HashMap<String, Operator>(); 
 		
@@ -201,49 +203,33 @@ public class SQLEngine {
 	}
 	
 	
-	public ConditionReorganizer pushDownSelection(final PlainSelect pselect, Map<String, Operator> operMap){
+	private ConditionReorganizer pushDownSelection(final PlainSelect pselect, Map<String, Operator> operMap){
 		/*********************  Push down Selection    ********************/
 		Expression where = pselect.getWhere();
 		
 		//reorganize where condition, distribute to each one
 		ConditionReorganizer reorganizer = new ConditionReorganizer(operMap.keySet());
 		where.accept(reorganizer);
+		reorganizer.printResults();
 		
-		if(where!=null){//the original where
-			//for every scan operator, pipeline select
-			for(Entry<String, Operator> scan : operMap.entrySet()){
-				//subwhere
-				String tName = scan.getKey();
-				Expression subwhere = reorganizer.getExprByTName(tName);
-				if(subwhere!=null){
-					Operator scan_select = scan.getValue();
-					scan_select = new OperatorSelection(scan_select, subwhere);
-					operMap.put(tName, scan_select);
-				}			
+		//for every scan operator, pipeline select
+		for(Entry<String, Operator> scan : operMap.entrySet()){
+			//subwhere
+			String tName = scan.getKey();
+			Expression subwhere = reorganizer.getExprByTName(tName);
+			if(subwhere!=null){
+				Operator scan_select = scan.getValue();
+				scan_select = new OperatorSelection(scan_select, subwhere);
+				operMap.put(tName, scan_select);
 			}
-			
-			//reset the original where to a filtered where
-			pselect.setWhere(reorganizer.getExprByTName(ConditionReorganizer.MultiTable));
 		}
+		
+		//reset the original where to a filtered where
+		pselect.setWhere(reorganizer.getExprByTName(ConditionReorganizer.MultiTable));			
+		
 		return reorganizer;
 	}
-	
-	
-//	public List<EqualJoin> parseJoin(final PlainSelect pselect){
-//		//evaluate where condition to find join pairs
-//		Expression where = pselect.getWhere();
-//		EvaluatorEqualJoin eval = new EvaluatorEqualJoin();
-//		where.accept(eval);
-//		List<EqualJoin> joinPairs = eval.getJoins();
-//		return joinPairs;
-//	}
-	
-	
-	
-	public void analysisQuery(final PlainSelect pselect){
-		//get scan tables
-		//Expression where = pselect.getWhere();
-	}
+
 	
 	public static List<Tuple> dump(Operator oper){
 		List<Tuple> results = new LinkedList<Tuple>();

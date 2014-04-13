@@ -507,7 +507,7 @@ public class EvaluatorConditionExpres implements ExpressionVisitor{
 				sb = newSB;
 
 			SQLEngine.globalTuple = tuple;
-			SQLEngine parser = new SQLEngine(null, null);
+			SQLEngine parser = new SQLEngine(null);
 			List<Tuple> tuples = parser.select(sb);
 			
 			try {

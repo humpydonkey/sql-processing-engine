@@ -83,6 +83,10 @@ public class OperatorScan implements Operator {
 		}else
 			return true;
 	}
+	
+	public File getFile(){
+		return file;
+	}
 
 	@Override
 	public Schema getSchema() {

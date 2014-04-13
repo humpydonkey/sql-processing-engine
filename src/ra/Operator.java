@@ -11,7 +11,6 @@ public interface Operator{
 	
 	//reset all
 	public void reset();
-
 	
 	public long getLength();
 	

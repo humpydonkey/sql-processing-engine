@@ -157,6 +157,46 @@ public class Schema  implements Serializable {
 			tableName.setAlias(talias.toString());
 	}
 	
+	
+	
+	/**
+	 * Convert column type from String to DatumType
+	 * @param index
+	 * @return
+	 * @throws Exception
+	 */
+	private DatumType convertColType(int index, ColumnDefinition colDef) throws Exception{
+//		ColumnDefinition colDef = getColDefinition(index);
+		String typeStr = colDef.getColDataType().getDataType();
+		DatumType type;
+		typeStr = DataType.recognizeType(typeStr);
+		switch(typeStr){
+
+		case DataType.LONG:
+			type = DatumType.Long;
+			return type;
+			
+		case DataType.DOUBLE:
+			type = DatumType.Double;
+			return type;
+			
+		case DataType.BOOL:
+			type = DatumType.Bool;
+			return type;
+		
+		case DataType.STRING:
+			type = DatumType.String;
+			return type;
+		
+		case DataType.DATE:
+			type = DatumType.Date;
+			return type;
+			
+		default :
+			throw new Exception("Wrong input type : " + typeStr);
+		}
+	}
+	
 	public String getTableName(){
 		return tableName.getName();
 	}
@@ -197,45 +237,7 @@ public class Schema  implements Serializable {
 			throw new IndexOutOfBoundsException();		
 		return columnSources[index];
 	}
-	
-	
-	/**
-	 * Convert column type from String to DatumType
-	 * @param index
-	 * @return
-	 * @throws Exception
-	 */
-	private DatumType convertColType(int index, ColumnDefinition colDef) throws Exception{
-//		ColumnDefinition colDef = getColDefinition(index);
-		String typeStr = colDef.getColDataType().getDataType();
-		DatumType type;
-		typeStr = DataType.recognizeType(typeStr);
-		switch(typeStr){
 
-		case DataType.LONG:
-			type = DatumType.Long;
-			return type;
-			
-		case DataType.DOUBLE:
-			type = DatumType.Double;
-			return type;
-			
-		case DataType.BOOL:
-			type = DatumType.Bool;
-			return type;
-		
-		case DataType.STRING:
-			type = DatumType.String;
-			return type;
-		
-		case DataType.DATE:
-			type = DatumType.Date;
-			return type;
-			
-		default :
-			throw new Exception("Wrong input type : " + typeStr);
-		}
-	}
 	
 	public int getLength(){
 		return length;
@@ -290,7 +292,7 @@ public class Schema  implements Serializable {
 	public static void main(String[] args) {
 
 		try {
-			CCJSqlParser parser = new CCJSqlParser(new FileInputStream(new File("data/NBA/nba11.sql")));
+			CCJSqlParser parser = new CCJSqlParser(new FileInputStream(new File("test/cp2_grade/nba11.sql")));
 			CreateTable ct = parser.CreateTable();
 			@SuppressWarnings("unchecked")
 			List<ColumnDefinition> list = ct.getColumnDefinitions();
