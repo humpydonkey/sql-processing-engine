@@ -38,13 +38,13 @@ public class SQLEngine {
 	
 	public SQLEngine(File dataPathIn){
 		localFromItemTable = new HashMap<String, Table>();
-		
+
 		if(dataPathIn!=null)
 			dataPath = dataPathIn;
-		
+
 		if(globalCreateTables==null)
 			globalCreateTables = new HashMap<String, CreateTable>();
-		
+
 	}
 	
 	
@@ -118,8 +118,15 @@ public class SQLEngine {
 			if(aggrs.length>0 || groupbyCols!=null){
 				//if aggregate function exist or group by column exist
 				OperatorGroupBy groupby = new OperatorGroupBy(oper, Config.getSwapDir(), groupbyCols, aggrs);
-				List<Tuple> tuples = groupby.dump();
-			//	System.out.println("Scanned "+OperatorScan.count+"\nGroup by "+groupby.count+" tuples");
+				
+				if(Config.canSwap()){
+					if(groupby.getLength()>Config.FileThreshold_MB){
+						List<File> groupFiles = groupby.dumpToDisk();
+					}else
+						//List<Tuple> tuples = groupby.dump();
+				}else
+					//List<Tuple> tuples = groupby.dump();
+
 				oper = new OperatorCache(tuples);	
 			}
 
