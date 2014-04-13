@@ -58,6 +58,10 @@ public class Schema  implements Serializable {
 					colsInUse.add(col);
 					colDefsInUse.add(colDef);
 				}
+			}else{
+				rawPosition.add(i);
+				colsInUse.add(col);
+				colDefsInUse.add(colDef);
 			}
 		}
 		

@@ -1,8 +1,10 @@
 package ra;
 
 import java.io.FileNotFoundException;
+import java.rmi.UnexpectedException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import net.sf.jsqlparser.expression.Expression;
@@ -20,7 +22,7 @@ public class OperatorOrderBy{
 	
 	private CompareAttribute[] compAttrs;
 	
-	public OperatorOrderBy(List<Tuple> listIn, List<OrderByElement> eles) throws Exception{
+	public OperatorOrderBy(List<OrderByElement> eles){
 	
 		compAttrs = new CompareAttribute[eles.size()];
 		
@@ -30,8 +32,13 @@ public class OperatorOrderBy{
 			if(expr instanceof Column){
 				Column col = (Column)expr;
 				compAttrs[i] = new CompareAttribute(col, obe.isAsc());
-			}else
-				throw new UnsupportedOperationException("Unsupported, OrderByElement is an expression! "+expr.toString());
+			} else
+				try {
+					throw new UnexpectedException("Unsupported, OrderByElement is an expression! "+expr.toString());
+				} catch (UnexpectedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 		}
 	}
 	
@@ -39,74 +46,9 @@ public class OperatorOrderBy{
 		return compAttrs;
 	}
 	
-//	private void quickSort_Desc(List<Tuple> list, int left, int right) {
-//		if (left >= right) {
-//			return;
-//		}
-//
-//		Datum pivot = null;
-//		int center = left;
-//		for (int j = left + 1; j <= right; j++) {
-//			pivot = list.get(left).getDataByName(firstColName);
-//			Datum movingData = list.get(j).getDataByName(firstColName);
-//			int compResult = movingData.compareTo(pivot);
-//			if (compResult > 0) {
-//				center++;
-//				if (center != j)
-//					swap(list, center, j);
-//			}else if(colNames.size()>1&&compResult == 0){
-//				pivot = list.get(left).getDataByName(colNames.get(1));
-//				movingData = list.get(j).getDataByName(colNames.get(1));
-//				compResult = movingData.compareTo(pivot);
-//
-//				if (compResult>0 && !orderbyElements.get(1).isAsc()) {
-//					center++;
-//					if (center != j)
-//						swap(list, center, j);
-//				}
-//			}
-//		}
-//		swap(list, center, left); // swap pivot to center
-//		quickSort_Desc(list, left, center - 1); // left part
-//		quickSort_Desc(list, center + 1, right); // right part
-//	}
-//
-//	private void quickSort_Asce(List<Tuple> list, int left, int right) {
-//		if (left >= right) {
-//			return;
-//		}
-//
-//		Datum pivot = null;
-//		int center = left;
-//		for (int j = left + 1; j <= right; j++) {
-//			pivot = list.get(left).getDataByName(firstColName);
-//			Datum movingData = list.get(j).getDataByName(firstColName);
-//			int compResult = movingData.compareTo(pivot);
-//			if (compResult < 0) {
-//				center++;
-//				if (center != j)
-//					swap(list, center, j);
-//			}else if(colNames.size()>1&&compResult == 0){
-//				pivot = list.get(left).getDataByName(colNames.get(1));
-//				movingData = list.get(j).getDataByName(colNames.get(1));
-//				compResult = movingData.compareTo(pivot);
-//
-//				if (compResult<0 && orderbyElements.get(1).isAsc()) {
-//					center++;
-//					if (center != j)
-//						swap(list, center, j);
-//				}
-//			}
-//		}
-//		swap(list, center, left); // swap pivot to center
-//		quickSort_Asce(list, left, center - 1); // left part
-//		quickSort_Asce(list, center + 1, right); // right part
-//	}
-
-	private void swap(List<Tuple> a, int i, int j) {
-		Tuple temp = a.get(i);
-		a.set(i, a.get(j));
-		a.set(j, temp);
+	
+	public Comparator<Tuple> getTupleComparator(){
+		return Tuple.getComparator(getCompAttrs());
 	}
 	
 	 
@@ -154,7 +96,7 @@ public class OperatorOrderBy{
 			eles.add(ele1);
 			eles.add(ele2);
 			
-			OperatorOrderBy ob = new OperatorOrderBy(tuples, eles);
+			OperatorOrderBy ob = new OperatorOrderBy(eles);
 			Collections.sort(tuples, Tuple.getComparator(ob.getCompAttrs()));
 			for(Tuple t : tuples){
 				t.printTuple();
