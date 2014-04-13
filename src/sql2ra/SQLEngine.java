@@ -2,6 +2,7 @@ package sql2ra;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -24,6 +25,7 @@ import ra.OperatorCache;
 import ra.OperatorGroupBy;
 import ra.OperatorOrderBy;
 import ra.OperatorProjection;
+import ra.OperatorScan;
 import ra.OperatorSelection;
 import dao.Schema;
 import dao.Tuple;
@@ -112,44 +114,50 @@ public class SQLEngine {
 			Aggregator[] aggrs = selectItemScan.getAggregators();
 
 
-			/*********************    Group By + Aggregate   ********************/
+			/*********************    Group By + Order By   ********************/
 			@SuppressWarnings("rawtypes")
 			List groupbyCols = pselect.getGroupByColumnReferences();
 			if(aggrs.length>0 || groupbyCols!=null){
 				//if aggregate function exist or group by column exist
 				OperatorGroupBy groupby = new OperatorGroupBy(oper, Config.getSwapDir(), groupbyCols, aggrs);
+				OperatorOrderBy ob = null;
+				if(pselect.getOrderByElements()!=null){
+					@SuppressWarnings("unchecked")
+					List<OrderByElement> eles = pselect.getOrderByElements();
+					ob = new OperatorOrderBy(eles);
+				}
+				
 				
 				if(Config.canSwap()){
 					if(groupby.getLength()>Config.FileThreshold_MB){
-						List<File> groupFiles = groupby.dumpToDisk();
-					}else
-						//List<Tuple> tuples = groupby.dump();
-				}else
-					//List<Tuple> tuples = groupby.dump();
+						List<File> groupFiles = null;
+						if(ob==null)
+							groupFiles = groupby.dumpToDisk(null);
+						else
+							groupFiles = groupby.dumpToDisk(ob.getTupleComparator());
+						
+						//TODO merge sort
+						
+						File f = new File("mergefile");
+						oper = new OperatorScan(f, oper.getSchema());
+					}else{
+						List<Tuple> tuples = groupby.dump();
+						Collections.sort(tuples, ob.getTupleComparator());
+						oper = new OperatorCache(tuples);
+					}		
+				}else{
+					List<Tuple> tuples = groupby.dump();
+					Collections.sort(tuples, ob.getTupleComparator());
+					oper = new OperatorCache(tuples);
+				}
 
-				oper = new OperatorCache(tuples);	
 			}
-
 			
 			/*********************    Projection    ********************/
 			if(!selectItemScan.getIfSelectAll()){
 				oper = new OperatorProjection(oper, newSchema);
 			}
 
-			
-			/*********************    Order By    ********************/
-			if(pselect.getOrderByElements()!=null){
-				@SuppressWarnings("unchecked")
-				List<OrderByElement> elets = pselect.getOrderByElements();
-
-				try {
-					OperatorOrderBy orderby = new OperatorOrderBy(dump(oper),elets);
-					oper = new OperatorCache(orderby.getResults());
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			}
 			
 			List<Tuple> res = SQLEngine.dump(oper);
 			if(pselect.getLimit()==null)

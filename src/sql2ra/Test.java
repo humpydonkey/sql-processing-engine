@@ -1,72 +1,80 @@
 package sql2ra;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import common.TimeCalc;
+
 import net.sf.jsqlparser.parser.CCJSqlParser;
-import net.sf.jsqlparser.parser.ParseException;
+import net.sf.jsqlparser.schema.Column;
+import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.Statement;
-import net.sf.jsqlparser.statement.select.FromItem;
-import net.sf.jsqlparser.statement.select.Join;
-import net.sf.jsqlparser.statement.select.PlainSelect;
-import net.sf.jsqlparser.statement.select.Select;
-import net.sf.jsqlparser.statement.select.SelectBody;
+import net.sf.jsqlparser.statement.create.table.CreateTable;
+import ra.OperatorGroupBy;
+import ra.OperatorScan;
+import dao.CompareAttribute;
+import dao.Schema;
+import dao.Tuple;
 
 public class Test {
 
 	public static void main(String[] args) {
-		FileReader stream;
-		try {
-			Map<String, List<String>> test = new HashMap<String, List<String>>();
-			test.put("1", new ArrayList<String>());
-			List<String> val = test.get("1");
-			val.add("original1");
-			val.add("original2");
+		try{
+			File swap = new File("test/");
+			File dataDir = new File("test/cp2_grade");
+			File sql = new File("test/cp2_littleBig/tpch_schemas.sql");
 			
-			val = new ArrayList<String>();
-			val.add("changed");
-			test.put("1", val);
-			
-			for(String str : test.get("1")){
-				System.out.println(str);
-			}
-			
-			stream = new FileReader(new File("test/cp1_sqls/test_join.sql"));
-
+			Config.setSwapDir(swap);
+			FileReader stream = new FileReader(sql);
 			CCJSqlParser parser = new CCJSqlParser(stream);
 			Statement stmt;
-			while ((stmt = parser.Statement()) != null) {
-				if (stmt instanceof Select) {
-					System.out.println("I would now evaluate:\n" + stmt);
-					Select sel = (Select) stmt;
-					SelectBody selBody = sel.getSelectBody();
-					if(selBody instanceof PlainSelect){
-						PlainSelect psel = (PlainSelect)selBody;
-						System.out.println(psel.getWhere());
-						FromItem from = psel.getFromItem();
-						System.out.println("From: "+from.toString());
-						@SuppressWarnings("unchecked")
-						List<Join> joins = psel.getJoins();
-						for(Join j : joins){
-							System.out.println("Join: "+j.toString()+","+j.getRightItem());
-						}
-					}
-				}
+			
+			SQLEngine myParser = new SQLEngine(dataDir);
+			
+			while((stmt = parser.Statement()) !=null){		
+				if(stmt instanceof CreateTable)	
+					myParser.create(stmt);
 			}
+			
+			Table tab = new Table(null,"lineitem");
+			CreateTable ct = SQLEngine.globalCreateTables.get("LINEITEM");
 
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ParseException e) {
-			// TODO Auto-generated catch block
+			Column col1 = new Column(tab, "suppkey");
+			Column col2 = new Column(tab, "returnflag");
+			Column col3 = new Column(tab, "shipmode");
+			Column col4 = new Column(tab, "orderkey");
+			Column col5 = new Column(tab, "partkey");
+			Column col6 = new Column(tab, "shipdate");
+
+			Map<String, Column> colsMapper = new HashMap<String, Column>();
+			colsMapper.put(col1.toString(), col1);
+			colsMapper.put(col2.toString(), col2);
+//			colsMapper.put(col3.toString(), col3);
+//			colsMapper.put(col4.toString(), col4);
+			
+			Schema schema = Schema.schemaFactory(null, ct, tab);
+			OperatorScan scan = new OperatorScan(new File(dataDir+"/lineitem.dat"),schema);
+			List<Tuple> tups = new ArrayList<Tuple>(10000);
+			int count=0;
+			while(count<=100000){
+				tups.add(scan.readOneTuple());
+				count++;
+			}
+			TimeCalc.begin(0);
+			Collections.sort(tups, Tuple.getComparator(new CompareAttribute[]{new CompareAttribute(col1,true)}));
+			
+//			for(Tuple tup : tups)
+//				System.out.println(tup.toString());
+			
+			TimeCalc.end(0, "Finish Sorting!");
+		}catch(Exception e){
 			e.printStackTrace();
 		}
-
 	}
 
 }

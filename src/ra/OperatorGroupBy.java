@@ -8,6 +8,8 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -21,9 +23,8 @@ import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.create.table.CreateTable;
 import sql2ra.Config;
 import sql2ra.SQLEngine;
-
 import common.Tools;
-
+import dao.CompareAttribute;
 import dao.Datum;
 import dao.Schema;
 import dao.Tuple;
@@ -70,7 +71,7 @@ public class OperatorGroupBy implements Operator{
 		}		
 	}
 	
-	public List<File> dumpToDisk(){
+	public List<File> dumpToDisk(Comparator<Tuple> comprtr){
 		File rawFile=null;
 		List<File> groupFiles = new ArrayList<File>();
 		
@@ -107,11 +108,11 @@ public class OperatorGroupBy implements Operator{
 						e.printStackTrace();
 					}
 					
-					flushBuffer(groupMap, groupFiles);
+					sortAndFlush(groupMap, groupFiles, comprtr);
 				}
 			}
 			
-			flushBuffer(groupMap, groupFiles);
+			sortAndFlush(groupMap, groupFiles, comprtr);
 			
 		}else
 			Tools.debug("Error! Cannot dump to disk, it didn't satisfy swap condition.");
@@ -130,12 +131,16 @@ public class OperatorGroupBy implements Operator{
 		return groupedTuples;
 	}
 	
-	private void flushBuffer(Map<String, Tuple> gMap, List<File> gFiles){
+	private void sortAndFlush(Map<String, Tuple> gMap, List<File> gFiles, Comparator<Tuple> comprtr){
 		File gfile = new File(swapDir.getPath()+"/GroupResult"+gFiles.size());
 		gFiles.add(gfile);
+		List<Tuple> flushData = new ArrayList<Tuple>(gMap.values());
+		if(comprtr!=null)
+			Collections.sort(flushData, comprtr);
+		
 		try(BufferedWriter bw = new BufferedWriter(new FileWriter(gfile))){
-			for(Entry<String, Tuple> entry : gMap.entrySet()){
-				bw.write(entry.getValue().toString());
+			for(Tuple tup : flushData){
+				bw.write(tup.toString());
 				bw.newLine();
 			}
 			bw.flush();
@@ -238,14 +243,14 @@ public class OperatorGroupBy implements Operator{
 		CreateTable ct = SQLEngine.globalCreateTables.get("LINEITEM");
 		@SuppressWarnings("rawtypes")
 		List groupCols = new ArrayList<Column>();
-		Column col1 = new Column(tab, "partkey");
+		Column col1 = new Column(tab, "suppkey");
 		Column col2 = new Column(tab, "returnflag");
 		Column col3 = new Column(tab, "shipmode");
 		Column col4 = new Column(tab, "orderkey");
-		Column col5 = new Column(tab, "suppkey");
+		Column col5 = new Column(tab, "partkey");
 		Column col6 = new Column(tab, "shipdate");
 		groupCols.add(col1);
-		groupCols.add(col2);
+		//groupCols.add(col2);
 		
 		Map<String, Column> colsMapper = new HashMap<String, Column>();
 		colsMapper.put(col1.toString(), col1);
@@ -259,7 +264,7 @@ public class OperatorGroupBy implements Operator{
 
 		
 		OperatorGroupBy gb = new OperatorGroupBy(scan, swap, groupCols);
-		List<File> files = gb.dumpToDisk();
+		List<File> files = gb.dumpToDisk(Tuple.getComparator(new CompareAttribute[]{new CompareAttribute(col1,true)}));
 		for(File f : files)
 			System.out.println(f.getPath());
 	}
