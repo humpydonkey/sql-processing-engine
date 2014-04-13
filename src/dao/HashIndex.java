@@ -1,6 +1,7 @@
 package dao;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.rmi.UnexpectedException;
@@ -18,7 +19,7 @@ public class HashIndex {
 	private Schema schema;
 	private Map<String, List<Long>> hashIndexDir;
 	private File hashIndexFile;
-	
+	private RandomAccessFile raf;
 	
 	public HashIndex(Table tabIn, String attrIn, Schema schemaIn, File swap){
 		tab = tabIn;
@@ -26,6 +27,12 @@ public class HashIndex {
 		schema = schemaIn;
 		hashIndexDir = new HashMap<String, List<Long>>();
 		hashIndexFile = new File(swap.getPath()+"/"+tab.getWholeTableName());
+		try {
+			raf = new RandomAccessFile(hashIndexFile,"rw");
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	
@@ -33,15 +40,33 @@ public class HashIndex {
 		tab = table;
 		attr = attribute;
 		hashIndexDir = new HashMap<String, List<Long>>();
-
+		try {
+			raf = new RandomAccessFile(hashIndexFile,"rw");
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 		//Write data into file, construct a hash index file
 		hashIndexFile = new File(swap.getPath()+"/"+tab.getWholeTableName());
-		updateIndex(dataSource, false);
+		insertBlock(dataSource, false);
 	}
 	
 	
-	public void updateIndex(Operator dataSource, boolean append){
-		try(RandomAccessFile raf = new RandomAccessFile(hashIndexFile,"rw")){	
+	public void close(){
+		try {
+			raf.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+
+
+	
+	public void insertBlock(Operator dataSource, boolean append){
+		try{	
 			if(append)
 				raf.seek(raf.length());
 		

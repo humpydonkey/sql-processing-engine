@@ -16,8 +16,8 @@ public class AggregatorCount extends Aggregator{
 	private String colName;
 	private boolean distinct;
 	private boolean countAll;
-	private Map<String, Set<Datum>> distinctCountMap;
-	
+	private Map<String, Set<String>> distinctCountMap;
+	private static final String SelectAll = "*";
 	
 	public AggregatorCount(Function funcIn, String[] groupByCols){
 		super(funcIn, groupByCols);
@@ -26,7 +26,7 @@ public class AggregatorCount extends Aggregator{
 		
 		if(funcIn.isAllColumns()){
 			countAll = true;
-			colName = "*";
+			colName = SelectAll;
 		}else{
 			countAll = false;
 			//assume Count() function only takes one variable
@@ -35,7 +35,7 @@ public class AggregatorCount extends Aggregator{
 		
 		if(func.isDistinct()){
 			distinct = true;
-			distinctCountMap = new HashMap<String, Set<Datum>>();
+			distinctCountMap = new HashMap<String, Set<String>>();
 		}
 		else
 			distinct = false;	
@@ -60,39 +60,35 @@ public class AggregatorCount extends Aggregator{
 			Datum data = tuple.getDataByName(colName);
 			if(data!=null){	//only count non-null value
 				if(distinct){
+					//Tools.debug("Group:"+key+"  aggre val:"+data.toString());
 					if(!distinctCountMap.containsKey(key)){
 						//insert new
-						Set<Datum> dataSet = new HashSet<Datum>();
-						dataSet.add(data);
-						distinctCountMap.put(key, new HashSet<Datum>());
+						Set<String> dataSet = new HashSet<String>();
+						dataSet.add(data.toString());
+						distinctCountMap.put(key, dataSet);
 					}else{
 						//update old
-						Set<Datum> dataSet = distinctCountMap.get(key);
-						dataSet.add(data);
+						Set<String> dataSet = distinctCountMap.get(key);
+						dataSet.add(data.toString());
 					}
 				}else{	//no distinct
-					if(!countMap.containsKey(key)){
-						//insert new
+					if(!countMap.containsKey(key))//insert new					
 						countMap.put(key, new DatumLong(1));
-					}else{
-						//else count ++
+					else
 						countPlusPlus(key);
-					}
 				}
 			}
 		}
-			
-		
 	}
 
 
 	@Override
 	public Datum getValue(String key) {
 		if(distinct){
-			distinctCountMap.get(key).size();	
-		}
-		
-		return countMap.get(key);
+			Set<String> valueSet = distinctCountMap.get(key);
+			return new DatumLong(valueSet.size());	
+		}else
+			return countMap.get(key);
 	}
 	
 	private void countPlusPlus(String key){

@@ -1,6 +1,7 @@
 package dao;
 
 import java.io.Serializable;
+import java.rmi.UnexpectedException;
 
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.Function;
@@ -74,7 +75,7 @@ public class Tuple implements Serializable{
 			}else if(newSource instanceof Function){ 
 				//is an aggregate function
 				Function func = (Function)newSource;
-		
+
 				//find the key
 				Aggregator aggre = newSchema.getAggregator(func);
 				StringBuilder groupbyKey = new StringBuilder();
@@ -85,12 +86,19 @@ public class Tuple implements Serializable{
 						break;
 					}
 						
-					Datum groupbyColumn = getDataByName(colName);
+					Datum groupbyColumn = getDataByName(colName); //key
 					groupbyKey.append(groupbyColumn.toString());
 				}
 				//map to the aggregated Datum value
 				oldData = aggre.getValue(groupbyKey.toString());
 				
+				if(oldData==null)
+					try {
+						throw new UnexpectedException("Can not find aggregate value, key:"+groupbyKey.toString());
+					} catch (UnexpectedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 			}else{
 				//should be a constant or expression
 				EvaluatorArithmeticExpres eval = new EvaluatorArithmeticExpres(this);
