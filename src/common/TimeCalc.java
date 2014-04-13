@@ -15,9 +15,6 @@ public class TimeCalc {
 			ids[i] = -1;
 	}
 	
-	public static void setPrint(boolean print){
-		ifPrint = print;
-	}
 	
 	public static void begin(int id){
 		 errMsg = new StringBuilder();

@@ -13,42 +13,23 @@ import ra.OperatorGroupBy;
 
 public class Tuple implements Serializable{
 	
-	
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = -6349689782189417493L;
 	private Datum[] dataArr;
 	private Schema schema;
 	
 	/**
 	 * Constructor
-	 * @param splitedData
-	 * @throws Exception 
-	 */
-	public Tuple(String[] splitedData, Schema schemaIn){
-		dataArr = new Datum[splitedData.length];
-		schema = schemaIn;
-		
-		for(int i=0; i<splitedData.length; i++){
-			if(splitedData[i].equals(""))
-				continue;
-			DatumType type = schemaIn.getColType(i);
-			dataArr[i] = DatumFactory.create(splitedData[i], type);
-		}
-	}
-	
-	
+	 */	
 	public Tuple(String rawLine, Schema schemaIn){
 		String[] splitedData = rawLine.split("\\|");
-		dataArr = new Datum[splitedData.length];
+		
+		int n = schemaIn.getLength();
+		dataArr = new Datum[n];
 		schema = schemaIn;
 		
-		for(int i=0; i<splitedData.length; i++){
-			if(splitedData[i].equalsIgnoreCase("1995-04"))
-				System.out.println("why?");
+		for(int i=0; i<n; i++){
 			DatumType type = schemaIn.getColType(i);
-			dataArr[i] = DatumFactory.create(splitedData[i], type);
+			dataArr[i] = DatumFactory.create(splitedData[schema.getRawPosition(i)], type);
 		}
 	}
 	

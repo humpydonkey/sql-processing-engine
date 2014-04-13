@@ -111,8 +111,7 @@ public class FileAccessor {
 		try(BufferedReader reader = getBR(addr)){
 			String line = null;
 			while((line = reader.readLine())!=null){
-				String [] data = line.split("\\|");
-				tuples.add(new Tuple(data, schema));
+				tuples.add(new Tuple(line, schema));
 			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -153,9 +152,8 @@ public class FileAccessor {
 					continue;
 				if(current>endLine)
 					break;
-				
-				String [] data = line.split("\\|");
-				tuples.add(new Tuple(data, schema));
+
+				tuples.add(new Tuple(line, schema));
 			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block

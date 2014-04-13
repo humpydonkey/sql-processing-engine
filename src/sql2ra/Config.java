@@ -4,7 +4,7 @@ import java.io.File;
 
 
 public class Config {
-	public static final int Buffer_SIZE = 100000;	//10w row ~ 10~20MB
+	public static final int Buffer_SIZE = 500000;	//50w row, 5 attributes ~ 20MB
 	public static final long OneMB = 1048576;	//1024*1024
 	
 	/**
@@ -14,8 +14,8 @@ public class Config {
 	
 	private static File swapDir = null;
 	
-	public static final boolean DebugMode = false;
-	public static final boolean PrintRuningTime = false;
+	public static final boolean DebugMode = true;
+	public static final boolean PrintRuningTime = true;
 
 	public static File getSwapDir(){
 		return swapDir;
