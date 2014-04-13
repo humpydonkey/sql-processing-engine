@@ -59,9 +59,10 @@ public class Test {
 			
 			Schema schema = Schema.schemaFactory(null, ct, tab);
 			OperatorScan scan = new OperatorScan(new File(dataDir+"/lineitem.dat"),schema);
-			List<Tuple> tups = new ArrayList<Tuple>(10000);
+			int length = 100000;
+			List<Tuple> tups = new ArrayList<Tuple>(length);
 			int count=0;
-			while(count<=100000){
+			while(count<=length){
 				tups.add(scan.readOneTuple());
 				count++;
 			}
