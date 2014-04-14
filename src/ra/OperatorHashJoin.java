@@ -22,6 +22,29 @@ public abstract class OperatorHashJoin implements Operator {
 		return joinedSchema;
 	}
 	
+	
+	protected void joinAndWrite(String attr, Tuple data, Map<String,List<Tuple>> map, BufferedWriter writer) throws IOException{
+		Datum keyData = data.getDataByName(attr);
+		if(keyData==null){
+			try {
+				throw new UnexpectedException("Can't get data from tuple : " + data.toString());
+			} catch (UnexpectedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
+		String key = keyData.toString();
+		List<Tuple> matches = map.get(key);
+		if(matches!=null){
+			for(Tuple match : matches){
+				Tuple result = joinTuple(data, match, attr);
+				writer.write(result.toString());
+				writer.newLine();
+			}
+		}
+	}
+	
 	protected void joinAndBuffer(String attr, Tuple data, Map<String,List<Tuple>> map,List<Tuple> buffer){
 		Datum keyData = data.getDataByName(attr);
 		if(keyData==null){
@@ -43,14 +66,6 @@ public abstract class OperatorHashJoin implements Operator {
 		}
 	}
 	
-	
-	protected void flush(BufferedWriter writer, List<Tuple> buffer) throws IOException{
-		for(Tuple tup : buffer){
-			writer.write(tup.toString());
-			writer.newLine();
-		}	
-		buffer.clear();
-	}
 	
 	
 	protected void addTuple(String attr, Tuple tuple, Map<String, List<Tuple>> map){

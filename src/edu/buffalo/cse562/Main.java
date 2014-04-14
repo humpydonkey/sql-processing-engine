@@ -81,8 +81,8 @@ public class Main {
 	
 	public static List<Tuple> testSpecificCP2(){
 		//mocking input
-		String dataDirStr = "test/cp2_littleBig/";
-		String[] sqlFilePaths = {"test/cp2_littleBig/tpch12a.sql"};
+		String dataDirStr = "test/cp2_grade/";
+		String[] sqlFilePaths = {"test/cp2_grade/tpch07a.sql"};
 
 		List<Tuple> tups = testSpecificSQL(dataDirStr, sqlFilePaths);
 		for(Tuple t : tups)

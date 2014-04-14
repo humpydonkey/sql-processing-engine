@@ -128,7 +128,7 @@ public class SQLEngine {
 					ob = new OperatorOrderBy(eles);
 				}
 				
-				if(Config.canSwap() && groupby.getLength()>Config.FileThreshold_MB){
+				if(groupby.isSwap()){
 					List<File> groupFiles = null;
 					if(ob==null)
 						groupFiles = groupby.dumpToDisk(null);
@@ -152,6 +152,11 @@ public class SQLEngine {
 					tuples = dump(oper);
 					Collections.sort(tuples, ob.getTupleComparator());
 					oper = new OperatorCache(tuples);
+				}
+			}else{
+				/*********************  Only Projection No Group By    ********************/
+				if(!selectItemScan.getIfSelectAll()){
+					oper = new OperatorProjection(oper, newSchema);
 				}
 			}
 			

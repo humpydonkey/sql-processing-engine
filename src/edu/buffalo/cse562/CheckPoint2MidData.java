@@ -92,13 +92,78 @@ public class CheckPoint2MidData {
 			List<String> correctResults = FileAccessor.getInstance().readAllLines(resultPath);
 			
 			for(int i=0; i<results.size(); i++){
-				System.out.println(results.get(i));
-				if(i<correctResults.size())
-					System.out.println(correctResults.get(i));
+				//System.out.println(results.get(i));
+				//if(i<correctResults.size())
+					//System.out.println(correctResults.get(i));
 				
-				//Assert.assertEquals(results.get(i), correctResults.get(i).toString());
+				Assert.assertEquals(results.get(i).toString(), correctResults.get(i));
 			}
+		}else
+			Assert.fail("0 result.");
+	}
+	
+	@Test
+	public void testTestSpecificSQL_tpch16b() {
+		String sqlPath = TestFileDir + "/" + "tpch16b.sql";
+		String resultPath = TestFileDir + "/" + "tpch16b.expected.dat";
+		
+		List<Tuple> results = Main.testSpecificSQL(TestFileDir, sqlPath);
+		if(results.size()>0){
 
+			List<String> correctResults = FileAccessor.getInstance().readAllLines(resultPath);
+			
+			for(int i=0; i<results.size(); i++){
+				//System.out.println(results.get(i));
+				//if(i<correctResults.size())
+					//System.out.println(correctResults.get(i));
+				
+				Assert.assertEquals(results.get(i).toString(), correctResults.get(i));
+			}
+		}else
+			Assert.fail("0 result.");
+	}
+	
+	
+	@Test
+	public void testTestSpecificSQL_tpch16c() {
+		String sqlPath = TestFileDir + "/" + "tpch16c.sql";
+		String resultPath = TestFileDir + "/" + "tpch16c.expected.dat";
+		
+		List<Tuple> results = Main.testSpecificSQL(TestFileDir, sqlPath);
+		if(results.size()>0){
+
+			List<String> correctResults = FileAccessor.getInstance().readAllLines(resultPath);
+			
+			for(int i=0; i<results.size(); i++){
+				//System.out.println(results.get(i));
+				//if(i<correctResults.size())
+					//System.out.println(correctResults.get(i));
+				
+				Assert.assertEquals(results.get(i).toString(), correctResults.get(i));
+			}
+		}else
+			Assert.fail("0 result.");
+	}
+	
+	
+	
+	@Test
+	public void testTestSpecificSQL_tpch16d() {
+		String sqlPath = TestFileDir + "/" + "tpch16d.sql";
+		String resultPath = TestFileDir + "/" + "tpch16d.expected.dat";
+		
+		List<Tuple> results = Main.testSpecificSQL(TestFileDir, sqlPath);
+		if(results.size()>0){
+
+			List<String> correctResults = FileAccessor.getInstance().readAllLines(resultPath);
+			
+			for(int i=0; i<results.size(); i++){
+				//System.out.println(results.get(i));
+				//if(i<correctResults.size())
+					//System.out.println(correctResults.get(i));
+				
+				Assert.assertEquals(results.get(i).toString(), correctResults.get(i));
+			}
 		}else
 			Assert.fail("0 result.");
 	}

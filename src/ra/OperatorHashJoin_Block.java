@@ -5,14 +5,14 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import sql2ra.Config;
+
 import common.Tools;
 
-import sql2ra.Config;
 import dao.Tuple;
 
 public class OperatorHashJoin_Block extends OperatorHashJoin{
@@ -53,7 +53,7 @@ public class OperatorHashJoin_Block extends OperatorHashJoin{
 	private void doJoin(BufferedWriter writer, String attr, Operator hashSource, Operator dataSource) throws IOException{
 		//construct hashMap
 		Map<String, List<Tuple>> hashMap = new HashMap<String, List<Tuple>>(Config.Buffer_SIZE);
-		List<Tuple> buffer = new ArrayList<Tuple>(Config.Buffer_SIZE);
+
 		int count = 0;
 		Tuple hashTup;
 		Tuple dataTup;
@@ -66,10 +66,7 @@ public class OperatorHashJoin_Block extends OperatorHashJoin{
 			if(count>=Config.Buffer_SIZE){
 				count=0;		
 				while((dataTup=dataSource.readOneTuple())!=null){
-					joinAndBuffer(attr, dataTup, hashMap, buffer);
-					
-					if(buffer.size()>=Config.Buffer_SIZE-10)
-						flush(writer, buffer);
+					joinAndWrite(attr, dataTup, hashMap, writer);
 				}
 				dataSource.reset();
 				hashMap.clear();
@@ -78,13 +75,9 @@ public class OperatorHashJoin_Block extends OperatorHashJoin{
 		
 		//do block join for the last part for hashInput
 		while((dataTup=dataSource.readOneTuple())!=null){
-			joinAndBuffer(attr, dataTup, hashMap, buffer);		
-			if(buffer.size()>=Config.Buffer_SIZE-10)
-				flush(writer, buffer);
+			joinAndWrite(attr, dataTup, hashMap, writer);		
 		}//block join end	
-		flush(writer, buffer);
 		hashMap = null;
-		buffer = null;
 	}
 	
 	@Override
