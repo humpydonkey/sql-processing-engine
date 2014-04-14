@@ -1,11 +1,14 @@
 package ra;
 
+import java.io.File;
+import java.util.List;
+
 import dao.Schema;
 import dao.Tuple;
 
 public class OperatorExternalMergeSort implements Operator {
 
-	public OperatorExternalMergeSort(Operator input){
+	public OperatorExternalMergeSort(List<File> groupFiles){
 		
 	}
 	

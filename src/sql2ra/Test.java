@@ -2,21 +2,21 @@ package sql2ra;
 
 import java.io.File;
 import java.io.FileReader;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-
-import common.TimeCalc;
 
 import net.sf.jsqlparser.parser.CCJSqlParser;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.create.table.CreateTable;
-import ra.OperatorGroupBy;
 import ra.OperatorScan;
+
+import common.TimeCalc;
+
 import dao.CompareAttribute;
 import dao.Schema;
 import dao.Tuple;
@@ -60,7 +60,7 @@ public class Test {
 			Schema schema = Schema.schemaFactory(null, ct, tab);
 			OperatorScan scan = new OperatorScan(new File(dataDir+"/lineitem.dat"),schema);
 			int length = 100000;
-			List<Tuple> tups = new ArrayList<Tuple>(length);
+			List<Tuple> tups = new LinkedList<Tuple>();
 			int count=0;
 			while(count<=length){
 				tups.add(scan.readOneTuple());

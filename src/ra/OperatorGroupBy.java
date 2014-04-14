@@ -23,6 +23,7 @@ import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.create.table.CreateTable;
 import sql2ra.Config;
 import sql2ra.SQLEngine;
+import common.TimeCalc;
 import common.Tools;
 import dao.CompareAttribute;
 import dao.Datum;
@@ -81,7 +82,7 @@ public class OperatorGroupBy implements Operator{
 		}else
 			swap=false;
 		
-		if(swap){			
+		if(swap){
 			Schema schema = input.getSchema();
 			int readCount=0;
 			while((readOneTuple())!=null){
@@ -107,13 +108,14 @@ public class OperatorGroupBy implements Operator{
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
-					
+					TimeCalc.begin(0);
 					sortAndFlush(groupMap, groupFiles, comprtr);
+					TimeCalc.end(0,"sort and flush once!");
 				}
 			}
-			
+			TimeCalc.begin(0);
 			sortAndFlush(groupMap, groupFiles, comprtr);
-			
+			TimeCalc.end(0,"sort and flush last time!");
 		}else
 			Tools.debug("Error! Cannot dump to disk, it didn't satisfy swap condition.");
 		
@@ -261,7 +263,6 @@ public class OperatorGroupBy implements Operator{
 		colsMapper.put(col6.toString(), col6);
 		Schema schema = Schema.schemaFactory(colsMapper, ct, tab);
 		OperatorScan scan = new OperatorScan(new File(dataDir+"/lineitem.dat"),schema);
-
 		
 		OperatorGroupBy gb = new OperatorGroupBy(scan, swap, groupCols);
 		List<File> files = gb.dumpToDisk(Tuple.getComparator(new CompareAttribute[]{new CompareAttribute(col1,true)}));
