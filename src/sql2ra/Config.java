@@ -4,7 +4,7 @@ import java.io.File;
 
 
 public class Config {
-	public static final int Buffer_SIZE = 100000;	//50w row, 5 attributes ~ 20MB
+	public static final int Buffer_SIZE = 50000;	//50w row, 5 attributes ~ 20MB
 	public static final long OneMB = 1048576;	//1024*1024
 	
 	/**

@@ -20,6 +20,7 @@ import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.SelectBody;
 import ra.Aggregator;
 import ra.ConditionReorganizer;
+import ra.ExternalMergeSort;
 import ra.Operator;
 import ra.OperatorCache;
 import ra.OperatorGroupBy;
@@ -127,48 +128,44 @@ public class SQLEngine {
 					ob = new OperatorOrderBy(eles);
 				}
 				
-				
-				if(Config.canSwap()){
-					if(groupby.getLength()>Config.FileThreshold_MB){
-						List<File> groupFiles = null;
-						if(ob==null)
-							groupFiles = groupby.dumpToDisk(null);
-						else
-							groupFiles = groupby.dumpToDisk(ob.getTupleComparator());
-						
-						//TODO merge sort
-						
-						File f = new File("mergefile");
-						oper = new OperatorScan(f, oper.getSchema());
-					}else{
-						List<Tuple> tuples = groupby.dump();
-						Collections.sort(tuples, ob.getTupleComparator());
-						oper = new OperatorCache(tuples);
-					}		
+				if(Config.canSwap() && groupby.getLength()>Config.FileThreshold_MB){
+					List<File> groupFiles = null;
+					if(ob==null)
+						groupFiles = groupby.dumpToDisk(null);
+					else
+						groupFiles = groupby.dumpToDisk(ob.getTupleComparator());
+					
+					ExternalMergeSort emsort = new ExternalMergeSort(
+							groupFiles,
+							groupby.getSchema(),
+							ob.getCompAttrs());
+					
+					File mergedF = emsort.sort();
+					oper = new OperatorScan(mergedF, oper.getSchema());			
 				}else{
 					List<Tuple> tuples = groupby.dump();
+					oper = new OperatorCache(tuples);
+					/*********************    Projection    ********************/
+					if(!selectItemScan.getIfSelectAll()){
+						oper = new OperatorProjection(oper, newSchema);
+					}
+					tuples = dump(oper);
 					Collections.sort(tuples, ob.getTupleComparator());
 					oper = new OperatorCache(tuples);
 				}
-
 			}
 			
-			/*********************    Projection    ********************/
-			if(!selectItemScan.getIfSelectAll()){
-				oper = new OperatorProjection(oper, newSchema);
-			}
-
+				
 			
-			List<Tuple> res = SQLEngine.dump(oper);
 			if(pselect.getLimit()==null)
-				return res;
+				return SQLEngine.dump(oper);
 			else{
 				int n = (int) pselect.getLimit().getRowCount();
 				List<Tuple> limitedRes = new ArrayList<Tuple>(n);
 				for(int i=0; i<n; i++)
-					limitedRes.add(res.get(i));
+					limitedRes.add(oper.readOneTuple());
 				return limitedRes;
-			}		
+			}	
 		}
 		
 		return null;		
@@ -254,7 +251,6 @@ public class SQLEngine {
 			results.add(tup);
 		}
 		
-		oper.reset();
 		return results;
 	}
 }
