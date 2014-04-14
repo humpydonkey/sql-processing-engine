@@ -99,11 +99,7 @@ public class Tuple implements Serializable{
 		for(CompareAttribute attr : attrs){
 			String colName = attr.getColName();
 			Datum selfVal = this.getDataByName(colName);
-			if(selfVal==null)
-				System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!");
 			Datum compVal = compTup.getDataByName(colName);
-			if(compVal==null)
-				System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!");
 			int res = selfVal.compareTo(compVal);
 			if(res==0)
 				continue;

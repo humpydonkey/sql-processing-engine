@@ -150,7 +150,8 @@ public class SQLEngine {
 						oper = new OperatorProjection(oper, newSchema);
 					}
 					tuples = dump(oper);
-					Collections.sort(tuples, ob.getTupleComparator());
+					if(ob!=null)
+						Collections.sort(tuples, ob.getTupleComparator());
 					oper = new OperatorCache(tuples);
 				}
 			}else{
