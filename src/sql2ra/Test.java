@@ -25,6 +25,10 @@ public class Test {
 
 	public static void main(String[] args) {
 		try{
+			System.out.print("create a big change!!!");
+			System.out.print("create a big change!!!");
+			System.out.print("create a big change!!!");
+			System.out.print("create a big change!!!");
 			File swap = new File("test/");
 			File dataDir = new File("test/cp2_grade");
 			File sql = new File("test/cp2_littleBig/tpch_schemas.sql");

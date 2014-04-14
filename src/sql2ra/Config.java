@@ -4,13 +4,13 @@ import java.io.File;
 
 
 public class Config {
-	public static final int Buffer_SIZE = 50000;	//50w row, 5 attributes ~ 20MB
+	public static final int Buffer_SIZE = 100000;	//50w row, 5 attributes ~ 20MB
 	public static final long OneMB = 1048576;	//1024*1024
 	
 	/**
 	 * If a file's size>Threshold_MB, then write into disk
 	 */
-	public static final long FileThreshold_MB = 50*OneMB;	//MB
+	public static final long FileThreshold_MB = 200*OneMB;	//MB
 	
 	private static File swapDir = null;
 	
