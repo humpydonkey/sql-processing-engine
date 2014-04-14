@@ -4,14 +4,12 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import common.Tools;
 
-import sql2ra.Config;
 import dao.Tuple;
 
 public class OperatorHashJoin_HalfMem extends OperatorHashJoin{
@@ -38,19 +36,12 @@ public class OperatorHashJoin_HalfMem extends OperatorHashJoin{
 		}	
 		
 		//do join
-		List<Tuple> buffer = new ArrayList<Tuple>(Config.Buffer_SIZE);
 		Tuple data;
 		try(BufferedWriter writer = new BufferedWriter(new FileWriter(joinF))){		
 			while((data=dataSource.readOneTuple())!=null){
-				joinAndBuffer(equalColName, data, hashMap, buffer);
-				//write the join result in disk
-				if(buffer.size()>=Config.Buffer_SIZE-10){
-					flush(writer, buffer);
-				}
+				joinAndWrite(equalColName, data, hashMap, writer);
 			}
-			flush(writer, buffer);
 			writer.flush();
-			buffer = null;
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

@@ -46,12 +46,18 @@ public class OperatorGroupBy implements Operator{
 	
 	@SuppressWarnings("rawtypes")
 	public OperatorGroupBy(Operator inputIn, File swapDirIn, List columnsIn, Aggregator... aggregatorsIn){
+		
 		input = inputIn;
 		swapDir = swapDirIn;
 		if(swapDir==null)
 			swap=false;
-		else
-			swap=true;
+		else{
+			if(input instanceof OperatorScan && (input.getLength()>Config.FileThreshold_MB)){
+				swap=true;
+			}else
+				swap=false;
+		}
+			
 		
 		groupMap = new LinkedHashMap<String, Tuple>();
 		aggregators = aggregatorsIn;	//could be null
@@ -75,51 +81,50 @@ public class OperatorGroupBy implements Operator{
 	public List<File> dumpToDisk(Comparator<Tuple> comprtr){
 		File rawFile=null;
 		List<File> groupFiles = new ArrayList<File>();
-		
-		if(input instanceof OperatorScan){
-			OperatorScan scan = (OperatorScan)input;
-			rawFile = scan.getFile();
-		}else
-			swap=false;
-		
-		if(swap){
-			Schema schema = input.getSchema();
-			int readCount=0;
-			while((readOneTuple())!=null){
-				readCount++;
-				
-				if(groupMap.size()>=Config.Buffer_SIZE){
-					try(BufferedReader br = new BufferedReader(new FileReader(rawFile))){
-						for(int i=0; i<readCount; i++)
-							br.readLine();	//skip count lines that already read
 
-						//continue reading
-						String line;
-						while((line = br.readLine())!=null){
-							Tuple tup = new Tuple(line, schema);
-							//if exist in groupMap then update
-							updateGroupMap(tup);
-						}
+		OperatorScan scan = (OperatorScan)input;
+		rawFile = scan.getFile();
+		
+		Schema schema = input.getSchema();
+		int readCount=0;
+		while((readOneTuple())!=null){
+			readCount++;
+			
+			if(groupMap.size()>=Config.Buffer_SIZE){
+				try(BufferedReader br = new BufferedReader(new FileReader(rawFile))){
+					for(int i=0; i<readCount; i++)
+						br.readLine();	//skip count lines that already read
 
-					} catch (FileNotFoundException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+					//continue reading
+					String line;
+					while((line = br.readLine())!=null){
+						Tuple tup = new Tuple(line, schema);
+						//if exist in groupMap then update
+						updateGroupMap(tup);
 					}
-					TimeCalc.begin(0);
-					sortAndFlush(groupMap, groupFiles, comprtr);
-					TimeCalc.end(0,"sort and flush once!");
+
+				} catch (FileNotFoundException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
+				TimeCalc.begin(0);
+				sortAndFlush(groupMap, groupFiles, comprtr);
+				TimeCalc.end(0,"sort and flush once!");
 			}
-			TimeCalc.begin(0);
-			sortAndFlush(groupMap, groupFiles, comprtr);
-			TimeCalc.end(0,"sort and flush last time!");
-		}else
-			Tools.debug("Error! Cannot dump to disk, it didn't satisfy swap condition.");
+		}
+		TimeCalc.begin(0);
+		sortAndFlush(groupMap, groupFiles, comprtr);
+		TimeCalc.end(0,"sort and flush last time!");
+	
 		
 		return groupFiles;
+	}
+	
+	public boolean isSwap(){
+		return swap;
 	}
 	
 	public List<Tuple> dump(){
@@ -149,7 +154,7 @@ public class OperatorGroupBy implements Operator{
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}				
+		}
 		gMap.clear();
 	}
 
@@ -203,6 +208,8 @@ public class OperatorGroupBy implements Operator{
 		StringBuffer sb = new StringBuffer();
 		for(Column col : groupbyCols){
 			Datum data = tuple.getDataByName(col);
+			if(data==null)
+				Tools.debug("Error!!!!!");
 			sb.append(data.toString());
 		}
 		return sb.toString();
