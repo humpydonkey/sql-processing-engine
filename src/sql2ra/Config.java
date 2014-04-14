@@ -14,8 +14,8 @@ public class Config {
 	
 	private static File swapDir = null;
 	
-	public static final boolean DebugMode = true;
-	public static final boolean PrintRuningTime = true;
+	public static final boolean DebugMode = false;
+	public static final boolean PrintRuningTime = false;
 
 	public static File getSwapDir(){
 		return swapDir;
