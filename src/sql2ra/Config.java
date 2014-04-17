@@ -10,11 +10,11 @@ public class Config {
 	/**
 	 * If a file's size>Threshold_MB, then write into disk
 	 */
-	public static final long FileThreshold_MB = 200*OneMB;	//MB
+	public static final long FileThreshold_MB = 50*OneMB;	//MB
 	
 	private static File swapDir = null;
 	
-	public static final boolean DebugMode = false;
+	public static final boolean DebugMode = true;
 	public static final boolean PrintRuningTime = false;
 
 	public static File getSwapDir(){

@@ -51,7 +51,9 @@ public class Main {
 					sqlFiles.add(new File(args[i]));
 				}
 				
-				runSQL(dataDir, swapDir, sqlFiles);
+				List<Tuple> results = runSQL(dataDir, swapDir, sqlFiles);
+				for(Tuple t : results)
+					System.out.println(t.toString());
 				
 			}else
 				System.out.println("Input error: "+args.toString());

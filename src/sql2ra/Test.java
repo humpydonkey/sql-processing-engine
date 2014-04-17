@@ -1,11 +1,13 @@
 package sql2ra;
 
+import java.io.BufferedInputStream;
+import java.io.DataInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileReader;
-import java.util.Collections;
+import java.nio.CharBuffer;
+import java.nio.channels.FileChannel;
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 
 import net.sf.jsqlparser.parser.CCJSqlParser;
@@ -13,22 +15,19 @@ import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.create.table.CreateTable;
-import ra.OperatorScan;
 
 import common.TimeCalc;
 
-import dao.CompareAttribute;
 import dao.Schema;
-import dao.Tuple;
 
 public class Test {
 
 	public static void main(String[] args) {
 		try{
-			System.out.print("create a big change!!!");
-			System.out.print("create a big change!!!");
-			System.out.print("create a big change!!!");
-			System.out.print("create a big change!!!");
+//			System.out.print("create a big change!!!");
+//			System.out.print("create a big change!!!");
+//			System.out.print("create a big change!!!");
+//			System.out.print("create a big change!!!");
 			File swap = new File("test/");
 			File dataDir = new File("test/cp2_grade");
 			File sql = new File("test/cp2_littleBig/tpch_schemas.sql");
@@ -62,20 +61,21 @@ public class Test {
 //			colsMapper.put(col4.toString(), col4);
 			
 			Schema schema = Schema.schemaFactory(null, ct, tab);
-			OperatorScan scan = new OperatorScan(new File(dataDir+"/lineitem.dat"),schema);
-			int length = 100000;
-			List<Tuple> tups = new LinkedList<Tuple>();
-			int count=0;
-			while(count<=length){
-				tups.add(scan.readOneTuple());
-				count++;
-			}
+			File dataFile = new File(dataDir+"/test.txt");
+//			OperatorScan scan = new OperatorScan(,schema);
+			
+			FileInputStream fs = new FileInputStream(dataFile);
+			FileChannel fc = fs.getChannel();
+			BufferedInputStream bin = new BufferedInputStream(fs);
+			DataInputStream din = new DataInputStream(fs);
+			System.out.print(din.readInt());
+			
+			CharBuffer buffer = CharBuffer.allocate(4);
+			
+			
 			TimeCalc.begin(0);
-			Collections.sort(tups, Tuple.getComparator(new CompareAttribute[]{new CompareAttribute(col1,true)}));
-			
-//			for(Tuple tup : tups)
-//				System.out.println(tup.toString());
-			
+
+
 			TimeCalc.end(0, "Finish Sorting!");
 		}catch(Exception e){
 			e.printStackTrace();
