@@ -57,6 +57,7 @@ public class CheckPoint2MidData {
 			Assert.fail("0 result.");
 	}
 	
+
 	@Test
 	public void testTestSpecificSQL_tpch10b() {
 		String sqlPath = TestFileDir + "/" + "tpch10b.sql";
@@ -105,7 +106,7 @@ public class CheckPoint2MidData {
 	public void testTestSpecificSQL_tpch10d() {
 		String sqlPath = TestFileDir + "/" + "tpch10d.sql";
 		String resultPath = TestFileDir + "/" + "tpch10d.expected.dat";
-		
+
 		List<Tuple> results = Main.testSpecificSQL(TestFileDir, sqlPath);
 		if(results.size()>0){
 
@@ -123,6 +124,7 @@ public class CheckPoint2MidData {
 			Assert.fail("0 result.");
 	}
 	
+
 	@Test
 	public void testTestSpecificSQL_tpch12a() {
 		String sqlPath = TestFileDir + "/" + "tpch12a.sql";
@@ -210,6 +212,7 @@ public class CheckPoint2MidData {
 		}else
 			Assert.fail("0 result.");
 	}
+
 	
 	@Test
 	public void testTestSpecificSQL_tpch16a() {

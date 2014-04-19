@@ -168,6 +168,7 @@ public class SQLEngine {
 			else{
 				int n = (int) pselect.getLimit().getRowCount();
 				List<Tuple> limitedRes = new ArrayList<Tuple>(n);
+
 				Tuple tup;
 				int limitCount = 0;
 				while((tup=oper.readOneTuple())!=null){
@@ -177,6 +178,10 @@ public class SQLEngine {
 						break;
 				}
 					
+
+				for(int i=0; i<n; i++)
+					limitedRes.add(oper.readOneTuple());
+
 				return limitedRes;
 			}	
 		}

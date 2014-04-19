@@ -216,6 +216,11 @@ public class CheckPoint2LittleDataTest {
 //					System.out.println(correctResults.get(i));
 				
 				Assert.assertEquals(results.get(i).toString(), correctResults.get(i));
+				System.out.println(results.get(i));
+				if(i<correctResults.size())
+					System.out.println(correctResults.get(i));
+				
+				//Assert.assertEquals(results.get(i), correctResults.get(i).toString());
 			}
 
 		}else
@@ -223,8 +228,7 @@ public class CheckPoint2LittleDataTest {
 	}
 	
 	
-	
-	
+
 	@Test
 	public void testTestSpecificSQL_tpch16a() {
 		String sqlPath = TestFileDir + "/" + "tpch16a.sql";
@@ -307,6 +311,10 @@ public class CheckPoint2LittleDataTest {
 //				if(i<correctResults.size())
 //					System.out.println(correctResults.get(i));
 //				
+				System.out.println(results.get(i));
+				if(i<correctResults.size())
+					System.out.println(correctResults.get(i));
+
 				Assert.assertEquals(results.get(i).toString(), correctResults.get(i));
 			}
 
