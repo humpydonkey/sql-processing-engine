@@ -9,12 +9,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import sql2ra.Config;
-
+import sqlparse.Config;
 import common.Tools;
-
 import dao.Tuple;
 
+/**
+ * Hash Join Operator implemented by
+ * external nested loop hash join
+ * @author Asia
+ *
+ */
 public class OperatorHashJoin_Block extends OperatorHashJoin{
 
 	private String attribute;

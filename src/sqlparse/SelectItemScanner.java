@@ -1,4 +1,4 @@
-package sql2ra;
+package sqlparse;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,9 +25,9 @@ import dao.DatumType;
 import dao.Schema;
 
 /**
- * parse selected item and generate new schema
- * constant and function will be stored as a DatumString in Column[]
- * if it is a function, then parse it and store it in colSources as a Function,
+ * Parse selected item and generate new schema
+ * Constant and function will be stored as a DatumString in Column[]
+ * If it is a function, then parse it and store it in colSources as a Function,
  * and generate related aggregator
  * @author Asia
  *

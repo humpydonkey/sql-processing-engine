@@ -19,6 +19,11 @@ import net.sf.jsqlparser.statement.create.table.ColumnDefinition;
 import net.sf.jsqlparser.statement.create.table.CreateTable;
 import ra.Aggregator;
 
+/**
+ * Schema of a table
+ * @author Asia
+ *
+ */
 public class Schema  implements Serializable {
 
 	private static final long serialVersionUID = -3104984314917863119L;

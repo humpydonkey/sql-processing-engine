@@ -13,7 +13,11 @@ import net.sf.jsqlparser.expression.Function;
 import dao.Datum;
 import dao.Tuple;
 
-
+/**
+ * Aggregate max function
+ * @author Asia
+ *
+ */
 public class AggregatorMax extends Aggregator {
 
     private Map<String, Datum> maxMap;

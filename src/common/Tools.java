@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import sql2ra.Config;
+import sqlparse.Config;
 
 public class Tools {
 

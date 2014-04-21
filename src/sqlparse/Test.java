@@ -1,4 +1,4 @@
-package sql2ra;
+package sqlparse;
 
 
 import java.io.BufferedInputStream;

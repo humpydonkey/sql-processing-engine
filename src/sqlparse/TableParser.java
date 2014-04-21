@@ -1,4 +1,4 @@
-package sql2ra;
+package sqlparse;
 
 import java.rmi.UnexpectedException;
 import java.util.Map;
@@ -8,7 +8,15 @@ import net.sf.jsqlparser.statement.select.FromItemVisitor;
 import net.sf.jsqlparser.statement.select.SubJoin;
 import net.sf.jsqlparser.statement.select.SubSelect;
 
-public class FromItemParser implements FromItemVisitor {
+/**
+ * Parse Table from FromItem
+ * Visitor pattern
+ * if a FromItem is a Table,
+ * then put it into fromItemTable
+ * @author Asia
+ *
+ */
+public class TableParser implements FromItemVisitor {
 
 	private boolean isSubSelect;
 	private boolean isSubJoin;
@@ -16,7 +24,7 @@ public class FromItemParser implements FromItemVisitor {
 	
 	private Map<String, Table> fromItemTable;
 	
-	public FromItemParser(Map<String, Table> localTableIn){
+	public TableParser(Map<String, Table> localTableIn){
 		if(localTableIn==null)
 			try {
 				throw new UnexpectedException("Input Argument is null!");
@@ -25,34 +33,6 @@ public class FromItemParser implements FromItemVisitor {
 				e.printStackTrace();
 			}
 		setFromItemTable(localTableIn);
-	}
-	
-	@Override
-	public void visit(Table arg0) {
-		String tname = arg0.getAlias();
-		if(tname==null){
-			tname = arg0.getName();
-		}
-
-		getFromItemTable().put(tname, arg0);
-		
-		setTable(true);
-		setSubJoin(false);
-		setSubSelect(false);
-	}
-
-	@Override
-	public void visit(SubSelect arg0) {
-		setTable(false);
-		setSubJoin(false);
-		setSubSelect(true);
-	}
-
-	@Override
-	public void visit(SubJoin arg0) {
-		setTable(false);
-		setSubJoin(true);
-		setSubSelect(false);
 	}
 	
 
@@ -87,5 +67,34 @@ public class FromItemParser implements FromItemVisitor {
 	public void setFromItemTable(Map<String, Table> fromItemTable) {
 		this.fromItemTable = fromItemTable;
 	}
+	
+	@Override
+	public void visit(Table arg0) {
+		String tname = arg0.getAlias();
+		if(tname==null){
+			tname = arg0.getName();
+		}
+
+		getFromItemTable().put(tname, arg0);
+		
+		setTable(true);
+		setSubJoin(false);
+		setSubSelect(false);
+	}
+
+	@Override
+	public void visit(SubSelect arg0) {
+		setTable(false);
+		setSubJoin(false);
+		setSubSelect(true);
+	}
+
+	@Override
+	public void visit(SubJoin arg0) {
+		setTable(false);
+		setSubJoin(true);
+		setSubSelect(false);
+	}
+
 
 }

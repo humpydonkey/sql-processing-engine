@@ -5,6 +5,11 @@ import dao.DatumDouble;
 import dao.Tuple;
 import net.sf.jsqlparser.expression.Function;
 
+/**
+ * Aggregate average function
+ * @author Asia
+ *
+ */
 public class AggregatorAvg extends Aggregator{
 
 	private Aggregator sumer;

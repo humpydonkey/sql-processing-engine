@@ -13,7 +13,11 @@ import net.sf.jsqlparser.expression.Function;
 import dao.Datum;
 import dao.Tuple;
 
-
+/**
+ * Aggregate min function
+ * @author Asia
+ *
+ */
 public class AggregatorMin extends Aggregator {
 
     private Map<String, Datum> minMap;

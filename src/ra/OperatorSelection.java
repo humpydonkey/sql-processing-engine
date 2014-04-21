@@ -4,6 +4,12 @@ import net.sf.jsqlparser.expression.Expression;
 import dao.Schema;
 import dao.Tuple;
 
+/**
+ * Operator selection, filter tuples that do not
+ * satisfy the condition in where
+ * @author Asia
+ *
+ */
 public class OperatorSelection implements Operator{
 
 	private Operator input;

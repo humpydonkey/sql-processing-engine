@@ -1,7 +1,11 @@
 package dao;
 
 
-
+/**
+ * String data cell
+ * @author Asia
+ *
+ */
 public class DatumString extends Datum {
  
 	private static final long serialVersionUID = 6843611218396643951L;

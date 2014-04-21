@@ -1,4 +1,4 @@
-package sql2ra;
+package sqlparse;
 
 import java.io.File;
 import java.util.List;
@@ -18,11 +18,12 @@ import dao.Tuple;
 
 
 /**
- * One FromItem corresponds one table/subselect/subjoin
+ * Convert a FromItem to an Operator, data source
+ * A FromItem could be a Table/Subselect/Subjoin object
  * @author Asia
  *
  */
-public class SourceOperatorScanner implements FromItemVisitor{
+public class FromItemConvertor implements FromItemVisitor{
 	private final File dataPath;
 	private Map<String,CreateTable> tables;
 	private String tableName;
@@ -30,7 +31,7 @@ public class SourceOperatorScanner implements FromItemVisitor{
 	private Schema schema = null;
 	private Operator source = null;
 	
-	public SourceOperatorScanner(File basePath, Map<String,CreateTable> tablesIn, Map<String, Column> allCols)
+	public FromItemConvertor(File basePath, Map<String,CreateTable> tablesIn, Map<String, Column> allCols)
 	{
 		colsInUseMapper = allCols;
 		dataPath = basePath;

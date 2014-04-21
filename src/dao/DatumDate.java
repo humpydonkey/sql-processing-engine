@@ -5,6 +5,11 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+/**
+ * Date data cell
+ * @author Asia
+ *
+ */
 public class DatumDate extends Datum {
 
 	private static final long serialVersionUID = 4697762788088326757L;

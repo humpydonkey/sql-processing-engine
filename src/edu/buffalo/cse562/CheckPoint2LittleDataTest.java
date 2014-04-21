@@ -6,6 +6,8 @@ import java.util.List;
 
 import junit.framework.Assert;
 
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 import dao.Schema;
@@ -14,6 +16,16 @@ import dao.Tuple;
 public class CheckPoint2LittleDataTest {
 
 	private final static String TestFileDir = "test/cp2_littleBig";
+	
+	@Before
+	public void preConfig(){
+		
+	}
+	
+	@After
+	public void end(){
+		
+	}
 	
 	@Test
 	public void testTestSpecificSQL_tpch07a() {
@@ -26,7 +38,7 @@ public class CheckPoint2LittleDataTest {
 			List<String> correctResults = FileAccessor.getInstance().readAllLines(resultPath);
 			
 			for(int i=0; i<results.size(); i++){
-				System.out.println(correctResults.get(i)+"\n"+results.get(i)+"\n");	
+				System.out.println(results.get(i)+"\n"+correctResults.get(i)+"\n");	
 				//Assert.assertEquals(results.get(i).toString(), correctResults.get(i));
 			}
 
@@ -50,7 +62,8 @@ public class CheckPoint2LittleDataTest {
 				System.out.println(results.get(i));
 				if(i<correctResults.size())
 					System.out.println(correctResults.get(i)+"\n");
-				
+				else
+					Assert.fail("Reuslt size doens't match!");
 				//Assert.assertEquals(results.get(i), correctResults.get(i).toString());
 			}
 
@@ -73,7 +86,8 @@ public class CheckPoint2LittleDataTest {
 				System.out.println(results.get(i));
 				if(i<correctResults.size())
 					System.out.println(correctResults.get(i)+"\n");
-				
+				else
+					Assert.fail("Reuslt size doens't match!");
 				//Assert.assertEquals(results.get(i), correctResults.get(i).toString());
 			}
 
@@ -96,7 +110,8 @@ public class CheckPoint2LittleDataTest {
 				System.out.println(results.get(i));
 				if(i<correctResults.size())
 					System.out.println(correctResults.get(i)+"\n");
-				
+				else
+					Assert.fail("Reuslt size doens't match!");
 				//Assert.assertEquals(results.get(i), correctResults.get(i).toString());
 			}
 
@@ -118,7 +133,8 @@ public class CheckPoint2LittleDataTest {
 				System.out.println(results.get(i));
 				if(i<correctResults.size())
 					System.out.println(correctResults.get(i)+"\n");
-				
+				else
+					Assert.fail("Reuslt size doens't match!");
 				//Assert.assertEquals(results.get(i), correctResults.get(i).toString());
 			}
 
@@ -136,11 +152,7 @@ public class CheckPoint2LittleDataTest {
 
 			List<String> correctResults = FileAccessor.getInstance().readAllLines(resultPath);
 			
-			for(int i=0; i<results.size(); i++){
-//				System.out.println(results.get(i));
-//				if(i<correctResults.size())
-//					System.out.println(correctResults.get(i));
-				
+			for(int i=0; i<results.size(); i++){	
 				Assert.assertEquals(results.get(i).toString(), correctResults.get(i));
 			}
 
@@ -160,11 +172,7 @@ public class CheckPoint2LittleDataTest {
 
 			List<String> correctResults = FileAccessor.getInstance().readAllLines(resultPath);
 			
-			for(int i=0; i<results.size(); i++){
-//				System.out.println(results.get(i));
-//				if(i<correctResults.size())
-//					System.out.println(correctResults.get(i));
-				
+			for(int i=0; i<results.size(); i++){	
 				Assert.assertEquals(results.get(i).toString(), correctResults.get(i));
 			}
 
@@ -185,11 +193,7 @@ public class CheckPoint2LittleDataTest {
 
 			List<String> correctResults = FileAccessor.getInstance().readAllLines(resultPath);
 			
-			for(int i=0; i<results.size(); i++){
-//				System.out.println(results.get(i));
-//				if(i<correctResults.size())
-//					System.out.println(correctResults.get(i));
-				
+			for(int i=0; i<results.size(); i++){		
 				Assert.assertEquals(results.get(i).toString(), correctResults.get(i));
 			}
 
@@ -211,16 +215,7 @@ public class CheckPoint2LittleDataTest {
 			List<String> correctResults = FileAccessor.getInstance().readAllLines(resultPath);
 			
 			for(int i=0; i<results.size(); i++){
-//				System.out.println(results.get(i));
-//				if(i<correctResults.size())
-//					System.out.println(correctResults.get(i));
-				
 				Assert.assertEquals(results.get(i).toString(), correctResults.get(i));
-				System.out.println(results.get(i));
-				if(i<correctResults.size())
-					System.out.println(correctResults.get(i));
-				
-				//Assert.assertEquals(results.get(i), correctResults.get(i).toString());
 			}
 
 		}else
@@ -239,11 +234,7 @@ public class CheckPoint2LittleDataTest {
 
 			List<String> correctResults = FileAccessor.getInstance().readAllLines(resultPath);
 			
-			for(int i=0; i<results.size(); i++){
-//				System.out.println(results.get(i));
-//				if(i<correctResults.size())
-//					System.out.println(correctResults.get(i));
-//				
+			for(int i=0; i<results.size(); i++){		
 				Assert.assertEquals(results.get(i).toString(), correctResults.get(i));
 			}
 
@@ -261,11 +252,7 @@ public class CheckPoint2LittleDataTest {
 
 			List<String> correctResults = FileAccessor.getInstance().readAllLines(resultPath);
 			
-			for(int i=0; i<results.size(); i++){
-//				System.out.println(results.get(i));
-//				if(i<correctResults.size())
-//					System.out.println(correctResults.get(i));
-//				
+			for(int i=0; i<results.size(); i++){	
 				Assert.assertEquals(results.get(i).toString(), correctResults.get(i));
 			}
 
@@ -283,11 +270,7 @@ public class CheckPoint2LittleDataTest {
 
 			List<String> correctResults = FileAccessor.getInstance().readAllLines(resultPath);
 			
-			for(int i=0; i<results.size(); i++){
-//				System.out.println(results.get(i));
-//				if(i<correctResults.size())
-//					System.out.println(correctResults.get(i));
-//				
+			for(int i=0; i<results.size(); i++){		
 				Assert.assertEquals(results.get(i).toString(), correctResults.get(i));
 			}
 
@@ -307,14 +290,6 @@ public class CheckPoint2LittleDataTest {
 			List<String> correctResults = FileAccessor.getInstance().readAllLines(resultPath);
 			
 			for(int i=0; i<results.size(); i++){
-//				System.out.println(results.get(i));
-//				if(i<correctResults.size())
-//					System.out.println(correctResults.get(i));
-//				
-				System.out.println(results.get(i));
-				if(i<correctResults.size())
-					System.out.println(correctResults.get(i));
-
 				Assert.assertEquals(results.get(i).toString(), correctResults.get(i));
 			}
 

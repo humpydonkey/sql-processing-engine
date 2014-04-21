@@ -5,6 +5,11 @@ import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
 import dao.Datum;
 import dao.Tuple;
 
+/**
+ * Abstraction of aggregate function
+ * @author Asia
+ *
+ */
 public abstract class Aggregator{
 	Function func;
 	String[] groupbyNames;

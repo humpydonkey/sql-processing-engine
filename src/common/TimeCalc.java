@@ -1,6 +1,6 @@
 package common;
 
-import sql2ra.Config;
+import sqlparse.Config;
 
 public class TimeCalc {
 	

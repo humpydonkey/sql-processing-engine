@@ -13,6 +13,11 @@ import java.util.Map;
 import ra.Operator;
 import net.sf.jsqlparser.schema.Table;
 
+/**
+ * Hash index implemented by random access file
+ * @author Asia
+ *
+ */
 public class HashIndex {
 	private Table tab;
 	private String attr;

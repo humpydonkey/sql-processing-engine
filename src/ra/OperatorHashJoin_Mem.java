@@ -10,6 +10,12 @@ import common.Tools;
 
 import dao.Tuple;
 
+/**
+ * Hash join operator implemented by a internal hash join,
+ * that all the tables resides in memory
+ * @author Asia
+ *
+ */
 public class OperatorHashJoin_Mem extends OperatorHashJoin{
 
 	private String equalColName;

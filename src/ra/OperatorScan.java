@@ -13,6 +13,7 @@ import dao.Schema;
 import dao.Tuple;
 
 /**
+ * Operator scan, scan data from file
  * @author Asia
  *
  */

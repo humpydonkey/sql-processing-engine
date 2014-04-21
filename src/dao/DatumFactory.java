@@ -1,6 +1,11 @@
 package dao;
 
-
+/**
+ * Datum factory, 
+ * simple factory that creates Datum by type
+ * @author Asia
+ *
+ */
 public class DatumFactory {
 	public static Datum create(String dataIn, DatumType type){
 		switch(type){

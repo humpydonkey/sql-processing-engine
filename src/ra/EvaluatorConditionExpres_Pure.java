@@ -52,7 +52,7 @@ import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
 import net.sf.jsqlparser.statement.select.SelectBody;
 import net.sf.jsqlparser.statement.select.SubSelect;
-import sql2ra.SQLEngine;
+import sqlparse.SQLEngine;
 import dao.Datum;
 import dao.DatumDate;
 import dao.DatumDouble;
@@ -61,6 +61,11 @@ import dao.DatumString;
 import dao.DatumType;
 import dao.Tuple;
 
+/**
+ * Parse where condition
+ * @author Asia
+ *
+ */
 public class EvaluatorConditionExpres_Pure implements ExpressionVisitor{
 	private Tuple tuple;
 	private boolean evalResult;

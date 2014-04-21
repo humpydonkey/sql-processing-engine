@@ -1,8 +1,13 @@
-package ra;
+package dao;
 
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 
+/**
+ * Equal join
+ * @author Asia
+ *
+ */
 public class EqualJoin {
 	private Column leftCol;
 	private Column rightCol;

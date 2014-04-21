@@ -46,6 +46,11 @@ import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.SubSelect;
 import dao.Tuple;
 
+/**
+ * Parse attributes in SubSelect of where condition
+ * @author Asia
+ *
+ */
 public class EvaluatorSubSelectGlobalAttr implements ExpressionVisitor{
 
 	Tuple tuple;

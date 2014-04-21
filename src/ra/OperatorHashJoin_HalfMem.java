@@ -12,6 +12,12 @@ import common.Tools;
 
 import dao.Tuple;
 
+/**
+ * Hash join operator implemented by half external,
+ * one table resides in memory, one in disk  
+ * @author Asia
+ *
+ */
 public class OperatorHashJoin_HalfMem extends OperatorHashJoin{
 
 	private String equalColName;

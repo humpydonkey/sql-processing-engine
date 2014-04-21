@@ -3,6 +3,13 @@ package ra;
 import dao.Schema;
 import dao.Tuple;
 
+/**
+ * Operator projection + Limit,
+ * limit is an SQL sentence that constrains
+ * the final result size of the output
+ * @author Asia
+ *
+ */
 public class OperatorProjection implements Operator{
 	private Operator input;
 	private Schema newSchema;

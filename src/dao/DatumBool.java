@@ -1,5 +1,10 @@
 package dao;
 
+/**
+ * Boolean data cell
+ * @author Asia
+ *
+ */
 public class DatumBool extends Datum {
 
 	private static final long serialVersionUID = -318289153287331084L;

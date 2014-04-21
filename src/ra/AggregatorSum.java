@@ -9,6 +9,11 @@ import net.sf.jsqlparser.expression.Function;
 import dao.Datum;
 import dao.Tuple;
 
+/**
+ * Aggregate sum function
+ * @author Asia
+ *
+ */
 public class AggregatorSum extends Aggregator {
 
 	private Map<String, Datum> sumMap;

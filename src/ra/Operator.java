@@ -3,6 +3,11 @@ package ra;
 import dao.Schema;
 import dao.Tuple;
 
+/**
+ * Abstraction of a relational algebra
+ * @author Asia
+ *
+ */
 public interface Operator{
 	//read one tuple from stream
 	public Tuple readOneTuple();

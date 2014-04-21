@@ -6,13 +6,19 @@ import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.List;
 
-import sql2ra.Config;
+import sqlparse.Config;
 import net.sf.jsqlparser.schema.Table;
 import dao.Datum;
 import dao.HashIndex;
 import dao.Schema;
 import dao.Tuple;
 
+/**
+ * Use HashIndex(Random Access File) implemented
+ * external hash join
+ * @author Asia
+ *
+ */
 public class OperatorHashJoin_Index extends OperatorHashJoin{
 	
 	private Operator input;

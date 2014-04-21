@@ -49,9 +49,10 @@ import dao.DatumType;
 import dao.Tuple;
 
 /**
+ * Parse arithmetic expression in items of select...from 
  * Only parsing arithmetic expression or constant, 
- * expression doesn't include aggregate function
- * constant will be returned as a String Datum value  
+ * expression doesn't include any aggregate function.
+ * Constant will be returned as a String Datum value  
  * @author Asia
  *
  */

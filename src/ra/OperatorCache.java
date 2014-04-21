@@ -6,6 +6,12 @@ import java.util.List;
 import dao.Schema;
 import dao.Tuple;
 
+/**
+ * A operator that caches all the tuples
+ * in memory
+ * @author Asia
+ *
+ */
 public class OperatorCache implements Operator {
 	
 	private List<Tuple> tuples;

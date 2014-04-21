@@ -3,7 +3,6 @@ package ra;
 import java.util.ArrayList;
 import java.util.List;
 
-import sql2ra.SQLEngine;
 import net.sf.jsqlparser.expression.AllComparisonExpression;
 import net.sf.jsqlparser.expression.AnyComparisonExpression;
 import net.sf.jsqlparser.expression.CaseExpression;
@@ -42,9 +41,14 @@ import net.sf.jsqlparser.expression.operators.relational.MinorThan;
 import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
 import net.sf.jsqlparser.expression.operators.relational.NotEqualsTo;
 import net.sf.jsqlparser.schema.Column;
-import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.SubSelect;
+import dao.EqualJoin;
 
+/**
+ * Parse Equal Join from where condition
+ * @author Asia
+ *
+ */
 public class EvaluatorEqualJoin implements ExpressionVisitor{
 	
 	private Column column;

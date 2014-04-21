@@ -3,7 +3,11 @@ package dao;
 import java.io.Serializable;
 
 
-
+/**
+ * Abstraction of a cell, the cell in a row in a table
+ * @author Asia
+ *
+ */
 public abstract class Datum implements Comparable<Datum>, Serializable {
 	
 	private static final long serialVersionUID = 1517024754320323043L;

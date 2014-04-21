@@ -1,4 +1,4 @@
-package sql2ra;
+package sqlparse;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import logicplan.ConditionDistributor;
+import logicplan.JoinManager;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.Statement;
@@ -19,7 +21,6 @@ import net.sf.jsqlparser.statement.select.OrderByElement;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.SelectBody;
 import ra.Aggregator;
-import ra.ConditionReorganizer;
 import ra.ExternalMergeSort;
 import ra.Operator;
 import ra.OperatorCache;
@@ -77,11 +78,11 @@ public class SQLEngine {
 			
 			//extract local table into a map
 			extractLocalTable(pselect,localFromItemTable);
-			ColumnFinder cf = new ColumnFinder(pselect);
+			ColumnUsedFinder cf = new ColumnUsedFinder(pselect);
 	
 			/*********************    Scan&Selection    ********************/
 			//parse scan
-			SourceOperatorScanner fromItemScan = new SourceOperatorScanner(dataPath, globalCreateTables, cf.getColumnMapper());
+			FromItemConvertor fromItemScan = new FromItemConvertor(dataPath, globalCreateTables, cf.getColumnMapper());
 			operMap = parseScan(pselect, fromItemScan);
 			//push down selection
 			if(operMap.size()==1){
@@ -96,7 +97,7 @@ public class SQLEngine {
 			}else{
 				/*********************   Push down Selection   ****************/
 				//resolve and redistribute the big where condition
-				ConditionReorganizer organizer = pushDownSelection(pselect, operMap);
+				ConditionDistributor organizer = pushDownSelection(pselect, operMap);
 				
 				/*********************    Equal Join    ********************/
 				if(pselect.getJoins()!=null){
@@ -177,10 +178,6 @@ public class SQLEngine {
 					if(limitCount==n)
 						break;
 				}
-					
-
-				for(int i=0; i<n; i++)
-					limitedRes.add(oper.readOneTuple());
 
 				return limitedRes;
 			}	
@@ -196,7 +193,7 @@ public class SQLEngine {
 	 */
 	public void extractLocalTable(final PlainSelect pselect, Map<String, Table> tableMap){
 		//Parse From, getLocalItemTable
-		FromItemParser fiParser = new FromItemParser(tableMap);
+		TableParser fiParser = new TableParser(tableMap);
 		pselect.getFromItem().accept(fiParser);
 		@SuppressWarnings("unchecked")
 		List<Join> joinList = pselect.getJoins();
@@ -208,7 +205,7 @@ public class SQLEngine {
 		}
 	}
 	
-	private Map<String, Operator> parseScan(final PlainSelect pselect, SourceOperatorScanner scanGenerator){
+	private Map<String, Operator> parseScan(final PlainSelect pselect, FromItemConvertor scanGenerator){
 		/*********************  Create Scan    ********************/
 		Map<String, Operator> operMap = new HashMap<String, Operator>(); 
 		
@@ -234,12 +231,12 @@ public class SQLEngine {
 	}
 	
 	
-	private ConditionReorganizer pushDownSelection(final PlainSelect pselect, Map<String, Operator> operMap){
+	private ConditionDistributor pushDownSelection(final PlainSelect pselect, Map<String, Operator> operMap){
 		/*********************  Push down Selection    ********************/
 		Expression where = pselect.getWhere();
 		
 		//reorganize where condition, distribute to each one
-		ConditionReorganizer reorganizer = new ConditionReorganizer(operMap.keySet());
+		ConditionDistributor reorganizer = new ConditionDistributor(operMap.keySet());
 		where.accept(reorganizer);
 		reorganizer.printResults();
 		
@@ -256,7 +253,7 @@ public class SQLEngine {
 		}
 		
 		//reset the original where to a filtered where
-		pselect.setWhere(reorganizer.getExprByTName(ConditionReorganizer.MultiTable));			
+		pselect.setWhere(reorganizer.getExprByTName(ConditionDistributor.MultiTable));			
 		
 		return reorganizer;
 	}

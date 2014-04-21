@@ -21,8 +21,8 @@ import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.create.table.CreateTable;
-import sql2ra.Config;
-import sql2ra.SQLEngine;
+import sqlparse.Config;
+import sqlparse.SQLEngine;
 import common.TimeCalc;
 import common.Tools;
 import dao.CompareAttribute;
@@ -30,6 +30,11 @@ import dao.Datum;
 import dao.Schema;
 import dao.Tuple;
 
+/**
+ * Group by operator
+ * @author Asia
+ *
+ */
 public class OperatorGroupBy implements Operator{
 
 	private Operator input;

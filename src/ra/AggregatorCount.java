@@ -10,6 +10,11 @@ import dao.Datum;
 import dao.DatumLong;
 import dao.Tuple;
 
+/**
+ * Aggregate count function
+ * @author Asia
+ *
+ */
 public class AggregatorCount extends Aggregator{
 
 	private Map<String, Datum> countMap;

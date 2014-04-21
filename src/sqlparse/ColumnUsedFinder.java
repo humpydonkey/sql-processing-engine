@@ -1,4 +1,4 @@
-package sql2ra;
+package sqlparse;
 
 import java.util.HashMap;
 import java.util.List;
@@ -55,17 +55,24 @@ import net.sf.jsqlparser.statement.select.SelectItem;
 import net.sf.jsqlparser.statement.select.SelectItemVisitor;
 import net.sf.jsqlparser.statement.select.SubSelect;
 
-public class ColumnFinder implements ExpressionVisitor, SelectItemVisitor{
+/**
+ * Find all the columns that appeared in an query(PlainSelect)
+ * @author Asia
+ *
+ */
+public class ColumnUsedFinder implements ExpressionVisitor, SelectItemVisitor{
 
 	private Map<String,Column> colsMapper;
-	boolean onlyOneTable;
-	Table fromTable;
+	private boolean onlyOneTable;
+	private Table fromTable;
 	
-	public ColumnFinder(PlainSelect psel){
+	public ColumnUsedFinder(PlainSelect psel){
 		colsMapper = new HashMap<String, Column>();
 		onlyOneTable = false;
 		fromTable = null;
 		
+		//getJoins() return all the other tables
+		//of from... sentence except the first table 
 		if(psel.getJoins()==null){
 			//only one table
 			onlyOneTable = true;

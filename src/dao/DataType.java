@@ -1,5 +1,10 @@
 package dao;
 
+/**
+ * Unify all the types in String form
+ * @author Asia
+ *
+ */
 public class DataType {
 
 	public final static String LONG = "long";
@@ -8,6 +13,11 @@ public class DataType {
 	public final static String BOOL = "bool";
 	public final static String STRING = "string";
 	
+	/**
+	 * Recognize the type given a string type 
+	 * @param typeIn
+	 * @return
+	 */
 	public static String recognizeType(String typeIn){
 		if(typeIn.toUpperCase().contains("CHAR")){
 			return DataType.STRING;

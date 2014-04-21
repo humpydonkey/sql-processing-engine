@@ -14,6 +14,11 @@ import dao.CompareAttribute;
 import dao.Schema;
 import dao.Tuple;
 
+/**
+ * External Merge Sort
+ * @author Asia
+ *
+ */
 public class ExternalMergeSort {
 
 	private List<File> files;

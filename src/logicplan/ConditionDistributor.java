@@ -1,4 +1,4 @@
-package ra;
+package logicplan;
 
 import io.FileAccessor;
 
@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import dao.EqualJoin;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.AllComparisonExpression;
 import net.sf.jsqlparser.expression.AnyComparisonExpression;
@@ -63,10 +64,16 @@ import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.create.table.CreateTable;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.SubSelect;
-import sql2ra.Config;
-import sql2ra.SQLEngine;
+import sqlparse.Config;
+import sqlparse.SQLEngine;
 
-public class ConditionReorganizer implements ExpressionVisitor{
+/**
+ * Recognize each condition in where sentence,
+ * distribute each one by table name
+ * @author Asia
+ *
+ */
+public class ConditionDistributor implements ExpressionVisitor{
 	
 	public static void main(String[] args){
 		File files = new File("D:/testDecompose/");
@@ -100,7 +107,7 @@ public class ConditionReorganizer implements ExpressionVisitor{
 					System.out.println("****parsing where: \n****"+psel.getWhere().toString());
 					System.out.println("global table:"+tableNames.toString());
 					Expression where = psel.getWhere();
-					ConditionReorganizer decomposer = new ConditionReorganizer(tableNames);
+					ConditionDistributor decomposer = new ConditionDistributor(tableNames);
 					where.accept(decomposer);
 					decomposer.printResults();
 				}else{
@@ -139,7 +146,7 @@ public class ConditionReorganizer implements ExpressionVisitor{
 	//2:both columns but from different table
 	private int sameTableState;	
 	
-	public ConditionReorganizer(Collection<String> tableNames){
+	public ConditionDistributor(Collection<String> tableNames){
 
 		sameTableState = -1;
 		joins = new ArrayList<EqualJoin>();

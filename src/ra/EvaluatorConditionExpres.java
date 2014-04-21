@@ -53,7 +53,7 @@ import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
 import net.sf.jsqlparser.statement.select.SelectBody;
 import net.sf.jsqlparser.statement.select.SubSelect;
-import sql2ra.SQLEngine;
+import sqlparse.SQLEngine;
 import dao.Datum;
 import dao.DatumDate;
 import dao.DatumDouble;

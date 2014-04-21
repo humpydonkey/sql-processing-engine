@@ -14,6 +14,11 @@ import dao.DatumType;
 import dao.Schema;
 import dao.Tuple;
 
+/**
+ * Abstraction of a hash join
+ * @author Asia
+ *
+ */
 public abstract class OperatorHashJoin implements Operator {
 	private Schema joinedSchema;
 	

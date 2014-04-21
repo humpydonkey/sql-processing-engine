@@ -11,7 +11,11 @@ import ra.Aggregator;
 import ra.EvaluatorArithmeticExpres;
 import ra.OperatorGroupBy;
 
-
+/**
+ * A row of a table
+ * @author Asia
+ *
+ */
 public class Tuple implements Serializable{
 	
 	private static final long serialVersionUID = -6349689782189417493L;

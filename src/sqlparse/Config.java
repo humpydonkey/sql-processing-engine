@@ -1,4 +1,4 @@
-package sql2ra;
+package sqlparse;
 
 import java.io.File;
 
@@ -14,7 +14,7 @@ public class Config {
 	
 	private static File swapDir = null;
 	
-	public static final boolean DebugMode = true;
+	public static final boolean DebugMode = false;
 
 	public static final boolean PrintRuningTime = false;
 

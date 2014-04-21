@@ -1,4 +1,4 @@
-package sql2ra;
+package logicplan;
 
 import java.io.File;
 import java.util.HashSet;
@@ -7,12 +7,13 @@ import java.util.Map;
 import java.util.Set;
 
 import common.TimeCalc;
-import ra.EqualJoin;
+import dao.EqualJoin;
 import ra.Operator;
 import ra.OperatorHashJoin;
 import ra.OperatorHashJoin_Block;
 import ra.OperatorHashJoin_HalfMem;
 import ra.OperatorHashJoin_Mem;
+import sqlparse.Config;
 
 /**
  * Decide which join to use,
