@@ -10,7 +10,7 @@ public class Config {
 	/**
 	 * If a file's size>Threshold_MB, then write into disk
 	 */
-	public static final long FileThreshold_MB = 50*OneMB;	//MB
+	public static final long FileThreshold_MB = 500*OneMB;	//MB
 	
 	//default value
 	private static File swapDir = new File("test/swap/");

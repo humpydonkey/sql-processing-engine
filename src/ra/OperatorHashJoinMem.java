@@ -28,7 +28,7 @@ public class OperatorHashJoinMem extends OperatorHashJoin{
 	private Operator largeInput;
 	
 	public OperatorHashJoinMem(EqualJoin equalJoin,  Operator left, Operator right){
-		Tools.debug("\n[Mem Join] " +equalJoin+ " Created!");
+		Tools.debug("[Mem Join] " +equalJoin+ " Created!");
 		
 		ejInfo = equalJoin;
 		joinResults = new ArrayDeque<Tuple>();

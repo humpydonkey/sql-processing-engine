@@ -20,44 +20,50 @@ import common.TimeCalc;
 import common.Tools;
 import dao.Tuple;
 
+
 public class Main {
 
 	public static void main(String args[]){
 		//input example: --data [data] [sqlfile1] [sqlfile2] ...
 		//           or  --data [data] --swap [swap] [sqlfile1] [sqlfile2] ...
-		//--data test/cp2_grade --swap test/  test/cp2_grade/tpch07a.sql
+		//--build 
+		//--data <datadir> --swap /tmp/swap --index /tmp/idx <datadir>/tpch_schemas.sql <datadir>/tpch07a.sql <datadir>/tpch10a.sql <datadir>/tpch12a.sql <datadir>/tpch16a.sql
+		
 		if(args.length>=3){
-			if(args[0].equalsIgnoreCase("--data")){
-				//data directory
-				String dataDirStr = args[1];
-				File dataDir = new File(dataDirStr);
-				
-				int i=2;	//index of of argument sqlfile
+			if(args[0].equals("--build")){
+				return;
+			}
 
-				//swap directory
-				File swapDir = null;
-				if(args[2].equalsIgnoreCase("--swap")){
-					if(args.length>3){
-						swapDir = new File(args[3]);
-						i = 4;
-					}
-					else
-						System.out.println("Input error: "+args.toString());
+			File dataDir = null;
+			File swapDir = null;
+			File indexDir = null;
+			List<File> sqlFiles = new ArrayList<File>();
+			for(int i=0; i<args.length; i++){
+				if(args[i].equalsIgnoreCase("--data")){
+					//data directory
+					String dataDirStr = args[++i];
+					dataDir = new File(dataDirStr);
+				}else if(args[i].equalsIgnoreCase("--swap")){
+					swapDir = new File(args[++i]);
+				}else if(args[i].equalsIgnoreCase("--index")){
+					//index
+					indexDir = new File(args[++i]);
+					//data dir
+					for(int j=i+1; j<args.length; j++)
+						sqlFiles.add(new File(args[j]));
 				}
-				
-				//sql files
-				List<File> sqlFiles = new ArrayList<File>();
-				for(; i<args.length; i++){
-					sqlFiles.add(new File(args[i]));
-				}
-				
-				//print the results
-				List<Tuple> results = runSQL(dataDir, swapDir, sqlFiles);
-				for(Tuple t : results)
-					System.out.println(t.toString());
-
-			}else
+			}
+			
+			if(dataDir==null||swapDir==null||indexDir==null||sqlFiles.size()==0){
 				System.out.println("Input error: "+args.toString());
+				return;
+			}
+			
+			//print the results
+			List<Tuple> results = runSQL(dataDir, swapDir, sqlFiles);
+			for(Tuple t : results)
+				System.out.println(t.toString());
+
 		}
 		
 		if(Config.DebugMode)
@@ -179,4 +185,6 @@ public class Main {
 		System.out.println();	
 		keyboard.close();
 	}
+	
+
 }

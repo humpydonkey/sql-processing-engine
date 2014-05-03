@@ -58,7 +58,7 @@ public class OperatorHashJoinExternal extends OperatorHashJoin{
 	
 	
 	public OperatorHashJoinExternal(EqualJoin equalJoin, Operator left, Operator right){
-		Tools.debug("\n[External Hash Join] " +  left.getLength() + "\t" 
+		Tools.debug("[External Hash Join] " +  left.getLength() + "\t" 
 				+ equalJoin + "\t" + right.getLength() + " Created!");
 		
 		long size;
@@ -82,10 +82,10 @@ public class OperatorHashJoinExternal extends OperatorHashJoin{
 		rightBlockTupsCount = new int[blockNum];
 		
 		String equalColName = ejInfo.getColName();
-		TimeCalc.begin("hash partition");
+		//TimeCalc.begin("hash partition");
 		leftBlocks = hashPartition(equalColName, left, blockNum, leftBlockTupsCount);
 		rightBlocks = hashPartition(equalColName, right, blockNum, rightBlockTupsCount);
-		TimeCalc.end("Finish hash partition!");
+		//TimeCalc.end("Finish hash partition!");
 		
 		leftSchema = left.getSchema();
 		rightSchema = right.getSchema();
@@ -172,6 +172,7 @@ public class OperatorHashJoinExternal extends OperatorHashJoin{
 					hashMap = new HashMap<String, List<Tuple>>(rightBlockTupsCount[index]);
 					fillHashMap(rightF, rightSchema, smallInputColName, hashMap);
 					dataScan = new OperatorScanFlt(leftF, leftSchema, hashMap, leftColIndex);
+					Tools.debug("  Finish initializing next block: "+leftF.getName());
 				}else{
 					largeInputColName = rightSchema.getColNameByName(ejInfo.getColName()).toString();
 					smallInputColName = leftSchema.getColNameByName(ejInfo.getColName()).toString();
@@ -179,7 +180,9 @@ public class OperatorHashJoinExternal extends OperatorHashJoin{
 					hashMap = new HashMap<String, List<Tuple>>(leftBlockTupsCount[index]);
 					fillHashMap(leftF, leftSchema, smallInputColName, hashMap);
 					dataScan = new OperatorScanFlt(rightF, rightSchema, hashMap, rightColIndex);
+					Tools.debug("  Finish initializing next block: "+rightF.getName());
 				}
+				
 				break;
 			}
 		}
