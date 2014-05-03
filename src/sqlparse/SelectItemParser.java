@@ -32,7 +32,7 @@ import dao.Schema;
  * @author Asia
  *
  */
-public class SelectItemScanner implements SelectItemVisitor{
+public class SelectItemParser implements SelectItemVisitor{
 	
 	private List<SelectItem> items;
 	private Schema newSchema;
@@ -50,7 +50,7 @@ public class SelectItemScanner implements SelectItemVisitor{
 	
 	
 	@SuppressWarnings("unchecked")
-	public SelectItemScanner(PlainSelect select){
+	public SelectItemParser(PlainSelect select){
 		items = select.getSelectItems();
 		ifSelectAll = false;
 		

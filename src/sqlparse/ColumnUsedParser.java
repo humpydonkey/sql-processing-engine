@@ -60,13 +60,13 @@ import net.sf.jsqlparser.statement.select.SubSelect;
  * @author Asia
  *
  */
-public class ColumnUsedFinder implements ExpressionVisitor, SelectItemVisitor{
+public class ColumnUsedParser implements ExpressionVisitor, SelectItemVisitor{
 
 	private Map<String,Column> colsMapper;
 	private boolean onlyOneTable;
 	private Table fromTable;
 	
-	public ColumnUsedFinder(PlainSelect psel){
+	public ColumnUsedParser(PlainSelect psel){
 		colsMapper = new HashMap<String, Column>();
 		onlyOneTable = false;
 		fromTable = null;

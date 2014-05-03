@@ -25,7 +25,7 @@ public class Main {
 	public static void main(String args[]){
 		//input example: --data [data] [sqlfile1] [sqlfile2] ...
 		//           or  --data [data] --swap [swap] [sqlfile1] [sqlfile2] ...
-
+		//--data test/cp2_grade --swap test/  test/cp2_grade/tpch07a.sql
 		if(args.length>=3){
 			if(args[0].equalsIgnoreCase("--data")){
 				//data directory
@@ -67,9 +67,9 @@ public class Main {
 
 	
 	public static List<Tuple> testSpecificSQL(String dataDirStr, String... sqlPaths){	
-		String swapPath = "test";
+
 		File dataDir = new File(dataDirStr);
-		File swapDir = new File(swapPath);
+		File swapDir = Config.getSwapDir();
 		List<File> sqlfiles = new ArrayList<File>();
 		for(String sqlPath : sqlPaths){
 			sqlfiles.add(new File(sqlPath));
@@ -83,10 +83,10 @@ public class Main {
 
 	
 	public static List<Tuple> testSpecificCP2(){
-		//mocking input
-		String dataDirStr = "test/cp2_grade/";
-		String[] sqlFilePaths = {"test/cp2_grade/tpch07a.sql"};
-
+		//mocking input		//cp2_grade   cp2_littleBig
+		String dataDirStr = "test/cp2_littleBig/";
+		String[] sqlFilePaths = {"test/cp2_littleBig/tpch07a.sql"};
+		
 		List<Tuple> tups = testSpecificSQL(dataDirStr, sqlFilePaths);
 		for(Tuple t : tups)
 			t.printTuple();
@@ -110,7 +110,7 @@ public class Main {
 		//mocking input
 		String dataDirStr = "test/cp1/";//"data/NBA/";  //"/data/tpch/";
 		String sqlFilePath = "test/cp1/";
-		String swapPath = null;
+		//String swapPath = null;
 		
 		File dataDir = new File(dataDirStr);
 		File swapDir = null;
@@ -131,7 +131,7 @@ public class Main {
 
 	
 	public static List<Tuple> runSQL(File dataDir, File swapDir, List<File> sqlFiles){
-		TimeCalc.begin(1);
+		TimeCalc.begin();
 		List<Tuple> results = null;
 		Config.setSwapDir(swapDir);
 
@@ -145,7 +145,7 @@ public class Main {
 				
 				while((stmt = parser.Statement()) !=null){		
 					if(stmt instanceof CreateTable)	
-						myParser.create(stmt);
+						SQLEngine.create(stmt);
 					else {
 						
 					 if(stmt instanceof Select){
@@ -166,7 +166,7 @@ public class Main {
 			
 		}//end for
 		
-		TimeCalc.end(1);
+		TimeCalc.end("Executing SQL finished!");
 		return results;
 	}
 
@@ -177,5 +177,6 @@ public class Main {
 		Scanner keyboard = new Scanner(System.in);
 		keyboard.nextLine();
 		System.out.println();	
+		keyboard.close();
 	}
 }

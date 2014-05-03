@@ -21,6 +21,7 @@ import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
 import net.sf.jsqlparser.statement.select.SelectBody;
+import sqlparse.TestEnvironment;
 
 import common.TimeCalc;
 
@@ -47,20 +48,21 @@ public class FileAccessor {
 		String add0 = "data/NBA/";
 		String add1 = "data/NBA/nba11.sql";
 		String add2 = "data/NBA/nba16.expected.dat";
-		String add3 = "test/data/partsupp.dat";
+		String add3 = "test/cp1/partsupp.dat";
 		System.out.println("start");
 		
-		TimeCalc.begin(1);
+		TimeCalc.begin();
 		//String content = FileAccessor.getInstance().readLine(add2);
 		//StringBuilder content = FileAccessor.getInstance().readBlock(add2);
 		//List<File> test =FileAccessor.getInstance().getDataFiles(add0, "dat");
 		//List<String> sqls = FileAccessor.getInstance().readAllSqls(add1);
 		
-		StringBuilder sb = FileAccessor.getInstance().readPartOfFile(new File(add3), 2);
-
-		FileAccessor.getInstance().writeFile(sb,"partsupp.dat");
-
-		TimeCalc.end(1);
+		//FileAccessor.StringBuilder sb = FileAccessor.getInstance().readPartOfFile(new File(add3), 2);
+		TestEnvironment envir = new TestEnvironment();
+		Schema schema = envir.generateSchema("partsupp");
+		List<Tuple> tups = FileAccessor.getInstance().readBlockTuple(add3, schema);
+		System.out.println(tups.get(1).getBytes());
+		TimeCalc.end("Finish reading");
 		System.out.println("end");
 	}
 	
@@ -106,7 +108,7 @@ public class FileAccessor {
 	 * @param addr : file path
 	 * @return : String content
 	 */
-	public List<Tuple> readBlock(String addr, Schema schema){
+	public List<Tuple> readBlockString(String addr, Schema schema){
 		List<Tuple> tuples = new LinkedList<Tuple>();
 		try(BufferedReader reader = getBR(addr)){
 			String line = null;
@@ -153,6 +155,21 @@ public class FileAccessor {
 				if(current>endLine)
 					break;
 
+				tuples.add(new Tuple(line, schema));
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return tuples;
+	}
+	
+	
+	public List<Tuple> readBlockTuple(String addr, Schema schema){
+		List<Tuple> tuples = new LinkedList<Tuple>();
+		try(BufferedReader reader = getBR(addr)){			
+			String line = null;
+			while((line = reader.readLine())!=null){
 				tuples.add(new Tuple(line, schema));
 			}
 		} catch (IOException e) {

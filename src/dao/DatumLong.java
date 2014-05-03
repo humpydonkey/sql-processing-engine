@@ -1,5 +1,11 @@
 package dao;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+
 /**
  * Long data cell
  * @author Asia
@@ -23,7 +29,12 @@ public class DatumLong extends Datum{
 	public long getValue(){
 		return value;
 	}
-	
+
+	@Override
+	public int getHashValue(){
+		return (int)value;
+	}
+
 	@Override
 	public double getNumericValue() {
 		return (double)value;
@@ -76,4 +87,21 @@ public class DatumLong extends Datum{
 		return String.valueOf(value);
 	}
 	
+	public static void main(String[] args){
+		try(ObjectOutputStream  output = new ObjectOutputStream(new FileOutputStream(new File("test/AttrSizeTest.test")))){
+			Datum data = new DatumLong(1111);
+			DatumType type = DatumType.Long;
+			
+			System.out.println(data.getBytes());
+			System.out.println(data.toString().getBytes().length);
+			output.writeObject(type);
+			
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 }

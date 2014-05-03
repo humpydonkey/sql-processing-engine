@@ -23,7 +23,12 @@ public class DatumString extends Datum {
 	public void setValue(String str){
 		value = str;
 	}
-
+	
+	@Override
+	public int getHashValue(){
+		return value.hashCode();
+	}
+	
 	@Override
 	public double getNumericValue() {
 		System.out.println("Wrong get value.");

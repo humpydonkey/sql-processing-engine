@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import logicplan.ConditionDistributor;
 import logicplan.JoinManager;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.schema.Table;
@@ -33,30 +32,32 @@ import dao.Schema;
 import dao.Tuple;
 
 public class SQLEngine {
-	private Map<String, Table> localFromItemTable;
-	
-	private static File dataPath;
-	
-	public static Map<String, CreateTable> globalCreateTables;
-	public static Tuple globalTuple;
-	
-	public SQLEngine(File dataPathIn){
-		localFromItemTable = new HashMap<String, Table>();
+	/*********************	static	filed	*********************/
+	private static Map<String, CreateTable> globalCreateTables;
+	private static Tuple globalTuple;
 
-		if(dataPathIn!=null)
-			dataPath = dataPathIn;
-
+	static {
 		if(globalCreateTables==null)
 			globalCreateTables = new HashMap<String, CreateTable>();
-
+	} 
+	
+	public static Map<String, CreateTable> getGlobalCreateTables(){
+		return globalCreateTables;
 	}
 	
-	
-	public Map<String, Table> getLocalTables(){
-		return localFromItemTable;
+	public static Tuple getGlobalTuple(){
+		return globalTuple;
 	}
 	
-	public void create(Statement stmt)
+	public static void setGlobalTuple(Tuple tup){
+		globalTuple = tup;
+	}
+	
+	/**
+	 * Parse Create Table statement
+	 * @param stmt
+	 */
+	public static void create(Statement stmt)
 	{
 		if(stmt instanceof CreateTable){
 			CreateTable ct = (CreateTable)stmt;
@@ -68,6 +69,23 @@ public class SQLEngine {
 		}
 	}
 	
+	
+	/*********************	non-static	filed	*********************/	
+	private Map<String, Table> localFromItemTable;
+	private File dataPath;
+	
+	public SQLEngine(File dataPathIn){
+		localFromItemTable = new HashMap<String, Table>();
+
+		if(dataPathIn!=null)
+			dataPath = dataPathIn;
+	}
+	
+	public Map<String, Table> getLocalTables(){
+		return localFromItemTable;
+	}
+
+	
 	public List<Tuple> select(SelectBody select){
 
 		Map<String, Operator> operMap = new HashMap<String, Operator>();
@@ -78,7 +96,7 @@ public class SQLEngine {
 			
 			//extract local table into a map
 			extractLocalTable(pselect,localFromItemTable);
-			ColumnUsedFinder cf = new ColumnUsedFinder(pselect);
+			ColumnUsedParser cf = new ColumnUsedParser(pselect);
 	
 			/*********************    Scan&Selection    ********************/
 			//parse scan
@@ -97,12 +115,13 @@ public class SQLEngine {
 			}else{
 				/*********************   Push down Selection   ****************/
 				//resolve and redistribute the big where condition
-				ConditionDistributor organizer = pushDownSelection(pselect, operMap);
+				SelectionParser distributor = pushDownSelection(pselect, operMap);
 				
 				/*********************    Equal Join    ********************/
 				if(pselect.getJoins()!=null){
-					JoinManager jm = new JoinManager(organizer.getJoinList(), operMap, Config.getSwapDir());
-					oper = jm.executeJoin();
+					JoinManager jm = new JoinManager(distributor.getJoinList(), operMap, Config.getSwapDir());
+					oper = jm.pipeline();
+					//oper = jm.executeJoin();
 				}
 			}
 			
@@ -111,11 +130,10 @@ public class SQLEngine {
 				oper = new OperatorSelection(oper, pselect.getWhere());
 			
 			/*********************    Parsing selected items    ********************/
-			SelectItemScanner selectItemScan = new SelectItemScanner(pselect);
+			SelectItemParser selectItemScan = new SelectItemParser(pselect);
 			Schema newSchema = selectItemScan.getSelectedColumns();
 			Aggregator[] aggrs = selectItemScan.getAggregators();
-
-
+			
 			/*********************    Group By + Order By   ********************/
 			@SuppressWarnings("rawtypes")
 			List groupbyCols = pselect.getGroupByColumnReferences();
@@ -161,8 +179,7 @@ public class SQLEngine {
 					oper = new OperatorProjection(oper, newSchema);
 				}
 			}
-			
-				
+
 			
 			if(pselect.getLimit()==null)
 				return SQLEngine.dump(oper);
@@ -231,20 +248,19 @@ public class SQLEngine {
 	}
 	
 	
-	private ConditionDistributor pushDownSelection(final PlainSelect pselect, Map<String, Operator> operMap){
+	private SelectionParser pushDownSelection(final PlainSelect pselect, Map<String, Operator> operMap){
 		/*********************  Push down Selection    ********************/
 		Expression where = pselect.getWhere();
 		
 		//reorganize where condition, distribute to each one
-		ConditionDistributor reorganizer = new ConditionDistributor(operMap.keySet());
-		where.accept(reorganizer);
-		reorganizer.printResults();
+		SelectionParser selParser = new SelectionParser(operMap.keySet());
+		selParser.parse(where);
 		
 		//for every scan operator, pipeline select
 		for(Entry<String, Operator> scan : operMap.entrySet()){
 			//subwhere
 			String tName = scan.getKey();
-			Expression subwhere = reorganizer.getExprByTName(tName);
+			Expression subwhere = selParser.getExprByTName(tName);
 			if(subwhere!=null){
 				Operator scan_select = scan.getValue();
 				scan_select = new OperatorSelection(scan_select, subwhere);
@@ -253,9 +269,9 @@ public class SQLEngine {
 		}
 		
 		//reset the original where to a filtered where
-		pselect.setWhere(reorganizer.getExprByTName(ConditionDistributor.MultiTable));			
+		pselect.setWhere(selParser.getExprByTName(SelectionParser.MultiTabName));			
 		
-		return reorganizer;
+		return selParser;
 	}
 
 	

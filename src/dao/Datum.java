@@ -24,6 +24,7 @@ public abstract class Datum implements Comparable<Datum>, Serializable {
 	@Override
 	public abstract String toString();
 	
+	public abstract int getHashValue();
 	
 	/**
 	 * they are equal if they have the same value and type.

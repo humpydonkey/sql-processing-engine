@@ -1,75 +1,48 @@
 package common;
 
+import java.util.Stack;
+
 import sqlparse.Config;
 
 public class TimeCalc {
 	
-	private static int[] ids = new int[10];
-	private static long[] startTimes = new long[10];
-	private static int size = 0;
-	private static StringBuilder errMsg;
+	private static Stack<Long> startTimes = new Stack<Long>();
 	private static boolean ifPrint = Config.PrintRuningTime;
 	
-	static{
-		for(int i=0; i<ids.length; i++)
-			ids[i] = -1;
+	private static String getStackTraceInfo(){
+		StackTraceElement ele = Thread.currentThread().getStackTrace()[3];
+		return "Line number: "+ele.getLineNumber()+" - "+ele.getMethodName()+" - "+ele.getFileName();
 	}
 	
-	
-	public static void begin(int id){
-		 errMsg = new StringBuilder();
-		if(exist(id)){
-			errMsg.append("TimeCalc.begin() : Error! There is alread exist such id: " + id + " \n");
-		}else if(size>=10){
-			errMsg.append("TimeCalc.begin() : Error! There is no room for another timer! \n");
-		}else{
-			ids[size] = id;
-			startTimes[size] = System.currentTimeMillis();
-			size++;
-		}
+	public static void begin(){
+		begin("");
 	}
 	
-	public static int end(int id){
-		return end(id,"");
+	public static void begin(String msg){
+		if(ifPrint){
+			System.out.println(startTimes.size() + ".Begin calculating time ------------------ "+ msg);
+			System.out.println(getStackTraceInfo());
+		}
+		startTimes.push(System.currentTimeMillis());
 	}
 	
-	public static int end(int id, String userMsg){
-		int index = findIndex(id);
-		if(index<0){
-			errMsg.append("TimeCalc.end() : Error! There is no such id! \n");
-			if(ifPrint)
-				System.out.print(errMsg.toString());
-			return 0;
-		}
-		else{
-			long span_ms = System.currentTimeMillis() - startTimes[index];
-			String content;
-			if(span_ms>1000){
-				float span_s = (float)span_ms/1000;
-				content = id + " " + userMsg + " running time : " + span_s + "s.";
-			}else
-				content = id + " " + userMsg + " running time : " + span_ms + "ms.";
-			
-			if(ifPrint)
-				System.out.println(content + errMsg.toString());
-			
-			ids[index] = -1;	
-			size--;
-			return (int)span_ms;
-		}
+	public static int end(){
+		return end("");
 	}
 	
-	private static boolean exist(int idIn){
-		for(int id : ids){
-			if(id==idIn) return true;
-		}
-		return false;
-	}
-	
-	private static int findIndex(int idIn){
-		for(int i=0; i<ids.length; i++){
-			if(ids[i]==idIn) return i;
-		}
-		return -1;
+	public static int end(String userMsg){
+		long span_ms = System.currentTimeMillis() - startTimes.pop();
+		String content;
+		if(span_ms>1000){
+			float span_s = (float)span_ms/1000;
+			content = startTimes.size() + " running time : " + span_s + "s.\t" + userMsg ;
+		}else
+			content = startTimes.size() + " running time : " + span_ms + "ms.\t" + userMsg ;
+
+		if(ifPrint)
+			System.out.println(content);
+
+		return (int)span_ms;
+		
 	}
 }

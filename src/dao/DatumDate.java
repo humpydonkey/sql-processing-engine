@@ -38,6 +38,11 @@ public class DatumDate extends Datum {
 	}
 	
 	@Override
+	public int getHashValue(){
+		return value.hashCode();
+	}
+	
+	@Override
 	public double getNumericValue() {
 		System.out.println("Wrong get value.");
 		return 0;
@@ -76,4 +81,5 @@ public class DatumDate extends Datum {
 	public long getBytes() {
 		return 32;
 	}
+
 }

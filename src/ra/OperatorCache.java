@@ -43,6 +43,9 @@ public class OperatorCache implements Operator {
 	public void reset() {
 		iter = tuples.iterator();
 	}
+	
+	@Override
+	public void close(){}
 
 
 	@Override

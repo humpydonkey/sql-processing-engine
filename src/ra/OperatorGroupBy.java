@@ -115,14 +115,14 @@ public class OperatorGroupBy implements Operator{
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				TimeCalc.begin(0);
+				TimeCalc.begin("Groupby sortAndFlush");
 				sortAndFlush(groupMap, groupFiles, comprtr);
-				TimeCalc.end(0,"sort and flush once!");
+				TimeCalc.end("Sort and flush once!");
 			}
 		}
-		TimeCalc.begin(0);
+		TimeCalc.begin("Groupby sortAndFlush last time");
 		sortAndFlush(groupMap, groupFiles, comprtr);
-		TimeCalc.end(0,"sort and flush last time!");
+		TimeCalc.end("Sort and flush last time!");
 	
 		
 		return groupFiles;
@@ -130,6 +130,10 @@ public class OperatorGroupBy implements Operator{
 	
 	public boolean isSwap(){
 		return swap;
+	}
+	
+	public void setSwap(boolean swapIn){
+		swap = swapIn;
 	}
 	
 	public List<Tuple> dump(){
@@ -246,15 +250,13 @@ public class OperatorGroupBy implements Operator{
 		CCJSqlParser parser = new CCJSqlParser(stream);
 		Statement stmt;
 		
-		SQLEngine myParser = new SQLEngine(dataDir);
-		
 		while((stmt = parser.Statement()) !=null){		
 			if(stmt instanceof CreateTable)	
-				myParser.create(stmt);
+				SQLEngine.create(stmt);
 		}
 		
 		Table tab = new Table(null,"lineitem");
-		CreateTable ct = SQLEngine.globalCreateTables.get("LINEITEM");
+		CreateTable ct = SQLEngine.getGlobalCreateTables().get("LINEITEM");
 		@SuppressWarnings("rawtypes")
 		List groupCols = new ArrayList<Column>();
 		Column col1 = new Column(tab, "suppkey");
@@ -280,5 +282,10 @@ public class OperatorGroupBy implements Operator{
 		List<File> files = gb.dumpToDisk(Tuple.getComparator(new CompareAttribute[]{new CompareAttribute(col1,true)}));
 		for(File f : files)
 			System.out.println(f.getPath());
+	}
+
+	@Override
+	public void close() {
+		input.close();
 	}
 }

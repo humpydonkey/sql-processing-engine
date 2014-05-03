@@ -23,6 +23,11 @@ public class DatumBool extends Datum {
 	public boolean getValue(){
 		return value;
 	}
+	
+	@Override
+	public int getHashValue(){
+		return value==true?1:0;
+	}
 
 	@Override
 	public double getNumericValue() {

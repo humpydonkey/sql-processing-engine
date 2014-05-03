@@ -12,12 +12,15 @@ public class Config {
 	 */
 	public static final long FileThreshold_MB = 50*OneMB;	//MB
 	
-	private static File swapDir = null;
+	//default value
+	private static File swapDir = new File("test/swap/");
 	
-	public static final boolean DebugMode = false;
+	public static final boolean DebugMode = true;
 
-	public static final boolean PrintRuningTime = false;
+	public static final boolean PrintRuningTime = true;
 
+	public static final int OneTupeSize_Byte = 100;
+	
 	public static File getSwapDir(){
 		return swapDir;
 	}

@@ -47,7 +47,6 @@ import net.sf.jsqlparser.expression.operators.relational.MinorThanEquals;
 import net.sf.jsqlparser.expression.operators.relational.NotEqualsTo;
 import net.sf.jsqlparser.parser.CCJSqlParserManager;
 import net.sf.jsqlparser.schema.Column;
-import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.Select;
@@ -62,31 +61,41 @@ import dao.DatumString;
 import dao.DatumType;
 import dao.Tuple;
 
-//it will ignore the comparison of a column from a different table
-//and ignore equal join condition
+/**
+ * Parse where condition
+ * @author Asia
+ *
+ */
 public class EvaluatorConditionExpres implements ExpressionVisitor{
-
 	private Tuple tuple;
 	private boolean evalResult;
 	private Datum data;
 	private Column column;
-	private boolean differentTable;
 	private EvaluatorSubSelectGlobalAttr subselecttAttrFinder;
 	private CCJSqlParserManager subselectParser;
 
 	public EvaluatorConditionExpres(Tuple tupleIn){
 		evalResult = true;
 		tuple = tupleIn;
-		differentTable = false;
 		subselecttAttrFinder = new EvaluatorSubSelectGlobalAttr(tupleIn);
 		subselectParser = new CCJSqlParserManager();
 	}
 	
 	
-	public boolean getResult(){	
+	public void updateTuple(Tuple tup){
+		tuple = tup;
+		resetState();
+	}
+	
+	private void resetState(){
+		data = null;
+		column = null;
+		evalResult = true;
+	}
+	
+	public boolean getResult(){
 		return evalResult;
 	}
-
 	
 	public Datum getData(){
 		Datum d = data;
@@ -279,39 +288,16 @@ public class EvaluatorConditionExpres implements ExpressionVisitor{
 	public void visit(EqualsTo arg) {
 		arg.getLeftExpression().accept(this);
 		Datum left = getData();
-		Column leftCol = getColumn();
-		if(differentTable){//mask
-			//ignore comparison of columns of different table
-			evalResult = true;
-			differentTable = false;
-			return;
-		}
 		
 		arg.getRightExpression().accept(this);
 		Datum right = getData();
-		Column rightCol = getColumn();	
 		
-		if(differentTable){//mask
-			//ignore comparison of columns of different table
+		int compResult = left.compareTo(right);
+		if(compResult==0)
 			evalResult = true;
-			differentTable = false;
-			return;
-		}
+		else
+			evalResult = false;
 		
-		//if they have same column name
-		if(leftCol!=null&&rightCol!=null){
-			if(leftCol.getColumnName().equalsIgnoreCase(rightCol.getColumnName())){
-				//it is a equal join, ignore it
-				differentTable = true;
-				return;
-			}
-		}else{	//common equals expression			
-			int compResult = left.compareTo(right);
-			if(compResult==0)
-				evalResult = true;
-			else
-				evalResult = false;
-		}
 	}
 
 	
@@ -321,14 +307,6 @@ public class EvaluatorConditionExpres implements ExpressionVisitor{
 		Datum left = getData();
 		arg.getRightExpression().accept(this);
 		Datum right = getData();
-		
-		if(differentTable){//mask
-			//ignore comparison of columns of different table
-			evalResult = true;
-			differentTable = false;
-			return;
-		}
-		
 		
 		int compResult = left.compareTo(right);
 		if(compResult>0)
@@ -343,13 +321,6 @@ public class EvaluatorConditionExpres implements ExpressionVisitor{
 		Datum left = getData();
 		arg.getRightExpression().accept(this);
 		Datum right = getData();
-		
-		if(differentTable){//mask
-			//ignore comparison of columns of different table
-			evalResult = true;
-			differentTable = false;
-			return;
-		}
 		
 		
 		int compResult = left.compareTo(right);
@@ -376,13 +347,6 @@ public class EvaluatorConditionExpres implements ExpressionVisitor{
 		Datum left = getData();	//column
 		arg.getRightExpression().accept(this);
 		Datum right = getData();//pattern
-
-		if(differentTable){//mask
-			//ignore comparison of columns of different table
-			evalResult = true;
-			differentTable = false;
-			return;
-		}
 		
 		String attribute = left.toString();
 		String likeStr = right.toString();
@@ -403,14 +367,6 @@ public class EvaluatorConditionExpres implements ExpressionVisitor{
 		arg.getRightExpression().accept(this);
 		Datum right = getData();
 		
-		if(differentTable){//mask
-			//ignore comparison of columns of different table
-			evalResult = true;
-			differentTable = false;
-			return;
-		}
-		
-		
 		int compResult = left.compareTo(right);
 		if(compResult<0)
 			evalResult = true;
@@ -424,15 +380,6 @@ public class EvaluatorConditionExpres implements ExpressionVisitor{
 		Datum left = getData();
 		arg.getRightExpression().accept(this);
 		Datum right = getData();
-		
-		
-		if(differentTable){//mask
-			//ignore comparison of columns of different table
-			evalResult = true;
-			differentTable = false;
-			return;
-		}
-		
 		
 		int compResult = left.compareTo(right);
 		if(compResult<=0)
@@ -448,15 +395,6 @@ public class EvaluatorConditionExpres implements ExpressionVisitor{
 		arg.getRightExpression().accept(this);
 		Datum right = getData();
 		
-		
-		if(differentTable){//mask
-			//ignore comparison of columns of different table
-			evalResult = true;
-			differentTable = false;
-			return;
-		}
-		
-		
 		int compResult = left.compareTo(right);
 		if(compResult!=0)
 			evalResult = true;
@@ -468,19 +406,6 @@ public class EvaluatorConditionExpres implements ExpressionVisitor{
 	public void visit(Column arg) {
 		column = arg;
 
-		Table argTable = arg.getTable();
-		if(argTable!=null){
-			String argTableName = argTable.getAlias()==null?argTable.getName():argTable.getAlias();
-			String tupTableName = tuple.getTableAlias()==null?tuple.getTableName():tuple.getTableAlias();
-			
-			if((tupTableName!=null) && (argTableName!=null) && (!argTableName.equals("null")) &&(!argTableName.equalsIgnoreCase(tupTableName))){
-				//in order to mask the where condition includes columns from different tables 
-				//Column arg is not the from the tuple's table, just ignore it
-				differentTable = true;
-				return;
-			}
-		}
-		
 		Datum var = tuple.getDataByName(arg);
 		if(var==null){
 			StringBuilder sb = new StringBuilder();
@@ -506,7 +431,7 @@ public class EvaluatorConditionExpres implements ExpressionVisitor{
 			if(newSB!=null)
 				sb = newSB;
 
-			SQLEngine.globalTuple = tuple;
+			SQLEngine.setGlobalTuple(tuple);
 			SQLEngine parser = new SQLEngine(null);
 			List<Tuple> tuples = parser.select(sb);
 			

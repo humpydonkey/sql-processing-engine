@@ -1,8 +1,5 @@
 package dao;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -11,13 +8,12 @@ import java.util.Map;
 
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.Function;
-import net.sf.jsqlparser.parser.CCJSqlParser;
-import net.sf.jsqlparser.parser.ParseException;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.create.table.ColumnDefinition;
 import net.sf.jsqlparser.statement.create.table.CreateTable;
 import ra.Aggregator;
+import sqlparse.TestEnvironment;
 
 /**
  * Schema of a table
@@ -225,17 +221,7 @@ public class Schema  implements Serializable {
 	public String getTableAlias(){
 		return tableName.getAlias();
 	}
-	
-	/**
-	 * Get column name
-	 * @param index
-	 * @return
-	 */
-	public String getColName(int index){
-		if(index>=columnNames.length)
-			throw new IndexOutOfBoundsException();		
-		return columnNames[index].getColumnName();
-	}
+
 	
 	/**
 	 * Get column type
@@ -264,10 +250,37 @@ public class Schema  implements Serializable {
 		return length;
 	}
 	
-	public Column getColumnByIndex(int index){
+	
+	/**
+	 * Get Column name by index
+	 * @param index
+	 * @return
+	 */
+	public Column getColNameByIndex(int index){
 		if(index>=columnNames.length)
 			throw new IndexOutOfBoundsException();		
 		return columnNames[index];
+	}
+	
+	/**
+	 * Get Column name by String name
+	 * @param name
+	 * @return
+	 */
+	public Column getColNameByName(String name){
+		int index = getColIndex(name);
+		if(index<0){
+			if(name.contains(".")){
+				name = name.split("\\.")[1];
+				index = getColIndex(name);
+				if(index>=0)
+					return columnNames[index];
+				else
+					return null;
+			}else
+				return null;	
+		}else
+			return columnNames[index];
 	}
 	
 	public Aggregator getAggregator(Function func){
@@ -324,23 +337,35 @@ public class Schema  implements Serializable {
 			setRawPosition(index, position);
 	}
 	
+	@Override
+	public String toString(){
+		StringBuilder sb = new StringBuilder();
+		for(Column col : columnNames)
+			sb.append(col.getWholeColumnName()+"|");
+		sb.deleteCharAt(sb.length()-1);
+		sb.append("\n");
+		
+		for(Expression source : columnSources)
+			sb.append(source.toString()+"|");
+		sb.deleteCharAt(sb.length()-1);
+		sb.append("\n");
+		
+		
+		for(DatumType type : colTypes)
+			sb.append(type.toString()+" | ");
+		sb.deleteCharAt(sb.length()-2);
+		sb.append("\n");
+		
+		return sb.toString();
+	}
+	
 	public static void main(String[] args) {
 
-		try {
-			CCJSqlParser parser = new CCJSqlParser(new FileInputStream(new File("test/cp2_grade/nba11.sql")));
-			CreateTable ct = parser.CreateTable();
-			@SuppressWarnings("unchecked")
-			List<ColumnDefinition> list = ct.getColumnDefinitions();
-			for(ColumnDefinition cd : list){
-				System.out.println(cd.getColumnName() + " : " + cd.getColDataType().getDataType());
-			}
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ParseException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+	
+		TestEnvironment envir = new TestEnvironment();
+		Schema schema = envir.generateSchema("lineitem");
+		System.out.println(schema.toString());
+	
 	}
 
 }

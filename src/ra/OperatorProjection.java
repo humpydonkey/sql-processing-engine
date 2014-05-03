@@ -45,4 +45,9 @@ public class OperatorProjection implements Operator{
 		return input.getSchema();
 	}
 
+	@Override
+	public void close() {
+		input.close();
+	}
+
 }

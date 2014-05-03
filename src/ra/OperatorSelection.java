@@ -14,12 +14,12 @@ public class OperatorSelection implements Operator{
 
 	private Operator input;
 	private Expression condition;
-	private EvaluatorConditionExpres_Pure evaluator;
+	private EvaluatorConditionExpres evaluator;
 	
 	public OperatorSelection(Operator inputIn,  Expression conditionIn){
 		input = inputIn;
 		condition = conditionIn;
-		evaluator = new EvaluatorConditionExpres_Pure(null);
+		evaluator = new EvaluatorConditionExpres(null);
 	}
 	
 	@Override
@@ -49,5 +49,10 @@ public class OperatorSelection implements Operator{
 	@Override
 	public Schema getSchema() {
 		return input.getSchema();
+	}
+
+	@Override
+	public void close() {
+		input.close();
 	}
 }

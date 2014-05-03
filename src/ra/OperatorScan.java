@@ -29,6 +29,10 @@ public class OperatorScan implements Operator {
 		reset();
 	}
 	
+	public File getFile(){
+		return file;
+	}
+	
 	@Override
 	public long getLength(){
 		return file.length();
@@ -67,7 +71,25 @@ public class OperatorScan implements Operator {
 			e.printStackTrace();
 		} 
 	}
+
+
+	@Override
+	public Schema getSchema() {
+		return schema;
+	}
 	
+	
+	@Override
+	public void close(){
+		try {
+			inputReader.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+
 	/**
 	 * Check inputReader whether is null
 	 * @return
@@ -84,14 +106,4 @@ public class OperatorScan implements Operator {
 		}else
 			return true;
 	}
-	
-	public File getFile(){
-		return file;
-	}
-
-	@Override
-	public Schema getSchema() {
-		return schema;
-	}
-
 }

@@ -1,7 +1,6 @@
 package ra;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Stack;
 
 import net.sf.jsqlparser.expression.AllComparisonExpression;
 import net.sf.jsqlparser.expression.AnyComparisonExpression;
@@ -52,112 +51,72 @@ import dao.EqualJoin;
 public class EvaluatorEqualJoin implements ExpressionVisitor{
 	
 	private Column column;
-	private List<EqualJoin> ejList;
+	private Stack<EqualJoin> ejStack;
+		
 	
 	public EvaluatorEqualJoin(){
-		ejList = new ArrayList<EqualJoin>();
+		ejStack = new Stack<EqualJoin>();
 	}
 	
-	public List<EqualJoin> getJoins(){
-		List<EqualJoin> results = ejList;
-		ejList = new ArrayList<EqualJoin>();
-		return results;
+	public Stack<EqualJoin> getJoins(){
+		return ejStack;
 	}
 	
-	private Column getColumn(){	
-		Column col = column;
-		column = null;
-		return col;
+	public EqualJoin popJoin(){
+		return ejStack.pop();
 	}
 	
-	@Override
-	public void visit(NullValue arg0) {
-		
-		
+	public int getSize(){
+		return ejStack.size();
 	}
+	
+	public boolean isEqualJoin(Column left, Column right){
+		if(left!=null&&right!=null){
+			//Same column name, different Table name
+			if(left.getColumnName().equalsIgnoreCase(right.getColumnName())){
+				String leftTName = left.getTable().getName();
+				String rightTName = right.getTable().getName();
+				if(!leftTName.equalsIgnoreCase(rightTName))
+					return true;
+			}
+		}
+		return false;
+	} 
 
-	@Override
-	public void visit(net.sf.jsqlparser.expression.Function arg0) {
-		
-		
-	}
+	
+	@Override	public void visit(NullValue arg0) {}
 
-	@Override
-	public void visit(InverseExpression arg0) {
-		
-		
-	}
+	@Override	public void visit(net.sf.jsqlparser.expression.Function arg0) {}
 
-	@Override
-	public void visit(JdbcParameter arg0) {
-		
-		
-	}
+	@Override	public void visit(InverseExpression arg0) {}
 
-	@Override
-	public void visit(DoubleValue arg0) {
-		
-		
-	}
+	@Override	public void visit(JdbcParameter arg0) {}
 
-	@Override
-	public void visit(LongValue arg0) {
-		
-		
-	}
+	@Override	public void visit(DoubleValue arg0) {}
 
-	@Override
-	public void visit(DateValue arg0) {
-		
-		
-	}
+	@Override	public void visit(LongValue arg0) {}
 
-	@Override
-	public void visit(TimeValue arg0) {
-		
-		
-	}
+	@Override	public void visit(DateValue arg0) {}
 
-	@Override
-	public void visit(TimestampValue arg0) {
-		
-		
-	}
+	@Override	public void visit(TimeValue arg0) {}
+
+	@Override	public void visit(TimestampValue arg0) {}
 
 	@Override
 	public void visit(Parenthesis arg0) {
 		arg0.getExpression().accept(this);
 	}
 
-	@Override
-	public void visit(StringValue arg0) {
-		
-		
-	}
+	@Override	public void visit(StringValue arg0) {}
+
+	@Override	public void visit(Addition arg0) {}
+
+	@Override	public void visit(Division arg0) {}
+
+	@Override	public void visit(Multiplication arg0) {}
 
 	@Override
-	public void visit(Addition arg0) {
-		
-		
-	}
-
-	@Override
-	public void visit(Division arg0) {
-		
-		
-	}
-
-	@Override
-	public void visit(Multiplication arg0) {
-		
-		
-	}
-
-	@Override
-	public void visit(Subtraction arg0) {
-		
-		
-	}
+	public void visit(Subtraction arg0) {}
 
 	@Override
 	public void visit(AndExpression arg0) {
@@ -165,16 +124,9 @@ public class EvaluatorEqualJoin implements ExpressionVisitor{
 		arg0.getRightExpression().accept(this);
 	}
 
-	@Override
-	public void visit(OrExpression arg0) {
-		
-	}
+	@Override	public void visit(OrExpression arg0) {}
 
-	@Override
-	public void visit(Between arg0) {
-		
-		
-	}
+	@Override	public void visit(Between arg0) {}
 
 	@Override
 	public void visit(EqualsTo arg) {
@@ -183,137 +135,63 @@ public class EvaluatorEqualJoin implements ExpressionVisitor{
 		arg.getRightExpression().accept(this);
 		Column rightCol = getColumn();	
 		
+		//is Equal Join
 		if(leftCol!=null&&rightCol!=null){
-			if(leftCol.getColumnName().equalsIgnoreCase(rightCol.getColumnName())){
-				String leftTName = leftCol.getTable().getName();
-				String rightTName = rightCol.getTable().getName();
-				if(!leftTName.equalsIgnoreCase(rightTName)){
-					EqualJoin ej = new EqualJoin(leftCol, rightCol);
-					ejList.add(ej);	//same Table name, same column name	
-				}
+			if(isEqualJoin(leftCol, rightCol)){
+				EqualJoin ej = new EqualJoin(leftCol, rightCol);
+				ejStack.add(ej);		
 			}
 		}
-	}
-
-	@Override
-	public void visit(GreaterThan arg0) {
-		
 		
 	}
 
-	@Override
-	public void visit(GreaterThanEquals arg0) {
-		
-		
-	}
+	@Override	public void visit(GreaterThan arg0) {}
 
-	@Override
-	public void visit(InExpression arg0) {
-		
-		
-	}
+	@Override	public void visit(GreaterThanEquals arg0) {}
 
-	@Override
-	public void visit(IsNullExpression arg0) {
-		
-		
-	}
+	@Override	public void visit(InExpression arg0) {}
 
-	@Override
-	public void visit(LikeExpression arg0) {
-		
-		
-	}
+	@Override	public void visit(IsNullExpression arg0) {}
 
-	@Override
-	public void visit(MinorThan arg0) {
-		
-		
-	}
+	@Override	public void visit(LikeExpression arg0) {}
 
-	@Override
-	public void visit(MinorThanEquals arg0) {
-		
-		
-	}
+	@Override	public void visit(MinorThan arg0) {}
 
-	@Override
-	public void visit(NotEqualsTo arg0) {
-		
-		
-	}
+	@Override	public void visit(MinorThanEquals arg0) {}
+
+	@Override	public void visit(NotEqualsTo arg0) {}
 
 	@Override
 	public void visit(Column arg0) {
 		column = arg0;
 	}
 
-	@Override
-	public void visit(SubSelect arg0) {
-		
-		
+	@Override	public void visit(SubSelect arg0) {}
+
+	@Override	public void visit(CaseExpression arg0) {}
+
+	@Override	public void visit(WhenClause arg0) {}
+
+	@Override	public void visit(ExistsExpression arg0) {}
+
+	@Override	public void visit(AllComparisonExpression arg0) {}
+
+	@Override	public void visit(AnyComparisonExpression arg0) {}
+
+	@Override	public void visit(Concat arg0) {}
+
+	@Override	public void visit(Matches arg0) {}
+
+	@Override	public void visit(BitwiseAnd arg0) {}
+
+	@Override	public void visit(BitwiseOr arg0) {}
+
+	@Override	public void visit(BitwiseXor arg0) {}
+
+	
+	private Column getColumn(){	
+		Column col = column;
+		column = null;
+		return col;
 	}
-
-	@Override
-	public void visit(CaseExpression arg0) {
-		
-		
-	}
-
-	@Override
-	public void visit(WhenClause arg0) {
-		
-		
-	}
-
-	@Override
-	public void visit(ExistsExpression arg0) {
-		
-		
-	}
-
-	@Override
-	public void visit(AllComparisonExpression arg0) {
-		
-		
-	}
-
-	@Override
-	public void visit(AnyComparisonExpression arg0) {
-		
-		
-	}
-
-	@Override
-	public void visit(Concat arg0) {
-		
-		
-	}
-
-	@Override
-	public void visit(Matches arg0) {
-		
-		
-	}
-
-	@Override
-	public void visit(BitwiseAnd arg0) {
-		
-		
-	}
-
-	@Override
-	public void visit(BitwiseOr arg0) {
-		
-		
-	}
-
-	@Override
-	public void visit(BitwiseXor arg0) {
-		
-		
-	}
-
-
-
 }

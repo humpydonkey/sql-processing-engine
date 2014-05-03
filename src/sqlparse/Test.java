@@ -55,7 +55,7 @@ public class Test {
 			}
 			
 			Table tab = new Table(null,"lineitem");
-			CreateTable ct = SQLEngine.globalCreateTables.get("LINEITEM");
+			CreateTable ct = SQLEngine.getGlobalCreateTables().get("LINEITEM");
 
 			Column col1 = new Column(tab, "suppkey");
 			Column col2 = new Column(tab, "returnflag");
@@ -82,9 +82,6 @@ public class Test {
 			
 			CharBuffer buffer = CharBuffer.allocate(4);
 			
-			
-			TimeCalc.begin(0);
-
 
 
 			OperatorScan scan = new OperatorScan(new File(dataDir+"/lineitem.dat"),schema);
@@ -95,14 +92,14 @@ public class Test {
 				tups.add(scan.readOneTuple());
 				count++;
 			}
-			TimeCalc.begin(0);
+			TimeCalc.begin("Sorting");
 			Collections.sort(tups, Tuple.getComparator(new CompareAttribute[]{new CompareAttribute(col1,true)}));
 			
 //			for(Tuple tup : tups)
 //				System.out.println(tup.toString());
 			
 
-			TimeCalc.end(0, "Finish Sorting!");
+			TimeCalc.end("Finish Sorting!");
 		}catch(Exception e){
 			e.printStackTrace();
 		}

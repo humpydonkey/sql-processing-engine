@@ -24,6 +24,12 @@ public class DatumDouble extends Datum{
 	public double getValue(){
 		return value;
 	}
+
+	@Override
+	public int getHashValue(){
+		//TODO Assume the precision is enough, too strong assumption
+		return (int)(value*100000000);
+	}
 	
 	@Override
 	public double getNumericValue() {
