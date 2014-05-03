@@ -126,9 +126,9 @@ public class SQLEngine {
 			}
 			
 			//TODO delete
-			List<Tuple> tups = dump(oper);
-			System.out.println("Total size after join:"+tups.size());
-			oper = new OperatorCache(tups);
+//			List<Tuple> tups = dump(oper);
+//			System.out.println("Total size after join:"+tups.size());
+//			oper = new OperatorCache(tups);
 			
 			/*********************    Add filtered where condition  ****************/
 			if(pselect.getWhere()!=null)
