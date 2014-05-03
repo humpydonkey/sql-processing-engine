@@ -7,7 +7,7 @@ import sqlparse.Config;
 public class TimeCalc {
 	
 	private static Stack<Long> startTimes = new Stack<Long>();
-	private static boolean ifPrint = Config.PrintRuningTime;
+	private static boolean ifPrint = Config.DebugMode;
 	
 	private static String getStackTraceInfo(){
 		StackTraceElement ele = Thread.currentThread().getStackTrace()[3];

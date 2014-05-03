@@ -17,8 +17,6 @@ public class Config {
 	
 	public static final boolean DebugMode = false;
 
-	public static final boolean PrintRuningTime = true;
-
 	public static final int OneTupeSize_Byte = 100;
 	
 	public static File getSwapDir(){
