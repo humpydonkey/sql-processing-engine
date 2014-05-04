@@ -10,15 +10,19 @@ public class DatumFactory {
 	public static Datum create(String dataIn, DatumType type){
 		switch(type){
 		case Long:
-			return new DatumLong(dataIn);
+			return new DatumLong(Long.parseLong(dataIn));
 		case Double:
-			return new DatumDouble(dataIn);
+			return new DatumDouble(Double.parseDouble(dataIn));
 		case Bool:
-			return new DatumBool(dataIn);
+			return new DatumBool(Boolean.parseBoolean(dataIn));
 		case String:
 			return new DatumString(dataIn);
 		case Date:
-			return new DatumDate(dataIn);
+			String[] s = dataIn.split("-");
+			int y = Integer.parseInt(s[0]);
+			int m = Integer.parseInt(s[1]);
+			int d = Integer.parseInt(s[2]);
+			return new DatumDate(y,m,d);
 		default:
 			try {
 				throw new Exception("unknown datum type : " + type);

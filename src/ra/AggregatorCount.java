@@ -17,7 +17,7 @@ import dao.Tuple;
  */
 public class AggregatorCount extends Aggregator{
 
-	private Map<String, Datum> countMap;
+	private Map<String, Integer> countMap;
 	private String colName;
 	private boolean distinct;
 	private boolean countAll;
@@ -27,7 +27,7 @@ public class AggregatorCount extends Aggregator{
 	public AggregatorCount(Function funcIn, String[] groupByCols){
 		super(funcIn, groupByCols);
 		
-		countMap = new HashMap<String, Datum>();
+		countMap = new HashMap<String, Integer>();
 		
 		if(funcIn.isAllColumns()){
 			countAll = true;
@@ -55,7 +55,7 @@ public class AggregatorCount extends Aggregator{
 			//because it is countAll, no specific column 	
 			if(!countMap.containsKey(key)){
 				//insert new
-				countMap.put(key, new DatumLong(1));
+				countMap.put(key, new Integer(1));
 			}else{
 				//else count ++
 				countPlusPlus(key);
@@ -78,7 +78,7 @@ public class AggregatorCount extends Aggregator{
 					}
 				}else{	//no distinct
 					if(!countMap.containsKey(key))//insert new					
-						countMap.put(key, new DatumLong(1));
+						countMap.put(key, new Integer(1));
 					else
 						countPlusPlus(key);
 				}
@@ -93,12 +93,12 @@ public class AggregatorCount extends Aggregator{
 			Set<String> valueSet = distinctCountMap.get(key);
 			return new DatumLong(valueSet.size());	
 		}else
-			return countMap.get(key);
+			return new DatumLong(countMap.get(key));
 	}
 	
 	private void countPlusPlus(String key){
-		Datum data = countMap.get(key);
-		data.setNumericValue(data.getNumericValue()+1);
+		Integer val = countMap.get(key);
+		countMap.put(key, val+1);
 	}
 
 }

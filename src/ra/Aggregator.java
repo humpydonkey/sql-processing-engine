@@ -3,6 +3,7 @@ package ra;
 import net.sf.jsqlparser.expression.Function;
 import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
 import dao.Datum;
+import dao.Datum.CastError;
 import dao.Tuple;
 
 /**
@@ -35,5 +36,5 @@ public abstract class Aggregator{
 	}
 	
 	public abstract void aggregate(Tuple tuple, String key);
-	public abstract Datum getValue(String key);
+	public abstract Datum getValue(String key) throws CastError;
 }

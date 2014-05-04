@@ -1,10 +1,5 @@
 package dao;
 
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
 /**
  * Date data cell
  * @author Asia
@@ -14,57 +9,41 @@ public class DatumDate extends Datum {
 
 	private static final long serialVersionUID = 4697762788088326757L;
 
-	private static DateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+	private int y;
+	private int m;
+	private int d;
 	
-	private Date value;
-	
-	public DatumDate(String dataIn){
-		super(DatumType.Date);
-		try {
-			value = format.parse(dataIn);
-		} catch (ParseException e) {
-			value = null;
-			e.printStackTrace();
-		}
+	public DatumDate(int year, int month, int day){
+		y = year;
+		m = month;
+		d = day;
 	}
 	
-	public DatumDate(Date dataIn){
-		super(DatumType.Date);
-		value = dataIn;
-	}
-	
-	public Date getValue(){
-		return value;
-	}
+	public DatumType getType(){return DatumType.Date;}
 	
 	@Override
 	public int getHashValue(){
-		return value.hashCode();
+		try {
+			return (int) toLong();
+		} catch (CastError e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return toString().hashCode();
 	}
 	
-	@Override
-	public double getNumericValue() {
-		System.out.println("Wrong get value.");
-		return 0;
-	}
-
-	@Override
-	public void setNumericValue(double valueIn) {
-		System.out.println("Wrong set value.");
-	}
 	
-	@Override
-	public String toString(){
-		return format.format(value);
-	}
-
 	@Override
 	public int compareTo(Datum o) {
 		if(o instanceof DatumDate){
 			DatumDate obj = (DatumDate)o;
-			Date obj1 = this.getValue();
-			Date obj2 = obj.getValue();
-			return obj1.compareTo(obj2);
+			try {
+				return (int)(this.toLong()-obj.toLong());
+			} catch (CastError e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			return 0;
 		} else
 			throw new IllegalArgumentException("Wrong type (" + o.getClass().getCanonicalName() + ") of this Object.");
 
@@ -72,14 +51,41 @@ public class DatumDate extends Datum {
 	
 	@Override
 	public Datum clone() {
-		Datum copy = new DatumDate((Date)value.clone());
-		return copy;
+		return new DatumDate(y, m, d);
 	}
 	
 
 	@Override
 	public long getBytes() {
-		return 32;
+		return 12;
+	}
+
+	@Override
+	public long toLong() throws CastError {
+		return y*1000+m*100+d;
+	}
+
+	@Override
+	public double toDouble() throws CastError {
+		return toLong();
+	}
+
+	@Override
+	public boolean equals(Datum d) throws CastError {
+		if(d.getType()!=DatumType.Date)
+			return false;
+		else
+			return this.toLong()==d.toLong();
+	}
+
+	@Override
+	public String toString() {
+		return String.format("%04d-%02d-%02d", y, m, d);
+	}
+
+	@Override
+	public boolean toBool() throws CastError {
+		throw new CastError("Datum.Date","Datum.Bool");
 	}
 
 }

@@ -1,6 +1,7 @@
 package ra;
 
 import dao.Datum;
+import dao.Datum.CastError;
 import dao.DatumDouble;
 import dao.Tuple;
 import net.sf.jsqlparser.expression.Function;
@@ -22,10 +23,10 @@ public class AggregatorAvg extends Aggregator{
 	}
 	
 	@Override
-	public Datum getValue(String key) {
+	public Datum getValue(String key) throws CastError {
 		Datum total = sumer.getValue(key);
 		Datum number = counter.getValue(key);		
-		return new DatumDouble(total.getNumericValue()/number.getNumericValue());
+		return new DatumDouble(total.toDouble()/number.toDouble());
 	}
 
 	@Override

@@ -1,5 +1,7 @@
 package ra;
 
+import java.sql.Date;
+
 import net.sf.jsqlparser.expression.AllComparisonExpression;
 import net.sf.jsqlparser.expression.AnyComparisonExpression;
 import net.sf.jsqlparser.expression.CaseExpression;
@@ -45,7 +47,6 @@ import dao.DatumDate;
 import dao.DatumDouble;
 import dao.DatumLong;
 import dao.DatumString;
-import dao.DatumType;
 import dao.Tuple;
 
 /**
@@ -107,9 +108,11 @@ public class EvaluatorArithmeticExpres implements ExpressionVisitor{
 		data = new DatumLong(arg.getValue());
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public void visit(DateValue arg) {
-		data = new DatumDate(arg.getValue());
+		Date date = arg.getValue();
+		data = new DatumDate(date.getYear(), date.getMonth(), date.getDay());
 	}
 
 	@Override
@@ -140,9 +143,7 @@ public class EvaluatorArithmeticExpres implements ExpressionVisitor{
 		arg.getRightExpression().accept(this);
 		Datum right = getData();
 		
-		data = decideDatumType(left, right);		
-		
-		data.setNumericValue(left.getNumericValue() + right.getNumericValue());
+		data = Datum.calcDatum(left, right, 1);		
 	}
 
 	@Override
@@ -153,12 +154,7 @@ public class EvaluatorArithmeticExpres implements ExpressionVisitor{
 		arg.getRightExpression().accept(this);
 		Datum right = getData();
 		
-		data = decideDatumType(left, right);		
-		
-		if(right.getNumericValue()==0)
-			data.setNumericValue(0);
-		else
-			data.setNumericValue(left.getNumericValue() / right.getNumericValue());
+		data = Datum.calcDatum(left, right, 4);		
 	}
 
 	@Override
@@ -169,9 +165,7 @@ public class EvaluatorArithmeticExpres implements ExpressionVisitor{
 		arg.getRightExpression().accept(this);
 		Datum right = getData();
 	
-		data = decideDatumType(left, right);		
-		
-		data.setNumericValue(left.getNumericValue() * right.getNumericValue());
+		data = Datum.calcDatum(left, right, 3);		
 	}
 
 	@Override
@@ -182,9 +176,7 @@ public class EvaluatorArithmeticExpres implements ExpressionVisitor{
 		arg.getRightExpression().accept(this);
 		Datum right = getData();
 
-		data = decideDatumType(left, right);
-		
-		data.setNumericValue(left.getNumericValue() - right.getNumericValue());
+		data = Datum.calcDatum(left, right, 2);
 	}
 
 	@Override
@@ -306,15 +298,5 @@ public class EvaluatorArithmeticExpres implements ExpressionVisitor{
 	@Override
 	public void visit(BitwiseXor arg) {
 		throw new UnsupportedOperationException("Not supported yet."); 
-	}
-	
-	private Datum decideDatumType(Datum left, Datum right){
-		Datum result = null;
-		if(left.getType()==DatumType.Long&&right.getType()==DatumType.Long)
-			result = new DatumLong(0);
-		else
-			result = new DatumDouble(0);
-		
-		return result;
 	}
 }

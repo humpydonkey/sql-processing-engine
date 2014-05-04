@@ -7,6 +7,10 @@ import java.util.Map;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.Function;
 import dao.Datum;
+import dao.Datum.CastError;
+import dao.DatumDouble;
+import dao.DatumLong;
+import dao.DatumType;
 import dao.Tuple;
 
 /**
@@ -41,12 +45,21 @@ public class AggregatorSum extends Aggregator {
 		if(!sumMap.containsKey(key)){
 			//insert new
 			sumMap.put(key, newVal);
-		}else{
-			//update old, sum
+		}else{	//update old, sum
 			Datum oldVal = sumMap.get(key);
 			//can not sum Bool, String, Date
-			double sum = oldVal.getNumericValue()+newVal.getNumericValue();
-			oldVal.setNumericValue(sum);
+			try {
+				if(oldVal.getType()==DatumType.Long){
+					DatumLong longVal = (DatumLong)oldVal;
+					longVal.setValue(oldVal.toLong()+newVal.toLong());
+				}else if(oldVal.getType()==DatumType.Double){
+					DatumDouble doubleVal = (DatumDouble)oldVal;
+					doubleVal.setValue(oldVal.toDouble()+newVal.toDouble());
+				}else
+					throw new UnsupportedOperationException("Not supported yet.");
+			}catch(CastError e){
+				e.printStackTrace();
+			}
 		}
 	}
 

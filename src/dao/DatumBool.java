@@ -8,20 +8,12 @@ package dao;
 public class DatumBool extends Datum {
 
 	private static final long serialVersionUID = -318289153287331084L;
-	private boolean value;
+	private boolean value;	
 	
-	public DatumBool(String data) {
-		super(DatumType.Bool);
-		value = Boolean.parseBoolean(data);
-	}
+	public DatumType getType(){return DatumType.Bool;}
 	
 	public DatumBool(boolean data) {
-		super(DatumType.Bool);
 		value = data;
-	}
-	
-	public boolean getValue(){
-		return value;
 	}
 	
 	@Override
@@ -29,16 +21,6 @@ public class DatumBool extends Datum {
 		return value==true?1:0;
 	}
 
-	@Override
-	public double getNumericValue() {
-		System.out.println("Wrong get value.");
-		return 0;
-	}
-
-	@Override
-	public void setNumericValue(double valueIn) {
-		System.out.println("Wrong set value.");
-	}
 
 	@Override
 	public int compareTo(Datum o) {
@@ -57,13 +39,8 @@ public class DatumBool extends Datum {
 
 	@Override
 	public Datum clone() {
-		Datum copy = new DatumBool(this.getValue());
+		Datum copy = new DatumBool(this.value);
 		return copy;
-	}
-	
-	public static void main(String[] args){
-		DatumBool bool1 = new DatumBool(true);
-		bool1.compareTo(null);
 	}
 
 	@Override
@@ -73,6 +50,29 @@ public class DatumBool extends Datum {
 
 	@Override
 	public String toString() {
-		return String.valueOf(value);
+		return value?"true":"false";
+	}
+
+	@Override
+	public boolean toBool() throws CastError {
+		return value;
+	}
+
+	@Override
+	public long toLong() throws CastError {
+		throw new CastError("Datum.Bool","Datum.Long");
+	}
+
+	@Override
+	public double toDouble() throws CastError {
+		throw new CastError("Datum.Bool","Datum.Double");
+	}
+
+	@Override
+	public boolean equals(Datum d) throws CastError {
+		if(d.getType()!=DatumType.Bool)
+			return false;
+		else
+			return value==d.toBool();
 	}
 }

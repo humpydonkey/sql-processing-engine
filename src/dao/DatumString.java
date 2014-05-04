@@ -12,17 +12,11 @@ public class DatumString extends Datum {
 	private String value;
 	
 	public DatumString(String dataIn){
-		super(DatumType.String);
 		value = dataIn;
 	}
 	
-	public String getValue(){
-		return value;
-	}
-	
-	public void setValue(String str){
-		value = str;
-	}
+
+	public DatumType getType(){return DatumType.String;}
 	
 	@Override
 	public int getHashValue(){
@@ -30,26 +24,11 @@ public class DatumString extends Datum {
 	}
 	
 	@Override
-	public double getNumericValue() {
-		System.out.println("Wrong get value.");
-		return 0;
-	}
-
-	@Override
-	public void setNumericValue(double valueIn) {
-		System.out.println("Wrong set value.");
-	}
-	
-	@Override
 	public int compareTo(Datum o) {
-		if(o instanceof DatumString){
-			DatumString obj = (DatumString)o;
-			String obj1 = this.getValue();
-			String obj2 = obj.getValue();
-			return obj1.compareTo(obj2);
-		} else{
-				throw new IllegalArgumentException("Wrong type (" + o.getClass().getCanonicalName() + ") of this Object.");
-		}
+		if(o instanceof DatumString)
+			return value.compareTo(o.toString());
+		 else
+			throw new IllegalArgumentException("Wrong type (" + o.getClass().getCanonicalName() + ") of this Object.");
 	}
 	
 	@Override
@@ -67,5 +46,32 @@ public class DatumString extends Datum {
 	@Override
 	public String toString() {
 		return value;
+	}
+
+
+	@Override
+	public boolean toBool() throws CastError {
+		throw new CastError("Datum.String", "Datum.Bool");
+	}
+
+
+	@Override
+	public long toLong() throws CastError {
+		throw new CastError("Datum.String", "Datum.Long");
+	}
+
+
+	@Override
+	public double toDouble() throws CastError {
+		throw new CastError("Datum.String", "Datum.Double");
+	}
+
+
+	@Override
+	public boolean equals(Datum d) throws CastError {
+		if(d.getType()!=DatumType.String)
+			return false;
+		else
+			return value.equals(d);
 	}
 }

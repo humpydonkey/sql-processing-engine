@@ -73,7 +73,6 @@ public class Main {
 
 	
 	public static List<Tuple> testSpecificSQL(String dataDirStr, String... sqlPaths){	
-
 		File dataDir = new File(dataDirStr);
 		File swapDir = Config.getSwapDir();
 		List<File> sqlfiles = new ArrayList<File>();

@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.rmi.UnexpectedException;
 import java.util.Comparator;
 
+import dao.Datum.CastError;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.Function;
 import net.sf.jsqlparser.schema.Column;
@@ -77,15 +78,18 @@ public class Tuple implements Serializable{
 					groupbyKey.append(groupbyColumn.toString());
 				}
 				//map to the aggregated Datum value
-				oldData = aggre.getValue(groupbyKey.toString());
-				
-				if(oldData==null)
-					try {
+				try {
+					oldData = aggre.getValue(groupbyKey.toString());
+					if(oldData==null)
 						throw new UnexpectedException("Can not find aggregate value, key:"+groupbyKey.toString());
-					} catch (UnexpectedException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
+				} catch (CastError e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}catch (UnexpectedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
 			}else{
 				//should be a constant or expression
 				EvaluatorArithmeticExpres eval = new EvaluatorArithmeticExpres(this);

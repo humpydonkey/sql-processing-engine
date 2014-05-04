@@ -26,9 +26,7 @@ import sqlparse.TestEnvironment;
 import common.TimeCalc;
 
 import dao.Datum;
-import dao.DatumBool;
-import dao.DatumDouble;
-import dao.DatumLong;
+import dao.Datum.CastError;
 import dao.Schema;
 import dao.Tuple;
 
@@ -265,19 +263,16 @@ public class FileAccessor {
 	}
 	
 	
-	private void writeDatum(BufferedRandomReader writer, Datum data) throws IOException{
+	private void writeDatum(BufferedRandomReader writer, Datum data) throws IOException, CastError{
 		switch(data.getType()){
 		case Long:
-			DatumLong dl = (DatumLong)data;
-			writer.writeLong(dl.getValue());
+			writer.writeLong(data.toLong());
 			return;
 		case Double:
-			DatumDouble doub = (DatumDouble)data;
-			writer.writeDouble(doub.getValue());
+			writer.writeDouble(data.toDouble());
 			return;
 		case Bool:
-			DatumBool bool = (DatumBool)data;
-			writer.writeBoolean(bool.getValue());
+			writer.writeBoolean(data.toBool());
 			return;
 		default:
 			//String and Date

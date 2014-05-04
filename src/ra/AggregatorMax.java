@@ -45,12 +45,11 @@ public class AggregatorMax extends Aggregator {
         if (!maxMap.containsKey(key)) {
             //insert new
             maxMap.put(key, newVal);
-        } else {
-            //update old, max
+        } else { //update old, max
             Datum oldVal = maxMap.get(key);
             //can not max Bool, String, Date
-            double max = Math.max(oldVal.getNumericValue(), newVal.getNumericValue());
-            oldVal.setNumericValue(max);
+            if(oldVal.compareTo(newVal)<0)
+            	maxMap.put(key, newVal);
         }
     }
 

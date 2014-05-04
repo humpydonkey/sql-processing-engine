@@ -49,8 +49,8 @@ public class AggregatorMin extends Aggregator {
             //update old, min
             Datum oldVal = minMap.get(key);
             //can not min Bool, String, Date
-            double min = Math.min(oldVal.getNumericValue(), newVal.getNumericValue());
-            oldVal.setNumericValue(min);
+            if(oldVal.compareTo(newVal)>0)
+            	minMap.put(key, newVal);
         }
     }
 

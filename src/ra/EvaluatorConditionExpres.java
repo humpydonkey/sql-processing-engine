@@ -1,6 +1,7 @@
 package ra;
 
 import java.io.StringReader;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -56,6 +57,7 @@ import sqlparse.SQLEngine;
 import dao.Datum;
 import dao.DatumDate;
 import dao.DatumDouble;
+import dao.DatumFactory;
 import dao.DatumLong;
 import dao.DatumString;
 import dao.DatumType;
@@ -123,9 +125,9 @@ public class EvaluatorConditionExpres implements ExpressionVisitor{
 	@Override
 	public void visit(Function arg) {
 		if(arg.getName().equalsIgnoreCase("DATE")){
-			String date = arg.getParameters().toString();
-			String tmp = date.substring(2, date.length()-2);
-			data = new DatumDate(tmp);
+			String para = arg.getParameters().getExpressions().get(0).toString();
+			String date = para.substring(1, para.length()-1);
+			data = DatumFactory.create(date, DatumType.Date);
 		}
 	}
 
@@ -149,9 +151,11 @@ public class EvaluatorConditionExpres implements ExpressionVisitor{
 		data = new DatumLong(arg.getValue());
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public void visit(DateValue arg) {
-		data = new DatumDate(arg.getValue());
+		Date date = arg.getValue();
+		data = new DatumDate(date.getYear(), date.getMonth(), date.getDay());
 	}
 
 	@Override
@@ -182,12 +186,7 @@ public class EvaluatorConditionExpres implements ExpressionVisitor{
 		arg.getRightExpression().accept(this);
 		Datum right = getData();
 		
-		if(left.getType()==DatumType.Long&&right.getType()==DatumType.Long)
-			data = new DatumLong(0);
-		else
-			data = new DatumDouble(0);
-		
-		data.setNumericValue(left.getNumericValue() + right.getNumericValue());
+		data = Datum.calcDatum(left, right, 1);
 	}
 
 	@Override
@@ -198,15 +197,7 @@ public class EvaluatorConditionExpres implements ExpressionVisitor{
 		arg.getRightExpression().accept(this);
 		Datum right = getData();
 		
-		if(left.getType()==DatumType.Long&&right.getType()==DatumType.Long)
-			data = new DatumLong(0);
-		else
-			data = new DatumDouble(0);
-		
-		if(right.getNumericValue()==0)
-			data.setNumericValue(0);
-		else
-			data.setNumericValue(left.getNumericValue() / right.getNumericValue());
+		data = Datum.calcDatum(left, right, 4);
 	}
 
 	@Override
@@ -217,13 +208,7 @@ public class EvaluatorConditionExpres implements ExpressionVisitor{
 		arg.getRightExpression().accept(this);
 		Datum right = getData();
 	
-	
-		if(left.getType()==DatumType.Long&&right.getType()==DatumType.Long)
-			data = new DatumLong(0);
-		else
-			data = new DatumDouble(0);
-		
-		data.setNumericValue(left.getNumericValue() * right.getNumericValue());
+		data = Datum.calcDatum(left, right, 3);
 	}
 
 	@Override
@@ -233,13 +218,8 @@ public class EvaluatorConditionExpres implements ExpressionVisitor{
 		
 		arg.getRightExpression().accept(this);
 		Datum right = getData();
-		
-		if(left.getType()==DatumType.Long&&right.getType()==DatumType.Long)
-			data = new DatumLong(0);
-		else
-			data = new DatumDouble(0);
-		
-		data.setNumericValue(left.getNumericValue() - right.getNumericValue());
+
+		data = Datum.calcDatum(left, right, 2);
 	}
 
 	@Override
