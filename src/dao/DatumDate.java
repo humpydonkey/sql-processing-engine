@@ -35,18 +35,18 @@ public class DatumDate extends Datum {
 	
 	@Override
 	public int compareTo(Datum o) {
-		if(o instanceof DatumDate){
-			DatumDate obj = (DatumDate)o;
-			try {
-				return (int)(this.toLong()-obj.toLong());
-			} catch (CastError e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			return 0;
-		} else
-			throw new IllegalArgumentException("Wrong type (" + o.getClass().getCanonicalName() + ") of this Object.");
-
+		try {
+			if(equals(o))
+				return 0;
+			if(o instanceof DatumDate){
+				return (int)(this.toLong()-o.toLong());		
+			} else
+				throw new IllegalArgumentException("Wrong type (" + o.getClass().getCanonicalName() + ") of this Object.");
+		} catch (CastError e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return 0;
 	}
 	
 	@Override
@@ -62,7 +62,7 @@ public class DatumDate extends Datum {
 
 	@Override
 	public long toLong() throws CastError {
-		return y*1000+m*100+d;
+		return y*10000+m*100+d;
 	}
 
 	@Override

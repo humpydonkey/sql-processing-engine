@@ -32,7 +32,10 @@ public class DatumLong extends Datum{
 				return 0;
 			if(o instanceof DatumDouble || o instanceof DatumLong){
 				double diff =  value - o.toDouble();
-				return diff>0?1:-1;
+				if(diff==0)
+					return 0;
+				else
+					return diff>0?1:-1;
 			}else
 				throw new IllegalArgumentException("Wrong type (" + o.getClass().getCanonicalName() + ") of this Object.");
 		} catch (CastError e) {

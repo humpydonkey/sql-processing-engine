@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import common.Tools;
+
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.AllComparisonExpression;
 import net.sf.jsqlparser.expression.AnyComparisonExpression;
@@ -69,6 +71,8 @@ import dao.Tuple;
  *
  */
 public class EvaluatorConditionExpres implements ExpressionVisitor{
+	public static boolean PrintDebug=false;
+	
 	private Tuple tuple;
 	private boolean evalResult;
 	private Datum data;
@@ -226,7 +230,10 @@ public class EvaluatorConditionExpres implements ExpressionVisitor{
 	public void visit(AndExpression arg) {
 		arg.getLeftExpression().accept(this);
 		boolean left = evalResult;
-		
+		if(left==false){
+			return;
+		}
+			
 		arg.getRightExpression().accept(this);
 		boolean right = evalResult;
 		
@@ -291,8 +298,14 @@ public class EvaluatorConditionExpres implements ExpressionVisitor{
 		int compResult = left.compareTo(right);
 		if(compResult>0)
 			evalResult = true;
-		else
+		else{
 			evalResult = false;
+			if(PrintDebug){
+				Tools.debug(left.toString()+"\t"+arg.toString());
+				return;
+			}
+		}
+			
 	}
 
 	@Override
@@ -306,8 +319,13 @@ public class EvaluatorConditionExpres implements ExpressionVisitor{
 		int compResult = left.compareTo(right);
 		if(compResult>=0)
 			evalResult = true;
-		else
+		else{
 			evalResult = false;
+			if(PrintDebug){
+				Tools.debug(left.toString()+"\t"+arg.toString());
+				return;
+			}
+		}
 	}
 
 	@Override
@@ -350,8 +368,13 @@ public class EvaluatorConditionExpres implements ExpressionVisitor{
 		int compResult = left.compareTo(right);
 		if(compResult<0)
 			evalResult = true;
-		else
+		else{
 			evalResult = false;
+			if(PrintDebug){
+				Tools.debug(left.toString()+"\t"+arg.toString());
+				return;
+			}
+		}
 	}
 
 	@Override
@@ -364,8 +387,13 @@ public class EvaluatorConditionExpres implements ExpressionVisitor{
 		int compResult = left.compareTo(right);
 		if(compResult<=0)
 			evalResult = true;
-		else
+		else{
 			evalResult = false;
+			if(PrintDebug){
+				Tools.debug(left.toString()+"\t"+arg.toString());
+				return;
+			}
+		}
 	}
 
 	@Override

@@ -142,7 +142,7 @@ public class CheckPoint1Test {
 			
 			for(int i=0; i<results.size(); i++){
 //				System.out.println(correctResults.get(i)+"\n"+results.get(i)+"\n");		
-				Assert.assertEquals(correctResults.get(i).toString(), results.get(i).toString());
+				Assert.assertEquals(correctResults.get(i), results.get(i).toString());
 			}
 		}else
 			Assert.fail("0 result.");

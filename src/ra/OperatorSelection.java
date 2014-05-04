@@ -1,5 +1,7 @@
 package ra;
 
+import common.Tools;
+
 import net.sf.jsqlparser.expression.Expression;
 import dao.Datum;
 import dao.Datum.CastError;
@@ -25,14 +27,18 @@ public class OperatorSelection implements Operator{
 		evaluator = new EvaluatorConditionExpres(null);
 	}
 	
+
 	@Override
 	public Tuple readOneTuple() {
 		Tuple tuple = null;
 		while((tuple=input.readOneTuple())!=null){
 			evaluator.updateTuple(tuple);
 			condition.accept(evaluator);
-			if(evaluator.getResult())
-				break;		
+			if(evaluator.getResult()){
+//				Tools.debug(tuple.toString());
+				break;
+			}
+						
 		}
 		return tuple;
 	}
