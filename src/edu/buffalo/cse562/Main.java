@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 
@@ -17,10 +18,8 @@ import net.sf.jsqlparser.statement.create.table.CreateTable;
 import net.sf.jsqlparser.statement.select.Select;
 import sqlparse.Config;
 import sqlparse.SQLEngine;
-
 import common.TimeCalc;
 import common.Tools;
-
 import dao.Tuple;
 
 
@@ -30,8 +29,8 @@ public class Main {
 		//input example: --data [data] [sqlfile1] [sqlfile2] ...
 		//           or  --data [data] --swap [swap] [sqlfile1] [sqlfile2] ...
 		//--build 
-		//--data <datadir> --swap test/swap --index test/idx test/Checkpoint3DataTest/tpch_schemas.sql test/Checkpoint3DataTest/tpch07a.sql test/Checkpoint3DataTest/tpch10a.sql test/Checkpoint3DataTest/tpch12a.sql test/Checkpoint3DataTest/tpch16a.sql
-		
+		//--data test/Checkpoint3DataTest/ --swap test/swap --index test/idx test/Checkpoint3DataTest/tpch_schemas.sql test/Checkpoint3DataTest/tpch07a.sql test/Checkpoint3DataTest/tpch10a.sql test/Checkpoint3DataTest/tpch12a.sql test/Checkpoint3DataTest/tpch16a.sql
+		//args = new String[]{"--data", "test/Checkpoint3DataTest/", "--swap", "test/swap", "--index", "test/idx", "test/Checkpoint3DataTest/tpch_schemas.sql", "test/Checkpoint3DataTest/tpch07a.sql", "test/Checkpoint3DataTest/tpch10a.sql", "test/Checkpoint3DataTest/tpch12a.sql", "test/Checkpoint3DataTest/tpch16a.sql"};
 		if(args.length>=3){
 			boolean ifBuild = false;
 			if(args[0].equals("--build")){
@@ -58,8 +57,8 @@ public class Main {
 				}
 			}
 			
-			if(dataDir==null||swapDir==null||indexDir==null||sqlFiles.size()==0){
-				System.out.println("Input error: "+args.toString());
+			if(dataDir==null||sqlFiles.size()==0){
+				System.out.println("Input error, dataDir: " + dataDir + "SQL File size: " + sqlFiles.size());
 				return;
 			}
 			
@@ -137,7 +136,7 @@ public class Main {
 				
 				while((stmt = parser.Statement()) !=null){		
 					if(stmt instanceof CreateTable){
-						//SQLEngine.create(stmt);
+						SQLEngine.create(stmt);
 					}else {
 						
 					 if(stmt instanceof Select){

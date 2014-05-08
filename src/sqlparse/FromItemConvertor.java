@@ -25,7 +25,7 @@ import dao.Tuple;
  */
 public class FromItemConvertor implements FromItemVisitor{
 	private final File dataPath;
-	private Map<String,CreateTable> tables;
+	private Map<String,CreateTable> ctMapper;
 	private String tableName;
 	private Map<String, Column> colsInUseMapper;
 	private SQLEngine engine;
@@ -36,7 +36,7 @@ public class FromItemConvertor implements FromItemVisitor{
 	{
 		colsInUseMapper = allCols;
 		dataPath = basePath;
-		tables = tablesIn;
+		ctMapper = tablesIn;
 		engine = engineIn;
 	}
 	
@@ -77,7 +77,7 @@ public class FromItemConvertor implements FromItemVisitor{
 			this.tableName =tableName.getName();
 		}
 		
-		CreateTable ctable = tables.get(tableName.getName().toUpperCase());
+		CreateTable ctable = ctMapper.get(tableName.getName().toUpperCase());
 
 		try {
 			if(ctable==null)
