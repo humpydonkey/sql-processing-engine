@@ -2,10 +2,13 @@ package edu.buffalo.cse562;
 
 import io.FileAccessor;
 
+import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 import junit.framework.Assert;
 
+import org.junit.Before;
 import org.junit.Test;
 
 import dao.Schema;
@@ -14,9 +17,24 @@ import dao.Tuple;
 public class CheckPoint1Test {
 	private final static String DataFileDir = "test/cp1/";
 	private final static String TestResultPath = "test/test_result.txt";
+	private final static String IndexDirStr = "test/MyIndexManager";
+	private final static File SchemaFile =  new File("test/Checkpoint3DataTest/tpch_schemas.sql");
+	
+	@Before
+	public void precomputation(){
+		List<File> sqls = new ArrayList<File>();
+		sqls.add(SchemaFile);
+		sqls.add(new File("test/cp1/nba01.sql"));
+		sqls.add(new File("test/cp1/nba02.sql"));
+		sqls.add(new File("test/cp1/nba03.sql"));
+		sqls.add(new File("test/cp1/nba04.sql"));
+		Main.precompute(IndexDirStr, new File(DataFileDir), sqls);
+	}
+	
+	
 	@Test
 	public void testTestSpecificSQL_nba01() {
-		List<Tuple> results = Main.testSpecificSQL(DataFileDir, "test/cp1/nba01.sql");
+		List<Tuple> results = Main.testSpecificSQL(DataFileDir, IndexDirStr, "test/cp1/nba01.sql");
 		
 		if(results.size()>0){
 			Schema schema = results.get(0).getSchema();
@@ -33,7 +51,7 @@ public class CheckPoint1Test {
 	
 	@Test
 	public void testTestSpecificSQL_nba02() {
-		List<Tuple> results = Main.testSpecificSQL(DataFileDir, "test/cp1/nba02.sql");
+		List<Tuple> results = Main.testSpecificSQL(DataFileDir, IndexDirStr,"test/cp1/nba02.sql");
 		
 		if(results.size()>0){
 			Schema schema = results.get(0).getSchema();
@@ -50,7 +68,7 @@ public class CheckPoint1Test {
 	
 	@Test
 	public void testTestSpecificSQL_nba03() {
-		List<Tuple> results = Main.testSpecificSQL(DataFileDir, "test/cp1/nba03.sql");
+		List<Tuple> results = Main.testSpecificSQL(DataFileDir, IndexDirStr,"test/cp1/nba03.sql");
 		
 		if(results.size()>0){
 			Schema schema = results.get(0).getSchema();
@@ -67,7 +85,7 @@ public class CheckPoint1Test {
 	
 	@Test
 	public void testTestSpecificSQL_nba04() {
-		List<Tuple> results = Main.testSpecificSQL(DataFileDir, "test/cp1/nba04.sql");
+		List<Tuple> results = Main.testSpecificSQL(DataFileDir, IndexDirStr,"test/cp1/nba04.sql");
 		
 		if(results.size()>0){
 			Schema schema = results.get(0).getSchema();
@@ -83,7 +101,7 @@ public class CheckPoint1Test {
 	}
 	@Test
 	public void testTestSpecificSQL_tpch1() {
-		List<Tuple> results = Main.testSpecificSQL(DataFileDir, "test/cp1/tpch1.sql");
+		List<Tuple> results = Main.testSpecificSQL(DataFileDir, IndexDirStr,"test/cp1/tpch1.sql");
 		
 		if(results.size()>0){
 			Schema schema = results.get(0).getSchema();
@@ -100,7 +118,7 @@ public class CheckPoint1Test {
 	
 	@Test
 	public void testTestSpecificSQL_tpch3() {
-		List<Tuple> results = Main.testSpecificSQL(DataFileDir, "test/cp1/tpch3.sql");
+		List<Tuple> results = Main.testSpecificSQL(DataFileDir, IndexDirStr,"test/cp1/tpch3.sql");
 		
 		if(results.size()>0){
 			Schema schema = results.get(0).getSchema();
@@ -117,7 +135,7 @@ public class CheckPoint1Test {
 
 	@Test
 	public void testTestSpecificSQL_tpch5() {
-		List<Tuple> results = Main.testSpecificSQL(DataFileDir, "test/cp1/tpch5.sql");
+		List<Tuple> results = Main.testSpecificSQL(DataFileDir, IndexDirStr,"test/cp1/tpch5.sql");
 		
 		if(results.size()>0){
 			Schema schema = results.get(0).getSchema();
@@ -134,7 +152,7 @@ public class CheckPoint1Test {
 	
 	@Test
 	public void testTestSpecificSQL_tpch6() {
-		List<Tuple> results = Main.testSpecificSQL(DataFileDir, "test/cp1/tpch6.sql");
+		List<Tuple> results = Main.testSpecificSQL(DataFileDir, IndexDirStr,"test/cp1/tpch6.sql");
 		
 		if(results.size()>0){
 			Schema schema = results.get(0).getSchema();

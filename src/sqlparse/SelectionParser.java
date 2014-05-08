@@ -461,7 +461,7 @@ public class SelectionParser implements ExpressionVisitor{
 		for(File f : files.listFiles()){
 			try {
 				Config.setSwapDir(swapPath);
-				SQLEngine engine = new SQLEngine(dataFile);
+				SQLEngine engine = new SQLEngine(dataFile, null);
 
 				//create schema
 				FileReader schemaReader = new FileReader(schemaFile);

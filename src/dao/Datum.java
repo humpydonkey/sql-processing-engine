@@ -21,7 +21,7 @@ public abstract class Datum implements Comparable<Datum>, Serializable {
 	
 	public abstract boolean equals(Datum d)  throws CastError;
 	public abstract DatumType getType();
-	public abstract int getHashValue();
+	public abstract int hashCode();
 	public abstract Datum clone();
 	public abstract long getBytes();
 	

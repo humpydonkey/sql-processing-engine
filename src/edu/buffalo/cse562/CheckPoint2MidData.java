@@ -2,10 +2,13 @@ package edu.buffalo.cse562;
 
 import io.FileAccessor;
 
+import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 import junit.framework.Assert;
 
+import org.junit.Before;
 import org.junit.Test;
 
 import dao.Schema;
@@ -14,13 +17,23 @@ import dao.Tuple;
 public class CheckPoint2MidData {
 
 	private final static String TestFileDir = "test/cp2_grade";
+	private final static String IndexDirStr = "test/MyIndexManager";
+	private final static File SchemaFile =  new File("test/Checkpoint3DataTest/tpch_schemas.sql");
+	
+	@Before
+	public void precomputation(){
+		List<File> sqls = new ArrayList<File>();
+		sqls.add(SchemaFile);
+		Main.precompute(IndexDirStr, new File(TestFileDir), sqls);
+	}
+	
 	
 	@Test
 	public void testTestSpecificSQL_tpch07a() {
 		String sqlPath = TestFileDir + "/" + "tpch07a.sql";
 		String resultPath = TestFileDir + "/" + "tpch07a.expected.dat";
 		
-		List<Tuple> results = Main.testSpecificSQL(TestFileDir, sqlPath);
+		List<Tuple> results = Main.testSpecificSQL(TestFileDir, IndexDirStr, sqlPath);
 		if(results.size()>0){
 			Schema schema = results.get(0).getSchema();	
 			List<String> correctResults = FileAccessor.getInstance().readAllLines(resultPath);
@@ -40,7 +53,7 @@ public class CheckPoint2MidData {
 		String sqlPath = TestFileDir + "/" + "tpch10a.sql";
 		String resultPath = TestFileDir + "/" + "tpch10a.expected.dat";
 		
-		List<Tuple> results = Main.testSpecificSQL(TestFileDir, sqlPath);
+		List<Tuple> results = Main.testSpecificSQL(TestFileDir, IndexDirStr, sqlPath);
 		if(results.size()>0){
 
 			List<String> correctResults = FileAccessor.getInstance().readAllLines(resultPath);
@@ -63,7 +76,7 @@ public class CheckPoint2MidData {
 		String sqlPath = TestFileDir + "/" + "tpch12a.sql";
 		String resultPath = TestFileDir + "/" + "tpch12a.expected.dat";
 		
-		List<Tuple> results = Main.testSpecificSQL(TestFileDir, sqlPath);
+		List<Tuple> results = Main.testSpecificSQL(TestFileDir, IndexDirStr, sqlPath);
 		if(results.size()>0){
 
 			List<String> correctResults = FileAccessor.getInstance().readAllLines(resultPath);			
@@ -81,7 +94,7 @@ public class CheckPoint2MidData {
 		String sqlPath = TestFileDir + "/" + "tpch16a.sql";
 		String resultPath = TestFileDir + "/" + "tpch16a.expected.dat";
 		
-		List<Tuple> results = Main.testSpecificSQL(TestFileDir, sqlPath);
+		List<Tuple> results = Main.testSpecificSQL(TestFileDir, IndexDirStr, sqlPath);
 		if(results.size()>0){
 
 			List<String> correctResults = FileAccessor.getInstance().readAllLines(resultPath);

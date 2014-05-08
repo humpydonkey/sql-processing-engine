@@ -2,15 +2,17 @@ package dao;
 
 import java.io.Serializable;
 import java.rmi.UnexpectedException;
+import java.util.Arrays;
 import java.util.Comparator;
+import java.util.List;
 
-import dao.Datum.CastError;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.Function;
 import net.sf.jsqlparser.schema.Column;
 import ra.Aggregator;
 import ra.EvaluatorArithmeticExpres;
 import ra.OperatorGroupBy;
+import dao.Datum.CastError;
 
 /**
  * A row of a table
@@ -21,7 +23,7 @@ public class Tuple implements Serializable{
 	
 	private static final long serialVersionUID = -6349689782189417493L;
 	
-	private Datum[] dataArr;
+	private Row row;
 	private Schema schema;
 	
 	/**
@@ -31,19 +33,23 @@ public class Tuple implements Serializable{
 		String[] splitedData = rawLine.split("\\|");
 		
 		int n = schemaIn.getLength();
-		dataArr = new Datum[n];
+		Datum[] dataArr = new Datum[n];	
+		row = new Row(dataArr);
 		schema = schemaIn;
 		
 		for(int i=0; i<n; i++){
 			DatumType type = schemaIn.getColType(i);
 			dataArr[i] = DatumFactory.create(splitedData[schema.getRawPosition(i)], type);
-		}
+		}		
 	}
 	
 	public Tuple(Datum[] dataIn, Schema schemaIn){
-		dataArr = dataIn;
+		row = new Row(dataIn);
 		schema = schemaIn;
 	}
+	
+	public Tuple.Row getRow(){ return row; }
+	public Datum[] getDataArr(){ return row.getData(); }
 	
 	public void changeTuple(Schema newSchema){
 		int length = newSchema.getLength();
@@ -98,7 +104,7 @@ public class Tuple implements Serializable{
 			}
 			newDataArr[i] = oldData;
 		}
-		dataArr = newDataArr;
+		row = new Row(newDataArr);
 		schema = newSchema;
 	}
 	
@@ -121,22 +127,6 @@ public class Tuple implements Serializable{
 		
 		return 0;
 	}
-	
-	
-	public static Comparator<Tuple> getComparator(final CompareAttribute[] attrs){
-		Comparator<Tuple> comptr = new Comparator<Tuple>(){
-			@Override
-			public int compare(Tuple arg0, Tuple arg1) {
-				return arg0.compareTo(arg1, attrs);
-			}
-		};
-		return comptr;
-	}
-	
-	
-	public Datum[] getDataArr(){
-		return dataArr;
-	}
 
 	
 	/**
@@ -145,11 +135,11 @@ public class Tuple implements Serializable{
 	 * @return
 	 * @throws Exception 
 	 */
-	public Datum getData(int index) throws Exception{
-		if(index>=dataArr.length){
-			throw new Exception("Index out of range! index: " + index + ", Length: " + dataArr.length);
+	public Datum getData(int index) throws UnexpectedException{
+		if(index>=row.length()){
+			throw new UnexpectedException("Index out of range! index: " + index + ", Length: " + row.length());
 		}else{
-			return dataArr[index];
+			return row.getDatum(index);
 		}		
 	}
 	
@@ -166,13 +156,13 @@ public class Tuple implements Serializable{
 				colName = colName.split("\\.")[1];
 				index = schema.getColIndex(colName);
 				if(index>=0)
-					return dataArr[index];
+					return row.getDatum(index);
 				else
 					return null;
 			}else
 				return null;	
 		}else
-			return dataArr[index];
+			return row.getDatum(index);
 	}
 	
 	
@@ -219,9 +209,9 @@ public class Tuple implements Serializable{
 	 */
 	public void printTuple(){
 		int i=0;
-		for(Datum data : dataArr){
+		for(Datum data : row.getData()){
 			i++;
-			if(i==dataArr.length)
+			if(i==row.length())
 				System.out.println(data.toString());
 			else
 				System.out.print(data.toString()+"|");
@@ -230,7 +220,7 @@ public class Tuple implements Serializable{
 	
 	public String toString(){
 		StringBuffer sb = new StringBuffer();
-		for(Datum data : dataArr)
+		for(Datum data : row.getData())
 			sb.append(data.toString()+'|');
 		sb.deleteCharAt(sb.length()-1);
 		return sb.toString();
@@ -242,10 +232,85 @@ public class Tuple implements Serializable{
 	
 	public long getBytes(){
 		long size = 0;
-		for(Datum data : dataArr){
+		for(Datum data : row.getData()){
 			size += data.getBytes();
 		}
 		return size;
+	}
+	
+	
+	/**
+	 * Get Comparator by Compare Attribute
+	 * @param attrs
+	 * @return
+	 */
+	public static Comparator<Tuple> getComparator(final CompareAttribute[] attrs){
+		Comparator<Tuple> comptr = new Comparator<Tuple>(){
+			@Override
+			public int compare(Tuple arg0, Tuple arg1) {
+				return arg0.compareTo(arg1, attrs);
+			}
+		};
+		return comptr;
+	}
+	
+	/**
+	 * Get Comparator by Columns
+	 * @param attrs: Columns
+	 * @param isAsc: Is Asc or Desc
+	 * @return
+	 */
+	public static Comparator<Tuple> getComparator(final Column[] attrs, final boolean[] isAsc){
+		CompareAttribute[] compAttr = new CompareAttribute[attrs.length];
+		for(int i=0; i<attrs.length; i++){
+			compAttr[i] = new CompareAttribute(attrs[i], isAsc[i]);
+		}
+		return getComparator(compAttr);		
+	}
+	
+	public static Comparator<Tuple> getComparator(final List<Column> attrs, final boolean[] isAsc){
+		CompareAttribute[] compAttr = new CompareAttribute[attrs.size()];
+		for(int i=0; i<attrs.size(); i++){
+			compAttr[i] = new CompareAttribute(attrs.get(i), isAsc[i]);
+		}
+		return getComparator(compAttr);		
+	}
+	
+	public static class Row implements Serializable, Comparable<Row>{
+		private static final long serialVersionUID = -5862096214159025225L;
+		private Datum[] data;
+		
+		public Row(int size){ data = new Datum[size]; }
+		public Row(Datum[] d){ data = d; }
+		
+		
+		public int length(){ return data.length; }
+		public Datum[] getData(){ return data; }
+		public Datum getDatum(int i){ return data[i]; }
+		public void setDatum(int i, Datum d){ data[i] = d; }
+		public String toString(){ return Arrays.toString(data); }
+		public int compareTo(Row o) { return Row.compareRows(data, o.getData()); }
+		public boolean equals(Object o){  
+			if(o instanceof Tuple.Row){
+				Tuple.Row obj = (Tuple.Row)o;
+				return this.compareTo(obj)==0?true:false;
+			}else
+				return false;
+		}
+		
+		public static int compareRows(Datum[] a, Datum[] b) {
+			int cmp;
+			for (int i = 0; i < a.length; i++) {
+				if (i >= b.length) {
+					return 0;
+				}
+				cmp = a[i].compareTo(b[i]);
+				if (cmp != 0) {
+					return cmp;
+				}
+			}
+			return 0;
+		}
 	}
 	
 //	public static void main(String[] args){

@@ -1,6 +1,7 @@
 package sqlparse;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -11,6 +12,7 @@ import java.util.Map.Entry;
 
 import logicplan.JoinManager;
 import net.sf.jsqlparser.expression.Expression;
+import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.create.table.CreateTable;
@@ -33,25 +35,16 @@ import dao.Tuple;
 
 public class SQLEngine {
 	/*********************	static	filed	*********************/
-	private static Map<String, CreateTable> globalCreateTables;
+	private static final Map<String, CreateTable> globalCreateTables = new HashMap<String, CreateTable>();
+	private static final Map<String, Schema> globalSchemas = new HashMap<String, Schema>();
 	private static Tuple globalTuple;
-
-	static {
-		if(globalCreateTables==null)
-			globalCreateTables = new HashMap<String, CreateTable>();
-	} 
+	private static IndexManager indxMngr;
 	
-	public static Map<String, CreateTable> getGlobalCreateTables(){
-		return globalCreateTables;
-	}
+	public static Map<String, CreateTable> getGlobalCreateTables(){	return globalCreateTables; }
+	public static Map<String, Schema> getGlobalSchemas(){ return globalSchemas; }
+	public static Tuple getGlobalTuple(){ return globalTuple; }
+	public static void setGlobalTuple(Tuple tup){ globalTuple = tup; }
 	
-	public static Tuple getGlobalTuple(){
-		return globalTuple;
-	}
-	
-	public static void setGlobalTuple(Tuple tup){
-		globalTuple = tup;
-	}
 	
 	/**
 	 * Parse Create Table statement
@@ -61,30 +54,44 @@ public class SQLEngine {
 	{
 		if(stmt instanceof CreateTable){
 			CreateTable ct = (CreateTable)stmt;
-
-			globalCreateTables.put(
-				ct.getTable().getName(),
-				ct
-			);
+			String tabName = ct.getTable().getName();
+			globalCreateTables.put(tabName,ct);
+			
+			Schema sch = Schema.schemaFactory(null, ct, ct.getTable());
+			globalSchemas.put(tabName, sch);
 		}
 	}
+
 	
+	public static void buildIndex(IndexManager indxMngr, String indexDir, String tabName, File dataDir, List<Column> key, List<Column>[] scdrKeys){
+		indxMngr = new IndexManager(indexDir);
+		Schema shcema = globalSchemas.get(tabName);
+		Operator data = new OperatorScan(dataDir, shcema);
+		try {
+			indxMngr.buildAllIndice(tabName, data, key, scdrKeys);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 	
 	/*********************	non-static	filed	*********************/	
 	private Map<String, Table> localFromItemTable;
 	private File dataPath;
 	
-	public SQLEngine(File dataPathIn){
+	public SQLEngine(File dataPathIn, String indexDir){
 		localFromItemTable = new HashMap<String, Table>();
 
 		if(dataPathIn!=null)
 			dataPath = dataPathIn;
+		if(indexDir!=null && indxMngr==null)
+			indxMngr = new IndexManager(indexDir);
 	}
 	
 	public Map<String, Table> getLocalTables(){
 		return localFromItemTable;
 	}
-
+	
 	
 	public List<Tuple> select(SelectBody select){
 
@@ -100,14 +107,14 @@ public class SQLEngine {
 	
 			/*********************    Scan&Selection    ********************/
 			//parse scan
-			FromItemConvertor fromItemScan = new FromItemConvertor(dataPath, globalCreateTables, cf.getColumnMapper());
+			FromItemConvertor fromItemScan = new FromItemConvertor(dataPath, globalCreateTables, cf.getColumnMapper(), this);
 			operMap = parseScan(pselect, fromItemScan);
 			//push down selection
 			if(operMap.size()==1){
 				if(pselect.getWhere()!=null){
 					//get the latest operator
 					oper = operMap.get(fromItemScan.getTableName());
-					oper = new OperatorSelection(oper, pselect.getWhere());
+					oper = new OperatorSelection(oper, pselect.getWhere(), this);
 					operMap.put(fromItemScan.getTableName(), oper);	
 					pselect.setWhere(null);
 				}else
@@ -125,14 +132,10 @@ public class SQLEngine {
 				}
 			}
 			
-			//TODO delete
-			List<Tuple> tups = dump(oper);
-			System.out.println("Total size after join:"+tups.size());
-			oper = new OperatorCache(tups);
 			
 			/*********************    Add filtered where condition  ****************/
 			if(pselect.getWhere()!=null)
-				oper = new OperatorSelection(oper, pselect.getWhere());
+				oper = new OperatorSelection(oper, pselect.getWhere(), this);
 			
 			/*********************    Parsing selected items    ********************/
 			SelectItemParser selectItemScan = new SelectItemParser(pselect);
@@ -268,7 +271,7 @@ public class SQLEngine {
 			Expression subwhere = selParser.getExprByTName(tName);
 			if(subwhere!=null){
 				Operator scan_select = scan.getValue();
-				scan_select = new OperatorSelection(scan_select, subwhere);
+				scan_select = new OperatorSelection(scan_select, subwhere, this);
 				operMap.put(tName, scan_select);
 			}
 		}

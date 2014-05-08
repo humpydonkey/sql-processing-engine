@@ -17,7 +17,7 @@ public class DatumBool extends Datum {
 	}
 	
 	@Override
-	public int getHashValue(){
+	public int hashCode(){
 		return value==true?1:0;
 	}
 

@@ -223,7 +223,7 @@ public class OperatorHashJoinExternal extends OperatorHashJoin{
 		Tuple tup;
 		while((tup=oper.readOneTuple())!=null){
 			Datum attrVal = tup.getDataByName(equalColIn);
-			int hash = attrVal.getHashValue();
+			int hash = attrVal.hashCode();
 			int num = hash%blockNumIn;	//block number
 			BufferedWriter writer = writers.get(num);
 			

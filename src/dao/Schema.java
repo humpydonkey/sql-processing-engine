@@ -33,8 +33,7 @@ public class Schema  implements Serializable {
 	private Map<Function, Aggregator> aggregatorMap;
 	private int[] rawPosition;
 	
-	
-	public static Schema schemaFactory(Map<String,Column> colsMapper, CreateTable ct, Table tableName) throws Exception{
+	public static Schema schemaFactory(Map<String,Column> colsMapper, CreateTable ct, Table tableName){
 		@SuppressWarnings("unchecked")
 		List<ColumnDefinition> allColDefs = ct.getColumnDefinitions();
 		
@@ -80,7 +79,7 @@ public class Schema  implements Serializable {
 	}
 	
 	
-	public Schema(Column[] colsIn, ColumnDefinition[] colDefsIn, int[] rawPosIn) throws Exception{
+	public Schema(Column[] colsIn, ColumnDefinition[] colDefsIn, int[] rawPosIn){
 		if(colsIn.length==0||colDefsIn.length==0)
 			throw new IllegalArgumentException("the number of columns/column definitions is 0.");
 		if(colsIn.length!=colDefsIn.length)
@@ -182,7 +181,7 @@ public class Schema  implements Serializable {
 	 * @return
 	 * @throws Exception
 	 */
-	private DatumType convertColType(int index, ColumnDefinition colDef) throws Exception{
+	private DatumType convertColType(int index, ColumnDefinition colDef){
 //		ColumnDefinition colDef = getColDefinition(index);
 		String typeStr = colDef.getColDataType().getDataType();
 		DatumType type;
@@ -210,7 +209,7 @@ public class Schema  implements Serializable {
 			return type;
 			
 		default :
-			throw new Exception("Wrong input type : " + typeStr);
+			throw new IllegalArgumentException("Wrong input type : " + typeStr);
 		}
 	}
 	
@@ -232,6 +231,28 @@ public class Schema  implements Serializable {
 		if(index>=columnNames.length)
 			throw new IndexOutOfBoundsException();		
 		return colTypes[index];
+	}
+	
+	
+	/**
+	 * Get column type by column name
+	 * @param name
+	 * @return
+	 */
+	public DatumType getColTypeByName(String name){
+		int index = getColIndex(name);
+		if(index<0){
+			if(name.contains(".")){
+				name = name.split("\\.")[1];
+				index = getColIndex(name);
+				if(index>=0)
+					return colTypes[index];
+				else
+					return null;
+			}else
+				return null;	
+		}else
+			return colTypes[index];
 	}
 	
 	/**

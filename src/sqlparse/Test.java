@@ -47,7 +47,7 @@ public class Test {
 			CCJSqlParser parser = new CCJSqlParser(stream);
 			Statement stmt;
 			
-			SQLEngine myParser = new SQLEngine(dataDir);
+			SQLEngine myParser = new SQLEngine(dataDir, null);
 			
 			while((stmt = parser.Statement()) !=null){		
 				if(stmt instanceof CreateTable)	

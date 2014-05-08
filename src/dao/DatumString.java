@@ -19,7 +19,7 @@ public class DatumString extends Datum {
 	public DatumType getType(){return DatumType.String;}
 	
 	@Override
-	public int getHashValue(){
+	public int hashCode(){
 		return value.hashCode();
 	}
 	

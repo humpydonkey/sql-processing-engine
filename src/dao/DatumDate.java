@@ -19,10 +19,13 @@ public class DatumDate extends Datum {
 		d = day;
 	}
 	
+	public int getYear(){ return y; }
+	public int getMonth(){ return m; }
+	public int getDay(){ return d; }
 	public DatumType getType(){return DatumType.Date;}
 	
 	@Override
-	public int getHashValue(){
+	public int hashCode(){
 		try {
 			return (int) toLong();
 		} catch (CastError e) {

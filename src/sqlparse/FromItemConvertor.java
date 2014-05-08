@@ -28,14 +28,16 @@ public class FromItemConvertor implements FromItemVisitor{
 	private Map<String,CreateTable> tables;
 	private String tableName;
 	private Map<String, Column> colsInUseMapper;
+	private SQLEngine engine;
 	private Schema schema = null;
 	private Operator source = null;
 	
-	public FromItemConvertor(File basePath, Map<String,CreateTable> tablesIn, Map<String, Column> allCols)
+	public FromItemConvertor(File basePath, Map<String,CreateTable> tablesIn, Map<String, Column> allCols, SQLEngine engineIn)
 	{
 		colsInUseMapper = allCols;
 		dataPath = basePath;
 		tables = tablesIn;
+		engine = engineIn;
 	}
 	
 	public String getTableName(){
@@ -62,8 +64,7 @@ public class FromItemConvertor implements FromItemVisitor{
 		else
 			this.tableName = subselect.getAlias();
 		
-		SQLEngine parser = new SQLEngine(dataPath);
-		List<Tuple> tuples = parser.select(subselect.getSelectBody());
+		List<Tuple> tuples = engine.select(subselect.getSelectBody());
 		source = new OperatorCache(tuples); 
 	}
 	

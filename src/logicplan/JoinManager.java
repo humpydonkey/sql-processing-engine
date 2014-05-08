@@ -29,13 +29,11 @@ public class JoinManager {
 	private Set<String> joinedHistory;
 	private List<EqualJoin> joinList;
 	private Map<String, Operator> operMap;
-	private File swapDir;
 	
 	public JoinManager(List<EqualJoin> joins, Map<String, Operator> operMapIn, File swapDirIn){
 		joinedHistory = new HashSet<String>();
 		joinList = joins;
 		operMap = operMapIn;
-		swapDir = swapDirIn;
 		
 		//find and set size
 		for(EqualJoin ej : joins){

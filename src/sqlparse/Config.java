@@ -6,6 +6,7 @@ import java.io.File;
 public class Config {
 	public static final int Buffer_SIZE = 100000;	//50w row, 5 attributes ~ 20MB
 	public static final long OneMB = 1048576;	//1024*1024
+	public static final String IndexFileName = "MyIndex";
 	
 	/**
 	 * If a file's size>Threshold_MB, then write into disk
@@ -15,8 +16,10 @@ public class Config {
 	//default value
 	private static File swapDir = new File("test/swap/");
 	
-	public static final boolean DebugMode = true;
-
+	public static final boolean DebugMode = false;
+	
+	public static final boolean IsBuildIndex = false;
+	
 	public static final int OneTupeSize_Byte = 100;
 	
 	public static File getSwapDir(){

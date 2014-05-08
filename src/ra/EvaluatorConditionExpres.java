@@ -73,6 +73,7 @@ import dao.Tuple;
 public class EvaluatorConditionExpres implements ExpressionVisitor{
 	public static boolean PrintDebug=false;
 	
+	private SQLEngine engine;
 	private Tuple tuple;
 	private boolean evalResult;
 	private Datum data;
@@ -80,7 +81,8 @@ public class EvaluatorConditionExpres implements ExpressionVisitor{
 	private EvaluatorSubSelectGlobalAttr subselecttAttrFinder;
 	private CCJSqlParserManager subselectParser;
 
-	public EvaluatorConditionExpres(Tuple tupleIn){
+	public EvaluatorConditionExpres(Tuple tupleIn, SQLEngine engineIn){
+		engine = engineIn;
 		evalResult = true;
 		tuple = tupleIn;
 		subselecttAttrFinder = new EvaluatorSubSelectGlobalAttr(tupleIn);
@@ -440,8 +442,8 @@ public class EvaluatorConditionExpres implements ExpressionVisitor{
 				sb = newSB;
 
 			SQLEngine.setGlobalTuple(tuple);
-			SQLEngine parser = new SQLEngine(null);
-			List<Tuple> tuples = parser.select(sb);
+
+			List<Tuple> tuples = engine.select(sb);
 			
 			try {
 				data = tuples.get(0).getData(0);

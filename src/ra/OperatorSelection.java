@@ -1,8 +1,7 @@
 package ra;
 
-import common.Tools;
-
 import net.sf.jsqlparser.expression.Expression;
+import sqlparse.SQLEngine;
 import dao.Datum;
 import dao.Datum.CastError;
 import dao.DatumDouble;
@@ -21,10 +20,10 @@ public class OperatorSelection implements Operator{
 	private Expression condition;
 	private EvaluatorConditionExpres evaluator;
 	
-	public OperatorSelection(Operator inputIn,  Expression conditionIn){
+	public OperatorSelection(Operator inputIn,  Expression conditionIn, SQLEngine engine){
 		input = inputIn;
 		condition = conditionIn;
-		evaluator = new EvaluatorConditionExpres(null);
+		evaluator = new EvaluatorConditionExpres(null, engine);
 	}
 	
 

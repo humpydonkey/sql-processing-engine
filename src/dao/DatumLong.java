@@ -20,7 +20,7 @@ public class DatumLong extends Datum{
 	public DatumType getType(){return DatumType.Long;}
 	
 	@Override
-	public int getHashValue(){
+	public int hashCode(){
 		return (int)value;
 	}
 	

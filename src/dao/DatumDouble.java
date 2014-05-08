@@ -20,7 +20,7 @@ public class DatumDouble extends Datum{
 	public DatumType getType(){return DatumType.Double;}
 
 	@Override
-	public int getHashValue(){
+	public int hashCode(){
 		//TODO Assume the precision is enough, too strong assumption
 		return (int)(value*100000000);
 	}
