@@ -22,12 +22,14 @@ public class AggregatorMin extends Aggregator {
 
     private Map<String, Datum> minMap;
     private Expression paraExpr;
-
+    private  EvaluatorArithmeticExpres eval ;
+    
     public AggregatorMin(Function funcIn, String[] groupByNamesIn) {
         super(funcIn, groupByNamesIn);
 
         minMap = new HashMap<String, Datum>();
-
+        eval = new EvaluatorArithmeticExpres();
+        
         @SuppressWarnings("unchecked")
         List<Expression> paraList = funcIn.getParameters().getExpressions();
         if (paraList.size() > 1)
@@ -37,10 +39,8 @@ public class AggregatorMin extends Aggregator {
     }
 
     @Override
-    public void aggregate(Tuple tuple, String key) {
-        EvaluatorArithmeticExpres eval = new EvaluatorArithmeticExpres(tuple);
-        paraExpr.accept(eval);
-        Datum newVal = eval.getData();
+    public void aggregate(Tuple tuple, String key) {   
+        Datum newVal = eval.parse(paraExpr, tuple);
 
         if (!minMap.containsKey(key)) {
             //insert new

@@ -43,6 +43,11 @@ public class Tuple implements Serializable{
 		}		
 	}
 	
+	public Tuple(Row rowIn, Schema schemaIn){
+		row  = rowIn;
+		schema = schemaIn;
+	}
+	
 	public Tuple(Datum[] dataIn, Schema schemaIn){
 		row = new Row(dataIn);
 		schema = schemaIn;
@@ -98,9 +103,8 @@ public class Tuple implements Serializable{
 				
 			}else{
 				//should be a constant or expression
-				EvaluatorArithmeticExpres eval = new EvaluatorArithmeticExpres(this);
-				newSource.accept(eval);
-				oldData = eval.getData();
+				EvaluatorArithmeticExpres eval = new EvaluatorArithmeticExpres();
+				oldData = eval.parse(newSource, this);
 			}
 			newDataArr[i] = oldData;
 		}
@@ -176,8 +180,17 @@ public class Tuple implements Serializable{
 				data = getDataByName(col.getColumnName());
 			return data;
 		}
-			
 	}
+	
+	
+	public boolean setDataByName(Datum data, Column col){
+		int pos = schema.getColIndex(col.getColumnName());
+		if(pos<0)
+			return false;
+		row.setDatum(pos, data);
+		return true;
+	}
+	
 	
 	/**
 	 * Get Datum type by column name
@@ -199,6 +212,7 @@ public class Tuple implements Serializable{
 		return schema.getTableName();
 	}
 	
+	
 	public String getTableAlias(){
 		return schema.getTableAlias();
 	}
@@ -218,6 +232,7 @@ public class Tuple implements Serializable{
 		}
 	}
 	
+	
 	public String toString(){
 		StringBuffer sb = new StringBuffer();
 		for(Datum data : row.getData())
@@ -226,9 +241,11 @@ public class Tuple implements Serializable{
 		return sb.toString();
 	}
 	
+	
 	public Schema getSchema(){
 		return schema;
 	}
+	
 	
 	public long getBytes(){
 		long size = 0;
@@ -238,6 +255,16 @@ public class Tuple implements Serializable{
 		return size;
 	}
 	
+	
+	public Tuple.Row getPrmyKey(){
+		int[] keyIndex = schema.getPrmyKeyIndex();
+		Datum[] key = new Datum[keyIndex.length];
+		Datum[] data = row.getData();
+		for(int i=0; i<keyIndex.length; i++){
+			key[i] = data[i];
+		}
+		return new Tuple.Row(key);
+	}
 	
 	/**
 	 * Get Comparator by Compare Attribute
@@ -254,6 +281,7 @@ public class Tuple implements Serializable{
 		return comptr;
 	}
 	
+	
 	/**
 	 * Get Comparator by Columns
 	 * @param attrs: Columns
@@ -268,6 +296,7 @@ public class Tuple implements Serializable{
 		return getComparator(compAttr);		
 	}
 	
+	
 	public static Comparator<Tuple> getComparator(final List<Column> attrs, final boolean[] isAsc){
 		CompareAttribute[] compAttr = new CompareAttribute[attrs.size()];
 		for(int i=0; i<attrs.size(); i++){
@@ -276,13 +305,13 @@ public class Tuple implements Serializable{
 		return getComparator(compAttr);		
 	}
 	
+	
 	public static class Row implements Serializable, Comparable<Row>{
 		private static final long serialVersionUID = -5862096214159025225L;
 		private Datum[] data;
 		
 		public Row(int size){ data = new Datum[size]; }
 		public Row(Datum[] d){ data = d; }
-		
 		
 		public int length(){ return data.length; }
 		public Datum[] getData(){ return data; }

@@ -7,6 +7,7 @@ import net.sf.jsqlparser.expression.AnyComparisonExpression;
 import net.sf.jsqlparser.expression.CaseExpression;
 import net.sf.jsqlparser.expression.DateValue;
 import net.sf.jsqlparser.expression.DoubleValue;
+import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.ExpressionVisitor;
 import net.sf.jsqlparser.expression.Function;
 import net.sf.jsqlparser.expression.InverseExpression;
@@ -45,8 +46,10 @@ import net.sf.jsqlparser.statement.select.SubSelect;
 import dao.Datum;
 import dao.DatumDate;
 import dao.DatumDouble;
+import dao.DatumFactory;
 import dao.DatumLong;
 import dao.DatumString;
+import dao.DatumType;
 import dao.Tuple;
 
 /**
@@ -63,12 +66,20 @@ public class EvaluatorArithmeticExpres implements ExpressionVisitor{
 	private Datum data;
 
 
-	public EvaluatorArithmeticExpres(Tuple tupleIn){
-		tuple = tupleIn;
-	}
+	public EvaluatorArithmeticExpres(){}
 
+	public Datum parse(Expression exp, Tuple tup){
+		tuple = tup;
+		exp.accept(this);
+		return getData();
+	}
 	
-	public Datum getData(){
+	public Datum parse(Expression exp){
+		exp.accept(this);
+		return getData();
+	}
+	
+	private Datum getData(){
 		Datum d = data;
 		data = null;
 		if(d!=null)
@@ -85,7 +96,11 @@ public class EvaluatorArithmeticExpres implements ExpressionVisitor{
 
 	@Override
 	public void visit(Function arg) {
-		throw new UnsupportedOperationException("Not supported yet."); 
+		if(arg.getName().equalsIgnoreCase("DATE")){
+			String para = arg.getParameters().getExpressions().get(0).toString();
+			String date = para.substring(1, para.length()-1);
+			data = DatumFactory.create(date, DatumType.Date);
+		}
 	}
 
 	@Override
@@ -242,7 +257,8 @@ public class EvaluatorArithmeticExpres implements ExpressionVisitor{
 
 	@Override
 	public void visit(Column arg) {
-		data = tuple.getDataByName(arg);
+		if(tuple!=null)
+			data = tuple.getDataByName(arg);
 	}
 
 	@Override

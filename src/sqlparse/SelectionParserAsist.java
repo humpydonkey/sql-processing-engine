@@ -46,7 +46,11 @@ import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.SubSelect;
 
-
+/**
+ * Use to parse OR condition only
+ * @author yazhoucao
+ *
+ */
 public class SelectionParserAsist  implements ExpressionVisitor {
 
 	private Stack<Table> orTables;

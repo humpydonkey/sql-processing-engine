@@ -2,6 +2,7 @@ package sqlparse;
 
 import java.io.File;
 import java.io.IOException;
+import java.rmi.UnexpectedException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -12,26 +13,37 @@ import java.util.Map.Entry;
 
 import logicplan.JoinManager;
 import net.sf.jsqlparser.expression.Expression;
+import net.sf.jsqlparser.expression.operators.relational.ExpressionList;
+import net.sf.jsqlparser.expression.operators.relational.ItemsList;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.create.table.CreateTable;
+import net.sf.jsqlparser.statement.delete.Delete;
+import net.sf.jsqlparser.statement.insert.Insert;
 import net.sf.jsqlparser.statement.select.FromItem;
 import net.sf.jsqlparser.statement.select.Join;
 import net.sf.jsqlparser.statement.select.OrderByElement;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.SelectBody;
+import net.sf.jsqlparser.statement.update.Update;
 import ra.Aggregator;
+import ra.EvaluatorArithmeticExpres;
+import ra.EvaluatorConditionExpres;
 import ra.ExternalMergeSort;
 import ra.Operator;
 import ra.OperatorCache;
 import ra.OperatorGroupBy;
+import ra.OperatorIndexScan;
 import ra.OperatorOrderBy;
 import ra.OperatorProjection;
 import ra.OperatorScan;
 import ra.OperatorSelection;
+import common.Tools;
+import dao.Datum;
 import dao.Schema;
 import dao.Tuple;
+import dao.Tuple.Row;
 
 public class SQLEngine {
 	/*********************	static	filed	*********************/
@@ -62,17 +74,22 @@ public class SQLEngine {
 		}
 	}
 
-	
-	public static void buildIndex(IndexManager indxMngr, String indexDir, String tabName, File dataDir, List<Column> key, List<Column>[] scdrKeys){
-		indxMngr = new IndexManager(indexDir);
-		Schema shcema = globalSchemas.get(tabName);
-		Operator data = new OperatorScan(dataDir, shcema);
+	/**
+	 * Build the index of given table
+	 * @param indexDir: index directory
+	 * @param dataDir: data file directory
+	 */
+	public static void buildIndex(String indexDir, File dataDir, Schema schema){
+		IndexManager indxMngr = new IndexManager(indexDir);
+		File dataFile = new File(dataDir.getPath()+File.separator+schema.getTableName()+".dat");
+		Operator data = new OperatorScan(dataFile, schema);
 		try {
-			indxMngr.buildAllIndice(tabName, data, key, scdrKeys);
+			indxMngr.buildPrmyStore(schema.getTableName(), data, schema.getPrmyKey(), schema.getAllScdrKeys());
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		indxMngr.close();
 	}
 	
 	/*********************	non-static	filed	*********************/	
@@ -88,11 +105,131 @@ public class SQLEngine {
 			indxMngr = new IndexManager(indexDir);
 	}
 	
-	public Map<String, Table> getLocalTables(){
-		return localFromItemTable;
+	public IndexManager getIndexManager(){ return indxMngr; }
+	public Map<String, Table> getLocalTables(){ return localFromItemTable; }
+	
+	/**
+	 * Insert statement
+	 * @param insert
+	 * @return
+	 */
+	public boolean insert(Insert insert){
+		boolean res = false; 
+		Table tab = insert.getTable();
+		String tabName = tab.getName();
+		Schema schema = globalSchemas.get(tabName);
+	
+		ItemsList items = insert.getItemsList();
+		InsertValueEvaluator eval = new InsertValueEvaluator();
+		
+		//One tuple
+		if(items instanceof ExpressionList){
+			ExpressionList exprs = (ExpressionList)items;
+			@SuppressWarnings("unchecked")
+			List<Expression> expList =  exprs.getExpressions();
+			Datum[] row = new Datum[expList.size()];
+			int i=0;
+			for(Object expr : expList){
+				Expression valueExpr = (Expression)expr;
+				valueExpr.accept(eval);
+				Datum cell = eval.getCell();
+				row[i++] = cell;
+			}
+			try {
+				indxMngr.insertInStoreMap(new Row(row), schema);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+			return true;
+		}else{
+			//subselect...
+		}
+			
+		return res;
 	}
 	
 	
+	@SuppressWarnings("unchecked")
+	public boolean update(Update update){
+		final String tabName = update.getTable().getName();
+		//convert Expressions to values
+		List<Expression> vals = update.getExpressions();
+		List<Datum> setValues = new ArrayList<Datum>(vals.size());
+		EvaluatorArithmeticExpres eval = new EvaluatorArithmeticExpres();
+		for(Expression exp : vals)
+			setValues.add(eval.parse(exp));
+		
+		
+		Schema schema = globalSchemas.get(tabName);
+		Expression where = update.getWhere();
+		//retrieve tuples
+		@SuppressWarnings("serial")
+		SelectionParser selParser = new SelectionParser(new ArrayList<String>(){{add(tabName);}});
+		selParser.parse(where);
+		List<Expression> exps = selParser.getSeparateExprs(tabName);
+		
+		FromItemConvertor tableConvertor = new FromItemConvertor(dataPath,selParser, globalCreateTables, null, this);
+		OperatorIndexScan data = tableConvertor.createIndexScan(exps, schema);
+		data.init();
+		EvaluatorConditionExpres selecltionEval = new EvaluatorConditionExpres(null, this);
+		//set values
+		List<Column> cols = update.getColumns();
+		int n = cols.size();
+		for(Tuple tup : data.getData()){
+			selecltionEval.updateTuple(tup);
+			where.accept(selecltionEval);
+			if(selecltionEval.getResult()){
+				for(int i=0; i<n; i++){
+					Column col = cols.get(i);
+					Datum value = setValues.get(i);
+					tup.setDataByName(value, col);
+				}	
+			}
+		}
+		
+		//put back
+		indxMngr.commit();
+		return true;	
+	}
+	
+	public boolean delete(Delete delete){
+		final String tabName = delete.getTable().getName();
+		Schema schema = globalSchemas.get(tabName);
+		
+		Expression where = delete.getWhere();
+		
+		@SuppressWarnings("serial")
+		SelectionParser selParser = new SelectionParser(new ArrayList<String>(){{add(tabName);}});
+		selParser.parse(where);
+		List<Expression> exps = selParser.getSeparateExprs(tabName);
+		
+		FromItemConvertor tableConvertor = new FromItemConvertor(dataPath,selParser, globalCreateTables, null, this);
+		OperatorIndexScan data = tableConvertor.createIndexScan(exps, schema);
+		
+		try {
+			//TODO
+			List<Long> keys = data.findDataKeys();
+			String name = indxMngr.getName();
+			indxMngr.reopen(name);
+			indxMngr.deleteFromStoreMap(keys, schema);
+		} catch (UnexpectedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return true;
+	}
+	
+	
+	/**
+	 * Select statement
+	 * @param select
+	 * @return
+	 */
 	public List<Tuple> select(SelectBody select){
 
 		Map<String, Operator> operMap = new HashMap<String, Operator>();
@@ -101,37 +238,36 @@ public class SQLEngine {
 		if(select instanceof PlainSelect){
 			PlainSelect pselect = (PlainSelect) select;
 			
-			//extract local table into a map
-			extractLocalTable(pselect,localFromItemTable);
+			/******** Extract local table out, fill into localFromItemTable, ignore subselect, subjoin ************/
+			TableParser tabParser = new TableParser(pselect);
+			localFromItemTable = tabParser.getFromItemTable();
+			
+			/******** Parse select item, find out which column will be use ************/
 			ColumnUsedParser cf = new ColumnUsedParser(pselect);
-	
+			
+			/******** Parse where condition, decompose and distribute it to different table, and generate Join List ************/
+			Expression where = pselect.getWhere();
+			//decompose where condition, distribute to each one
+			SelectionParser selParser = new SelectionParser(localFromItemTable.keySet());
+			selParser.parse(where);
+			//reset the original where to a filtered where
+			pselect.setWhere(selParser.getMergedExprs(SelectionParser.MultiTabName));
+			
 			/*********************    Scan&Selection    ********************/
 			//parse scan
-			FromItemConvertor fromItemScan = new FromItemConvertor(dataPath, globalCreateTables, cf.getColumnMapper(), this);
+			FromItemConvertor fromItemScan = new FromItemConvertor(dataPath,selParser, globalCreateTables, cf.getColumnMapper(), this);
 			operMap = parseScan(pselect, fromItemScan);
-			//push down selection
-			if(operMap.size()==1){
-				if(pselect.getWhere()!=null){
-					//get the latest operator
-					oper = operMap.get(fromItemScan.getTableName());
-					oper = new OperatorSelection(oper, pselect.getWhere(), this);
-					operMap.put(fromItemScan.getTableName(), oper);	
-					pselect.setWhere(null);
-				}else
-					oper = operMap.get(fromItemScan.getTableName());
-			}else{
-				/*********************   Push down Selection   ****************/
-				//resolve and redistribute the big where condition
-				SelectionParser distributor = pushDownSelection(pselect, operMap);
-				
-				/*********************    Equal Join    ********************/
-				if(pselect.getJoins()!=null){
-					JoinManager jm = new JoinManager(distributor.getJoinList(), operMap, Config.getSwapDir());
-					oper = jm.pipeline();
-					//oper = jm.executeJoin();
-				}
-			}
 			
+			/*********************   Push down Selection   ****************/
+			//resolve and redistribute the big where condition
+			oper = pushDownSelection(selParser, operMap);
+			
+			/*********************    Equal Join    ********************/
+			if(pselect.getJoins()!=null){
+				JoinManager jm = new JoinManager(selParser.getJoinList(), operMap, Config.getSwapDir());
+				oper = jm.pipeline();
+				//oper = jm.executeJoin();
+			}
 			
 			/*********************    Add filtered where condition  ****************/
 			if(pselect.getWhere()!=null)
@@ -211,26 +347,21 @@ public class SQLEngine {
 		return null;		
 	}
 	
-	/**
-	 * Extract local table out, fill into localFromItemTable
-	 * ignore subselect, subjoin
-	 * @param pselect
-	 */
-	public void extractLocalTable(final PlainSelect pselect, Map<String, Table> tableMap){
-		//Parse From, getLocalItemTable
-		TableParser fiParser = new TableParser(tableMap);
-		pselect.getFromItem().accept(fiParser);
-		@SuppressWarnings("unchecked")
-		List<Join> joinList = pselect.getJoins();
-		if(joinList!=null){
-			for(Join t : joinList){
-				Table table = (Table)t.getRightItem();
-				table.accept(fiParser);	//generate scan operator
-			}
-		}
+	
+	public Map<String, Operator> parseScanSelection(final PlainSelect pselect, SelectionParser selParser, FromItemConvertor scanGenerator){		
+		/*********************  Create Scan    ********************/
+		Map<String, Operator> operMap = new HashMap<String, Operator>(); 
+		
+		FromItem fromitem = pselect.getFromItem();
+		fromitem.accept(scanGenerator);
+		//the first table, fromItem, always have
+		Operator oper = scanGenerator.getSourceOperator();	
+		operMap.put(scanGenerator.getTableName(), oper);
+			
+		return null;
 	}
 	
-	private Map<String, Operator> parseScan(final PlainSelect pselect, FromItemConvertor scanGenerator){
+	public Map<String, Operator> parseScan(final PlainSelect pselect, FromItemConvertor scanGenerator){
 		/*********************  Create Scan    ********************/
 		Map<String, Operator> operMap = new HashMap<String, Operator>(); 
 		
@@ -255,31 +386,27 @@ public class SQLEngine {
 		return operMap;
 	}
 	
-	
-	private SelectionParser pushDownSelection(final PlainSelect pselect, Map<String, Operator> operMap){
-		/*********************  Push down Selection    ********************/
-		Expression where = pselect.getWhere();
-		
-		//reorganize where condition, distribute to each one
-		SelectionParser selParser = new SelectionParser(operMap.keySet());
-		selParser.parse(where);
-		
+
+	/*********************  Push down Selection    ********************/
+	private Operator pushDownSelection(SelectionParser selParser, Map<String, Operator> operMap){
+		if(operMap.size()==0)
+			throw new IllegalArgumentException("OperMap.size is 0!");
+		Operator oper = null;
 		//for every scan operator, pipeline select
 		for(Entry<String, Operator> scan : operMap.entrySet()){
 			//subwhere
 			String tName = scan.getKey();
-			Expression subwhere = selParser.getExprByTName(tName);
+			Expression subwhere = selParser.getMergedExprs(tName);
 			if(subwhere!=null){
 				Operator scan_select = scan.getValue();
 				scan_select = new OperatorSelection(scan_select, subwhere, this);
 				operMap.put(tName, scan_select);
-			}
+				Tools.debug("Push down selection : "+ tName +" "+subwhere.toString());
+				oper = scan_select;
+			}else
+				oper = scan.getValue();
 		}
-		
-		//reset the original where to a filtered where
-		pselect.setWhere(selParser.getExprByTName(SelectionParser.MultiTabName));			
-		
-		return selParser;
+		return oper;
 	}
 
 	

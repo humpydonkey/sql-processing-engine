@@ -22,12 +22,14 @@ public class AggregatorMax extends Aggregator {
 
     private Map<String, Datum> maxMap;
     private Expression paraExpr;
-
+    private EvaluatorArithmeticExpres eval;
+    
     public AggregatorMax(Function funcIn, String[] groupByNamesIn) {
         super(funcIn, groupByNamesIn);
 
         maxMap = new HashMap<String, Datum>();
-
+        eval = new EvaluatorArithmeticExpres();
+        
         @SuppressWarnings("unchecked")
         List<Expression> paraList = funcIn.getParameters().getExpressions();
         if (paraList.size() > 1)
@@ -38,10 +40,7 @@ public class AggregatorMax extends Aggregator {
 
     @Override
     public void aggregate(Tuple tuple, String key) {
-        EvaluatorArithmeticExpres eval = new EvaluatorArithmeticExpres(tuple);
-        paraExpr.accept(eval);
-        Datum newVal = eval.getData();
-
+        Datum newVal = eval.parse(paraExpr, tuple);
         if (!maxMap.containsKey(key)) {
             //insert new
             maxMap.put(key, newVal);

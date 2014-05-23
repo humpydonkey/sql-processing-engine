@@ -17,7 +17,7 @@ public class TestEnvironment {
 	
 	public TestEnvironment(){
 		// TODO Auto-generated method stub
-		File sql = new File("test/cp2_littleBig/tpch_schemas.sql");
+		File sql = new File("test/Checkpoint4_25Mb/tpch_schemas.sql");
 
 		FileReader stream;
 		try {

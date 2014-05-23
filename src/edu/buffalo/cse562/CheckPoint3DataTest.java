@@ -290,8 +290,8 @@ public class CheckPoint3DataTest {
 			List<String> correctResults = FileAccessor.getInstance().readAllLines(resultPath);
 			
 			for(int i=0; i<results.size(); i++){
-				System.out.println(correctResults.get(i)+"\n"+results.get(i)+"\n");	
-				//Assert.assertEquals(results.get(i).toString(), correctResults.get(i));
+				//System.out.println(correctResults.get(i)+"\n"+results.get(i)+"\n");	
+				Assert.assertEquals(results.get(i).toString(), correctResults.get(i));
 			}
 
 		}else
@@ -311,8 +311,8 @@ public class CheckPoint3DataTest {
 			List<String> correctResults = FileAccessor.getInstance().readAllLines(resultPath);
 			
 			for(int i=0; i<results.size(); i++){
-				System.out.println(correctResults.get(i)+"\n"+results.get(i)+"\n");	
-				//Assert.assertEquals(results.get(i).toString(), correctResults.get(i));
+				//System.out.println(correctResults.get(i)+"\n"+results.get(i)+"\n");	
+				Assert.assertEquals(results.get(i).toString(), correctResults.get(i));
 			}
 
 		}else

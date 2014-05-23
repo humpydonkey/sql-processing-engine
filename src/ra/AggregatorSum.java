@@ -22,11 +22,13 @@ public class AggregatorSum extends Aggregator {
 
 	private Map<String, Datum> sumMap;
 	private Expression paraExpr;
+	private EvaluatorArithmeticExpres eval;
 	
 	public AggregatorSum(Function funcIn, String[] groupByNamesIn) {
 		super(funcIn, groupByNamesIn);
 		
 		sumMap = new HashMap<String, Datum>();
+		eval = new EvaluatorArithmeticExpres();
 		
 		@SuppressWarnings("unchecked")
 		List<Expression> paraList = funcIn.getParameters().getExpressions();
@@ -38,9 +40,8 @@ public class AggregatorSum extends Aggregator {
 
 	@Override
 	public void aggregate(Tuple tuple, String key) {
-		EvaluatorArithmeticExpres eval = new EvaluatorArithmeticExpres(tuple);
-		paraExpr.accept(eval);
-		Datum newVal = eval.getData();
+		
+		Datum newVal = eval.parse(paraExpr, tuple);
 		
 		if(!sumMap.containsKey(key)){
 			//insert new

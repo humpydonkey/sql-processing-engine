@@ -251,6 +251,6 @@ public abstract class OperatorHashJoin implements Operator {
 		}
 		
 		
-		return new Schema(joinedNames, joinedTypes, joinedSources, null);
+		return new Schema(joinedNames, joinedTypes, joinedSources, null, null);
 	}
 }

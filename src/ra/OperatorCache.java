@@ -31,6 +31,8 @@ public class OperatorCache implements Operator {
 		iter = tuples.iterator();
 	}
 	
+	public List<Tuple> getData(){ return tuples; }
+	
 	@Override
 	public Tuple readOneTuple() {
 		if(iter.hasNext())

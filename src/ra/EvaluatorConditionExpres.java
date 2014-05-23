@@ -419,7 +419,7 @@ public class EvaluatorConditionExpres implements ExpressionVisitor{
 		Datum var = tuple.getDataByName(arg);
 		if(var==null){
 			StringBuilder sb = new StringBuilder();
-			Map<String, Integer> schemaMap = tuple.getSchema().getIndexMap();
+			Map<String, Integer> schemaMap = tuple.getSchema().getColIndexMap();
 			for(Entry<String, Integer> entry : schemaMap.entrySet())
 				sb.append(entry.getKey() + " | ");
 			

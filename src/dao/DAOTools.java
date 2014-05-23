@@ -19,7 +19,12 @@ public class DAOTools {
 					return true;
 				else
 					return false;
-			}else if(left.getName().equalsIgnoreCase(right.getName()))
+			}else if(left.getName()!=null&&right.getName()!=null){
+				if(left.getName().equalsIgnoreCase(right.getName()))
+					return true;
+				else
+					return false;
+			}else if(left.getName()==null&&right.getName()==null)
 				return true;
 			else
 				return false;

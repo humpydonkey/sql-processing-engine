@@ -92,7 +92,7 @@ public class SelectItemParser implements SelectItemVisitor{
 			colNames.toArray(colArr);
 			colTypes.toArray(typeArr);
 			colSources.toArray(exprArr);
-			newSchema = new Schema(colArr, typeArr,exprArr, aggreMap);
+			newSchema = new Schema(colArr, typeArr,exprArr, null, aggreMap);
 		}
 	}
 	

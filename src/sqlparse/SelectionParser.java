@@ -9,7 +9,6 @@ import java.rmi.UnexpectedException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -64,8 +63,14 @@ import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.create.table.CreateTable;
 import net.sf.jsqlparser.statement.select.PlainSelect;
 import net.sf.jsqlparser.statement.select.SubSelect;
+import ra.EvaluatorConditionForIndex;
 import ra.EvaluatorEqualJoin;
+import ra.OperatorIndexScan.IndexScanType;
+
+import common.Tools;
+
 import dao.DAOTools;
+import dao.Datum;
 import dao.EqualJoin;
 
 
@@ -84,22 +89,30 @@ public class SelectionParser implements ExpressionVisitor{
 	private Map<String, List<Expression>> exprsMap;
 	private Stack<Table> allTables;	//all pushed down Tables
 	private SelectionParserAsist orParser;
+	private Collection<String> tableNames;
 	
-	public SelectionParser(Collection<String> tableNames){
+	public SelectionParser(Collection<String> tableNamesIn){
 		allTables = new Stack<Table>();
 		exprsMap = new HashMap<String, List<Expression>>();
 		joins = new ArrayList<EqualJoin>();
 		orParser = new SelectionParserAsist();
+		tableNames = tableNamesIn;
 		
 		for(String tName : tableNames)
-			exprsMap.put(tName, new LinkedList<Expression>());
+			exprsMap.put(tName, new ArrayList<Expression>());
 		
-		exprsMap.put(MultiTabName, new LinkedList<Expression>());
+		exprsMap.put(MultiTabName, new ArrayList<Expression>());
 	}
 	
 	public void parse(Expression where){
+		if(where==null){
+			Tools.debug("Where condition is null! Nothing to parse!");
+			return;			
+		}
+
 		where.accept(this);
 		extractEqualJoin();
+		premergeConditions();
 		printResults();
 	}
 
@@ -107,18 +120,32 @@ public class SelectionParser implements ExpressionVisitor{
 		return joins;
 	}
 	
-	public Expression getExprByTName(String tName){
+	/**
+	 * Get merged expression condition by table name
+	 * @param tName
+	 * @return
+	 */
+	public Expression getMergedExprs(String tName){
 		List<Expression> exprs = exprsMap.get(tName);
 		if(exprs==null||exprs.size()==0)
 			return null;
-			
+
 		Expression exp = exprs.get(0);
-		
+
 		for(int i=1; i<exprs.size(); i++){
 			exp = new AndExpression(exp, exprs.get(i));
 		}
-		
+
 		return exp;
+	}
+	
+	/**
+	 * Get separate expression conditions by table name
+	 * @param tabName
+	 * @return
+	 */
+	public List<Expression> getSeparateExprs(String tabName){
+		return exprsMap.get(tabName);
 	}
 
 	@Override	public void visit(NullValue arg0) {}
@@ -326,6 +353,66 @@ public class SelectionParser implements ExpressionVisitor{
 	
 	
 	/**
+	 * Merge conditions like X>A,X<B to A<X<B, only merge one for each table
+	 */
+	private void premergeConditions(){
+		//for each table
+		for(Entry<String, List<Expression>> entry : exprsMap.entrySet()){
+			if(entry.getKey().equals(MultiTabName))
+				continue;
+			
+			EvaluatorConditionForIndex eval = new EvaluatorConditionForIndex();
+			
+			boolean isFinish = false;
+			List<Expression> exprs = entry.getValue();
+			
+			//for each Expression, find the one has the same column 
+			for(int i=0; i<exprs.size(); i++){
+				if(isFinish)
+					break;
+				
+				Expression expI = exprs.get(i);
+				expI.accept(eval);
+				Column colI = eval.getColumn();
+				Datum[] dataI = eval.getData();
+				if(colI==null||dataI==null)
+					continue;
+				
+				IndexScanType type = eval.getType();
+				if(type==IndexScanType.EqualsTo){
+					break;
+				}else if(type==IndexScanType.NotEqualsTo||type==IndexScanType.All)
+					continue;
+				
+				for(int j=i+1; j<exprs.size(); j++){
+					Expression expJ = exprs.get(j);
+					expJ.accept(eval);
+					Column colJ = eval.getColumn();
+					Datum[] dataJ = eval.getData();
+					if(colJ==null||dataJ==null)
+						break;
+					
+					IndexScanType typeJ = eval.getType();
+					if(typeJ==IndexScanType.EqualsTo){
+						break;
+					}else if(typeJ==IndexScanType.NotEqualsTo||typeJ==IndexScanType.All)
+						continue;
+					
+					//merge
+					if(colI.getColumnName().equals(colJ.getColumnName())){
+						Expression merged = new AndExpression(expI, expJ);
+						exprs.remove(i);
+						exprs.remove(j-1);
+						exprs.add(merged);
+						isFinish = true;
+						break;
+					}
+				}
+			}
+		}
+	}
+	
+	/**
 	 * Distribute Expression to corresponding Table
 	 * @param t
 	 * @param expr
@@ -346,8 +433,11 @@ public class SelectionParser implements ExpressionVisitor{
 			//both alias and table name are null
 			//then it is a non-null table with all null value
 			//it means there is only one table
-			//there should not have such case
-			throw new UnsupportedOperationException("Unexpected......"); 
+			if(tableNames.size()==1){
+				String tabName = tableNames.iterator().next();
+				exprsMap.get(tabName).add(expr);
+			}else
+				throw new UnsupportedOperationException("Unexpected......"); 
 		}
 	}
 
@@ -371,20 +461,31 @@ public class SelectionParser implements ExpressionVisitor{
 		expr.getLeftExpression().accept(this);		
 		checkSameAndPushResult(saveLength);
 		Table leftTab = allTables.pop();
-		if(leftTab!=null&&leftTab.getName().equals(MultiTabName)){
-			distributeExpression(leftTab, expr);
-			return;
+		if(leftTab!=null){
+			if(leftTab.getName()==null){
+				//only one table
+				
+			}else if(leftTab.getName().equals(MultiTabName)){
+				distributeExpression(leftTab, expr);
+				return;
+			}
 		}
+		
 			
 		expr.getRightExpression().accept(this);		
 		checkSameAndPushResult(saveLength);
 		Table rightTab = allTables.pop();
-		if(rightTab!=null&&rightTab.getName().equals(MultiTabName)){
-			distributeExpression(rightTab, expr);
-			return;
+		if(rightTab!=null){
+			if(rightTab.getName()==null){
+				//only one table
+				
+			}else if(rightTab.getName().equals(MultiTabName)){
+				distributeExpression(rightTab, expr);
+				return;
+			}
 		}
 		
-		
+	
 		if(leftTab==null&&rightTab!=null)
 			distributeExpression(rightTab, expr);
 		else if(leftTab!=null&&rightTab==null)
@@ -454,15 +555,13 @@ public class SelectionParser implements ExpressionVisitor{
 	
 	
 	public static void main(String[] args) {
-		File files = new File("D:/testDecompose/");
-		File schemaFile = new File("test/cp2_littleBig/tpch_schemas.sql");
-		File dataFile = new File("test/data");		
-		File swapPath = new File("test/");
+		File files = new File("test/DecomposeExpression");
+		File schemaFile = new File("test/checkpoint4_25Mb/tpch_schemas.sql");
+		//File dataFile = new File("test/data");		
+		File swapPath = new File("test/swap");
 		for(File f : files.listFiles()){
 			try {
 				Config.setSwapDir(swapPath);
-				SQLEngine engine = new SQLEngine(dataFile, null);
-
 				//create schema
 				FileReader schemaReader = new FileReader(schemaFile);
 				Statement create;
@@ -474,15 +573,15 @@ public class SelectionParser implements ExpressionVisitor{
 				
 				//read sql
 				PlainSelect psel = FileAccessor.getInstance().parsePSelect(f);
-				Map<String, Table>  tableMap = new HashMap<String, Table>();
-				engine.extractLocalTable(psel, tableMap);	
+				TableParser tparser = new TableParser(psel);
+				Map<String, Table>  tableMap = tparser.getFromItemTable();
 				
 				System.out.println(f.toString());
 				System.out.println(psel.toString());
 				
 				Collection<String> tableNames = tableMap.keySet();
-				if(tableNames.size()>1){	
-					System.out.println("****parsing where: \n****"+psel.getWhere().toString());
+				if(tableNames.size()>0){
+					System.out.println("****parsing where: \n****"+psel.getWhere());
 					System.out.println("global table:"+tableNames.toString());
 					Expression where = psel.getWhere();
 					SelectionParser selParser = new SelectionParser(tableNames);

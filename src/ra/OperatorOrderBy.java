@@ -69,7 +69,7 @@ public class OperatorOrderBy{
 		List<ColumnDefinition> defs =  new ArrayList<ColumnDefinition>();
 		defs.add(colDef1);
 		defs.add(colDef2);
-		Schema schema = new Schema(new Column[]{col1,col2}, new ColumnDefinition[]{colDef1, colDef2}, new int[]{0,1});
+		Schema schema = new Schema(new Column[]{col1,col2}, new ColumnDefinition[]{colDef1, colDef2}, new int[]{0,1}, null);
 		Tuple t1 = new Tuple(new String("C|22"), schema);
 		Tuple t2 = new Tuple(new String("C|5"), schema);
 		Tuple t3 = new Tuple(new String("A|11"), schema);
