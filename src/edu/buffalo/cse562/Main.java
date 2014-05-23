@@ -33,7 +33,7 @@ public class Main {
 		//--build 
 		//--data test/Checkpoint3DataTest/ --swap test/swap --index test/idx test/Checkpoint3DataTest/tpch_schemas.sql test/Checkpoint3DataTest/tpch07a.sql test/Checkpoint3DataTest/tpch10a.sql test/Checkpoint3DataTest/tpch12a.sql test/Checkpoint3DataTest/tpch16a.sql
 		//buildForTest();	//"test/Checkpoint4_25Mb/query01.sql", "test/Checkpoint4_25Mb/query02.sql", "test/Checkpoint4_25Mb/query03.sql"  "test/Checkpoint4_25Mb/query02.sql", "test/Checkpoint4_25Mb/query03.sql", "test/Checkpoint4_25Mb/query04.sql", "test/Checkpoint4_25Mb/query05.sql", "test/Checkpoint4_25Mb/query06.sql"
-		//args = new String[]{"--data", "test/Checkpoint4_25Mb/", "--swap", "test/swap", "--index", "test/idx", "test/Checkpoint4_25Mb/tpch_schemas.sql", "test/Checkpoint4_25Mb/query01.sql", "test/Checkpoint4_25Mb/query02.sql", "test/Checkpoint4_25Mb/query03.sql", "test/Checkpoint4_25Mb/query04.sql", "test/Checkpoint4_25Mb/query05.sql"};
+		//args = new String[]{"--data", "test/Checkpoint4_25Mb/", "--swap", "test/swap", "--index", "test/idx", "test/Checkpoint4_25Mb/tpch_schemas.sql", "test/Checkpoint4_25Mb/query06.sql"};
 		if(args.length>=3){
 			boolean ifBuild = false;
 			if(args[0].equals("--build")){
@@ -148,7 +148,13 @@ public class Main {
 							else
 								Tools.debug("Insert failed");
 						} else if (stmt instanceof Update) {
-							boolean res = myParser.update((Update)stmt);
+							boolean res;
+							Update updt = (Update)stmt;
+							if(updt.getTable().getName().equalsIgnoreCase("lineitem")&&updt.getColumns().get(0).toString().equalsIgnoreCase("shipdate")){
+								res = myParser.update2(updt);
+							}else
+								res = myParser.update((Update)stmt);
+														
 							if(res)
 								Tools.debug("Update successful");
 							else

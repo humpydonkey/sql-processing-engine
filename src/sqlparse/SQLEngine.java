@@ -150,6 +150,64 @@ public class SQLEngine {
 		return res;
 	}
 	
+	public boolean update2(Update update){
+		final String tabName = update.getTable().getName();
+		//convert Expressions to values
+		@SuppressWarnings("unchecked")
+		List<Expression> vals = update.getExpressions();
+		List<Datum> setValues = new ArrayList<Datum>(vals.size());
+		EvaluatorArithmeticExpres eval = new EvaluatorArithmeticExpres();
+		for(Expression exp : vals)
+			setValues.add(eval.parse(exp));
+		Schema schema = globalSchemas.get(tabName);
+		Expression where = update.getWhere();
+		
+		//find tuples
+		@SuppressWarnings("serial")
+		SelectionParser selParser = new SelectionParser(new ArrayList<String>(){{add(tabName);}});
+		selParser.parse(where);
+		List<Expression> exps = selParser.getSeparateExprs(tabName);
+		
+		FromItemConvertor tableConvertor = new FromItemConvertor(dataPath,selParser, globalCreateTables, null, this);
+		OperatorIndexScan data = tableConvertor.createIndexScan(exps, schema);
+		data.init();
+		EvaluatorConditionExpres selecltionEval = new EvaluatorConditionExpres(null, this);
+		@SuppressWarnings("unchecked")
+		List<Column> cols = update.getColumns();
+		int n = cols.size();
+		for(Tuple tup : data.getData()){
+			selecltionEval.updateTuple(tup);
+			where.accept(selecltionEval);
+			if(selecltionEval.getResult()){
+				for(int i=0; i<n; i++){
+					Column col = cols.get(i);
+					Datum value = setValues.get(i);
+					//update	
+					tup.setDataByName(value, col);
+				}
+			}
+		}
+					
+		try {
+			//delete	
+			List<Long> keys = data.findDataKeys();
+			String name = indxMngr.getName();
+			indxMngr.reopen(name);
+			indxMngr.deleteFromStoreMap(keys, schema);
+			
+			//insert
+			for(Tuple tup : data.getData()){
+				indxMngr.insertInStoreMap(tup.getRow(), schema);
+			}
+		} catch (UnexpectedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return true;
+	}
 	
 	@SuppressWarnings("unchecked")
 	public boolean update(Update update){
@@ -160,7 +218,6 @@ public class SQLEngine {
 		EvaluatorArithmeticExpres eval = new EvaluatorArithmeticExpres();
 		for(Expression exp : vals)
 			setValues.add(eval.parse(exp));
-		
 		
 		Schema schema = globalSchemas.get(tabName);
 		Expression where = update.getWhere();
@@ -174,6 +231,7 @@ public class SQLEngine {
 		OperatorIndexScan data = tableConvertor.createIndexScan(exps, schema);
 		data.init();
 		EvaluatorConditionExpres selecltionEval = new EvaluatorConditionExpres(null, this);
+		
 		//set values
 		List<Column> cols = update.getColumns();
 		int n = cols.size();
@@ -184,6 +242,7 @@ public class SQLEngine {
 				for(int i=0; i<n; i++){
 					Column col = cols.get(i);
 					Datum value = setValues.get(i);
+					//update	
 					tup.setDataByName(value, col);
 				}	
 			}

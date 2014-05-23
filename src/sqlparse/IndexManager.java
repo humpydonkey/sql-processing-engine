@@ -129,6 +129,7 @@ public class IndexManager {
 			return null;
 		}else
 			return buildScdr(tabName, keyCols, schema, storeMap);
+
 	}
 	
 	/*
@@ -310,8 +311,6 @@ public class IndexManager {
 		if(scdrColsArr!=null){
 			for(int i=0; i<scdrColsArr.length; i++){
 				List<Column> scdrCols = scdrColsArr[i];
-//				if(i==1)
-//					continue;
 				buildScdr(tabName, scdrCols, schema, storeMap);
 			}
 		}
@@ -381,7 +380,7 @@ public class IndexManager {
 				keyTypes[i] = schema.getColType(index);
 			}
 		}
-		
+
 		//construct secondary tree map
 		return prmyTreeMap.secondaryTreeMap(
 				generateIndexName(tabName, colNames),
