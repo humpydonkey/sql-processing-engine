@@ -16,7 +16,7 @@ public class Config {
 	//default value
 	private static File swapDir = new File("test/swap/");
 	
-	public static final boolean DebugMode = false;
+	public static final boolean DebugMode = true;
 	
 	public static final boolean IsBuildIndex = false;
 	
