@@ -170,42 +170,19 @@ public class SQLEngine {
 		
 		FromItemConvertor tableConvertor = new FromItemConvertor(dataPath,selParser, globalCreateTables, null, this);
 		OperatorIndexScan data = tableConvertor.createIndexScan(exps, schema);
-		data.init();
-		EvaluatorConditionExpres selecltionEval = new EvaluatorConditionExpres(null, this);
 		@SuppressWarnings("unchecked")
 		List<Column> cols = update.getColumns();
-		int n = cols.size();
-		for(Tuple tup : data.getData()){
-			selecltionEval.updateTuple(tup);
-			where.accept(selecltionEval);
-			if(selecltionEval.getResult()){
-				for(int i=0; i<n; i++){
-					Column col = cols.get(i);
-					Datum value = setValues.get(i);
-					//update	
-					tup.setDataByName(value, col);
-				}
-			}
+		int[] pos = new int[cols.size()];
+		for(int i=0; i<cols.size(); i++){
+			pos[i] = schema.getColIndex(cols.get(i).getColumnName());
 		}
-					
 		try {
-			//delete	
-			List<Long> keys = data.findDataKeys();
-			String name = indxMngr.getName();
-			indxMngr.reopen(name);
-			indxMngr.deleteFromStoreMap(keys, schema);
-			
-			//insert
-			for(Tuple tup : data.getData()){
-				indxMngr.insertInStoreMap(tup.getRow(), schema);
-			}
+			data.updateStoreMap(pos, setValues);
 		} catch (UnexpectedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
+		
 		return true;
 	}
 	

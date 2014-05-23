@@ -6,12 +6,14 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.SortedMap;
 
-import common.Tools;
-
+import jdbm.PrimaryStoreMap;
 import jdbm.SecondaryTreeMap;
 import net.sf.jsqlparser.statement.create.table.Index;
 import sqlparse.IndexManager;
 import sqlparse.TestEnvironment;
+
+import common.Tools;
+
 import dao.Datum;
 import dao.DatumDate;
 import dao.Schema;
@@ -176,6 +178,64 @@ public class OperatorIndexScan implements Operator{
 		return data;
 	}
 	
+	public void updateStoreMap(int[] colPos, List<Datum> setVals) throws UnexpectedException{
+		String tabName = schema.getTableName();		
+		PrimaryStoreMap<Long, Row> storeMap = manager.getPrmyStoreIndex(tabName, schema.getColTypes());
+		SecondaryTreeMap<Row, Long, Row> indexFile = manager.buildScdr(tabName, schema.getScdrKey(index), schema, storeMap);
+		
+		if(values==null&&type!=IndexScanType.All){
+			Tools.debug("-----------------------Error! Input Datum[] values is null!------------------------");
+			type = IndexScanType.All;
+		}
+		
+		//fromKey, toKey
+		Datum[] toKey;
+		Datum[] fromKey;
+		switch(type){
+		case All: 	//pull out all tuples
+			for(Iterable<Long> iter : indexFile.values()){
+				for(Long key : iter){
+					Tools.debug("!!!!!!!!!!");
+				}		
+			}
+			break;
+		case NotEqualsTo:
+			Tools.debug("!!!!!!!!!!");
+			//rangeSingleValKeyScan(values, data, indexFile, false);
+			//rangeSingleValKeyScan(values, data, indexFile, true);
+			break;
+		case GreaterThanEquals:	//>=
+			toKey = new Datum[]{values[1]};
+			Tools.debug("!!!!!!!!!!");
+			//equalsValueKeyScan(toKey, data, indexFile);
+		case GreaterThan:
+			Tools.debug("!!!!!!!!!!");
+			//rangeSingleValKeyScan(values, data, indexFile, false);
+			break;
+		case MinorThanEquals:
+			fromKey = new Datum[]{values[0]};
+			Tools.debug("!!!!!!!!!!");
+			//equalsValueKeyScan(fromKey, data, indexFile);
+		case MinorThan:
+			Tools.debug("!!!!!!!!!!");
+			//rangeSingleValKeyScan(values, data, indexFile, true);
+			break;
+		case MinorThanGreaterEquals:	//A<X<=B
+		case MinorGreaterBothEquals:	//A<=X<=B
+			toKey = new Datum[]{values[1]};
+			Tools.debug("!!!!!!!!!!");
+			//equalsValueKeyScan(toKey, data, indexFile);
+		case MinorEqualsGreaterThan:	//A<=X<B
+		case MinorGreaterThan:			//A<X<B
+			rangeKeyUpdate(values, colPos, setVals, storeMap, indexFile);
+			break;
+		case EqualsTo:
+			Tools.debug("!!!!!!!!!!");
+			//equalsValueKeyScan(values, data, indexFile);
+			break;
+		}
+	}
+	
 	/**
 	 * Range index scan from index file, 
 	 * use subMap(from, to), inclusive from, exclusive to: A<=X<B
@@ -205,6 +265,26 @@ public class OperatorIndexScan implements Operator{
 		}
 	}
 
+	private void rangeKeyUpdate(Datum[] values, int[] colPos, List<Datum> setVals, PrimaryStoreMap<Long, Row> storeMap, SecondaryTreeMap<Row, Long, Row> indexFile){
+		Row from = new Row(new Datum[]{values[0]});
+		Row to = new Row(new Datum[]{values[1]});
+		SortedMap<Row, Iterable<Long>> vals = indexFile.subMap(from, to);
+		for(Iterable<Long> iter : vals.values()){
+			for(Long key : iter){
+				Row row = indexFile.getPrimaryValue(key);
+				int i=0;
+				//set value of columns
+				for(Datum cellVal : setVals){
+					row.setDatum(colPos[i++], cellVal);
+				}
+				//delete
+				storeMap.remove(key);
+				//update
+				storeMap.putValue(row);
+			}//iterable end		
+		}		
+	}
+	
 	/**
 	 * Range index scan from index file,
 	 * use headMap or tailMap, strictly minor than or greater than

@@ -32,7 +32,7 @@ public class Main {
 		//           or  --data [data] --swap [swap] [sqlfile1] [sqlfile2] ...
 		//--build 
 		//--data test/Checkpoint3DataTest/ --swap test/swap --index test/idx test/Checkpoint3DataTest/tpch_schemas.sql test/Checkpoint3DataTest/tpch07a.sql test/Checkpoint3DataTest/tpch10a.sql test/Checkpoint3DataTest/tpch12a.sql test/Checkpoint3DataTest/tpch16a.sql
-		//buildForTest();	//"test/Checkpoint4_25Mb/query01.sql", "test/Checkpoint4_25Mb/query02.sql", "test/Checkpoint4_25Mb/query03.sql"  "test/Checkpoint4_25Mb/query02.sql", "test/Checkpoint4_25Mb/query03.sql", "test/Checkpoint4_25Mb/query04.sql", "test/Checkpoint4_25Mb/query05.sql", "test/Checkpoint4_25Mb/query06.sql"
+		//buildForTest();	//"test/Checkpoint4_25Mb/query01.sql", "test/Checkpoint4_25Mb/query02.sql","test/Checkpoint4_25Mb/query03.sql", "test/Checkpoint4_25Mb/query04.sql", "test/Checkpoint4_25Mb/query05.sql", "test/Checkpoint4_25Mb/query06.sql"
 		//args = new String[]{"--data", "test/Checkpoint4_25Mb/", "--swap", "test/swap", "--index", "test/idx", "test/Checkpoint4_25Mb/tpch_schemas.sql", "test/Checkpoint4_25Mb/query06.sql"};
 		if(args.length>=3){
 			boolean ifBuild = false;

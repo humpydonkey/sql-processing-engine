@@ -331,7 +331,7 @@ public class IndexManager {
 	 * @return Secondary B+ tree index
 	 * @throws UnexpectedException 
 	 */
-	private SecondaryTreeMap<Tuple.Row, Long, Tuple.Row> buildScdr(String tabName, List<Column> colNames, Schema schema, PrimaryStoreMap<Long, Tuple.Row> storeMap) throws UnexpectedException{
+	public SecondaryTreeMap<Tuple.Row, Long, Tuple.Row> buildScdr(String tabName, List<Column> colNames, Schema schema, PrimaryStoreMap<Long, Tuple.Row> storeMap) throws UnexpectedException{
 		//get key column indice
 		final int keyLen = colNames.size();
 		final int[] keyIndice = new int[keyLen];
