@@ -12,8 +12,6 @@ In this project, you will implement a simple SQL query evaluator with support fo
 Your code is expected to evaluate the SELECT statements on provided data, and produce output in a standardized form. Your code will be evaluated for both correctness and performance (in comparison to a naive evaluator based on volcano operators and nested- loop joins).
 
 
-
-
 Checkpoint 2:
 
 Enhance your query evaluator to provide full support for SQL, out-of-core query processing and limited forms of query evaluation.
@@ -21,8 +19,6 @@ Enhance your query evaluator to provide full support for SQL, out-of-core query 
 First, this means that we'll be expecting a more feature-complete submission. Your code will be evaluated on a broader range of queries selected from TPC-H benchmark, which exercises a broader range of SQL features than the Project 1 test cases did.
 
 Second, performance constraints will be tighter. The reference implementation for this project has been improved over that of Project 1, meaning that you'll be expected to perform more efficiently, and to handle data that does not fit into main memory.
-
-
 
 
 Checkpoint 3:
