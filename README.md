@@ -2,6 +2,7 @@ sql-processing-engine
 =====================
 
 Simple SQL Processing Engine
+
 Advanced Database System Course Project, there are three checkpoints for this project:
 
 Checkpoint 1:
