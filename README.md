@@ -5,7 +5,7 @@ sql-processing-engine
 
 `Course Project of Advanced Database System`
 
-There are three checkpoints for this project through the semester:
+There are three checkpoints through the semester, at each checkpoint, we submit our code to test the correctness and there will be a ranking of performance.
 
 ###Checkpoint 1:
 In this project, you will implement a simple SQL query evaluator with support for Select, Project, Join, Union, and Aggregate operations. That is, your code will receive a SQL file with a set of CREATE TABLE statements defining a schema for your data, and one or more SELECT statements.
